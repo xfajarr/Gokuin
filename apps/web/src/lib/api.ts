@@ -4,6 +4,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import type { Need } from '@gokuin/core'
 import * as backend from './api.server'
+import type { CycleRunInput } from './types'
 import {
   SAMPLE_ROUTES,
   SAMPLE_SELECTION,
@@ -35,3 +36,9 @@ export const getIntegrity = createServerFn({ method: 'GET' })
 export const selectRoute = createServerFn({ method: 'POST' })
   .validator((input: { need: Need; maxLeakBps?: number; maxWaitBlocks?: number }) => input)
   .handler(({ data }) => backend.postSelect(data, SAMPLE_SELECTION))
+
+// No sample fallback — see the comment on postAdminCycleRun in api.server.ts.
+// A thrown error here reaches the console route as a rejected promise.
+export const runCycle = createServerFn({ method: 'POST' })
+  .validator((input: CycleRunInput) => input)
+  .handler(({ data }) => backend.postAdminCycleRun(data))

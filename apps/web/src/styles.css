@@ -429,6 +429,27 @@ tr.row-victim:hover td {
   margin-bottom: 1.25rem;
 }
 
+/* Same shape as .sample-banner but semantic bad (brick) — a real failure on
+   the console page, never a stand-in for sample data (see console.tsx). */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--bad);
+  border: 1px solid color-mix(in srgb, var(--bad) 55%, var(--line));
+  background: color-mix(in srgb, var(--bad) 8%, var(--panel));
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.badge-active {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+}
+
 /* ---------- twin comparison ---------- */
 
 .twin-grid {
@@ -548,6 +569,86 @@ label {
   gap: 1rem;
   align-items: end;
   margin-bottom: 1.25rem;
+}
+
+/* ---------- console: six-stage runner ---------- */
+
+.stage-list {
+  margin-top: 0.5rem;
+}
+
+.stage-run {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 1rem;
+  border-top: 1px solid var(--line);
+  padding: 1.15rem 0;
+  opacity: 0.4;
+  transition: opacity 0.25s ease;
+}
+
+.stage-run:first-child {
+  border-top: none;
+}
+
+.stage-run.is-active,
+.stage-run.is-done,
+.stage-run.is-error {
+  opacity: 1;
+}
+
+.stage-run-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+  padding-top: 0.15rem;
+}
+
+.stage-run-num .n {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.stage-run-body {
+  min-width: 0;
+}
+
+.stage-run-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.2rem;
+}
+
+.stage-run-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.stage-run-note {
+  margin: 0 0 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .stage-run {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+  .stage-run-num {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .stage-run-num .n {
+    display: inline;
+  }
 }
 
 /* ---------- console log ---------- */

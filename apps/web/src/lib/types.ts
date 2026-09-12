@@ -81,3 +81,31 @@ export const ROUTE_LABELS: Record<RouteId, string> = {
   'flashbots-protect': 'Flashbots Protect',
   'mev-blocker': 'MEV Blocker',
 }
+
+/** POST /admin/cycles/run body — mirrors apps/api/src/routes/admin.ts's t.Object. */
+export interface CycleRunInput {
+  cycleId: number
+  pool: `0x${string}`
+  router: `0x${string}`
+  amountInWei: string
+  slippageBps: number
+}
+
+/** POST /admin/cycles/run response — mirrors RunCycleResult in apps/api/src/cycle/run.ts.
+ * Step 4-7 (inclusion, observation, simulate, sandwich) are NOT necessarily
+ * finished by the time this responds — run() only settles whatever has
+ * already reached 'included' status (see that file's own comment). The
+ * console polls GET /v1/probes/:id afterwards to reveal the rest as it lands. */
+export interface CycleRunResult {
+  cycleId: number
+  scheduleHash: `0x${string}`
+  committedTx: `0x${string}`
+  probeIds: number[]
+  reveal: {
+    cycleId: number
+    committed: number
+    published: number
+    intact: boolean
+    tx: `0x${string}`
+  }
+}

@@ -2,10 +2,19 @@
 // inside a createServerFn handler (see api.ts) so this never reaches the
 // client bundle and API_URL never leaks to the browser.
 import type { Need, Row, RouteScore, Selection } from '@gokuin/core'
-import type { Fetched, Integrity, ProbeDetail, RouteRowsResponse } from './types'
+import type { CycleRunInput, CycleRunResult, Fetched, Integrity, ProbeDetail, RouteRowsResponse } from './types'
 
 const API_URL = process.env.API_URL ?? 'http://localhost:4000'
+// Bearer token for POST /admin/cycles/run (apps/api/src/routes/admin.ts). Read
+// only here, at module scope of a file that is never imported outside a
+// createServerFn handler — same containment as API_URL above. Confirmed by
+// inspecting `bun run build`'s client chunk output: neither this token nor
+// its literal env key name appear in dist/client/**.
+const API_ADMIN_TOKEN = process.env.API_ADMIN_TOKEN
 const TIMEOUT_MS = 4_000
+// The live cycle run can take longer than a read — dispatch alone is two
+// signed mainnet sends before the endpoint responds.
+const RUN_TIMEOUT_MS = 15_000
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
@@ -73,4 +82,31 @@ export function postSelect(
   fallback: Selection,
 ) {
   return withFallback<Selection>(fallback, '/v1/select', { method: 'POST', body: JSON.stringify(body) })
+}
+
+/**
+ * POST /admin/cycles/run — drives the live six-stage runner on /console
+ * (PRD §7.3, §9.2, §16). Deliberately has NO sample-data fallback, unlike
+ * every other function in this file: this is the one page that claims to run
+ * a live probe cycle on camera, and rendering a fixture cycle here would
+ * present invented evidence as a real measurement. Sample fallback stays
+ * correct for the read-only pages (index, route, probe, cycle) — it would be
+ * a lie on this one. Do not "fix" this by adding a fallback; let it throw and
+ * let the console route surface the failure.
+ */
+export async function postAdminCycleRun(body: CycleRunInput): Promise<CycleRunResult> {
+  if (!API_ADMIN_TOKEN) {
+    throw new Error('API_ADMIN_TOKEN is not configured on the web server — cannot run a live cycle.')
+  }
+  const res = await fetch(`${API_URL}/admin/cycles/run`, {
+    method: 'POST',
+    signal: AbortSignal.timeout(RUN_TIMEOUT_MS),
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${API_ADMIN_TOKEN}` },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    throw new Error(`POST /admin/cycles/run responded ${res.status}${detail ? `: ${detail}` : ''}`)
+  }
+  return (await res.json()) as CycleRunResult
 }
