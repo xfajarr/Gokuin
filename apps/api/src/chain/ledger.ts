@@ -1,7 +1,7 @@
-// ProbeLedger writes via viem. contracts/ has not been built/deployed in this
-// workspace yet (out of this task's scope — apps/api and apps/listener only),
-// so the ABI is hand-declared here from PRD.md §6.1 and MUST be kept in sync
-// with contracts/src/ProbeLedger.sol whenever that lands.
+// ProbeLedger writes via viem. The ABI is GENERATED from `forge build` output
+// by packages/abi — never hand-declared. A hand-written signature that drifts
+// from the deployed contract fails at broadcast, not at compile time, and the
+// first place we would notice is a reverted reveal on camera.
 //
 // Dry-run behaviour: the call is ALWAYS abi-encoded for real via
 // `encodeFunctionData` — that part of the code path is never stubbed. If a
@@ -10,82 +10,11 @@
 // deterministic, clearly-labelled stand-in tx hash so callers (cycle
 // orchestration, tests) exercise the identical control flow either way.
 import { encodeFunctionData, keccak256, type Hex, type PublicClient, type WalletClient } from 'viem'
+import { ProbeLedgerAbi } from '@gokuin/abi'
 import type { Row } from '@gokuin/core'
 import type { Env } from '../env'
 
-export const PROBE_LEDGER_ABI = [
-  {
-    type: 'function',
-    name: 'commitCycle',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'cycleId', type: 'uint16' },
-      { name: 'scheduleHash', type: 'bytes32' },
-      { name: 'count', type: 'uint16' },
-    ],
-    outputs: [],
-  },
-  {
-    type: 'function',
-    name: 'record',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'cycleId', type: 'uint16' },
-      {
-        name: 'row',
-        type: 'tuple',
-        components: [
-          { name: 'mainnetTxHash', type: 'bytes32' },
-          { name: 'submittedBlock', type: 'uint64' },
-          { name: 'includedBlock', type: 'uint64' },
-          { name: 'leakedAtBlock', type: 'uint64' },
-          { name: 'extractedWei', type: 'uint128' },
-          { name: 'simOut', type: 'uint128' },
-          { name: 'realOut', type: 'uint128' },
-          { name: 'routeId', type: 'uint32' },
-          { name: 'cycleId', type: 'uint16' },
-          { name: 'sandwiched', type: 'bool' },
-        ],
-      },
-    ],
-    outputs: [{ name: 'rowId', type: 'uint256' }],
-  },
-  {
-    type: 'function',
-    name: 'revealCycle',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'cycleId', type: 'uint16' },
-      { name: 'salt', type: 'bytes32' },
-    ],
-    outputs: [],
-  },
-  {
-    type: 'function',
-    name: 'integrity',
-    stateMutability: 'view',
-    inputs: [{ name: 'cycleId', type: 'uint16' }],
-    outputs: [
-      { name: 'committed', type: 'uint16' },
-      { name: 'published', type: 'uint16' },
-      { name: 'intact', type: 'bool' },
-    ],
-  },
-  {
-    type: 'function',
-    name: 'rowsByRoute',
-    stateMutability: 'view',
-    inputs: [{ name: 'routeId', type: 'uint32' }],
-    outputs: [{ name: '', type: 'uint256[]' }],
-  },
-  {
-    type: 'function',
-    name: 'rowCount',
-    stateMutability: 'view',
-    inputs: [],
-    outputs: [{ name: '', type: 'uint256' }],
-  },
-] as const
+export const PROBE_LEDGER_ABI = ProbeLedgerAbi
 
 export interface LedgerWriteResult {
   txHash: Hex
@@ -159,11 +88,22 @@ export class ProbeLedgerClient {
     return { txHash: hash, dryRun: false }
   }
 
-  async revealCycle(cycleId: number, salt: Hex): Promise<LedgerWriteResult> {
+  /**
+   * The commitment is over (cycleId, routeIds, slots, salt), so the contract
+   * cannot verify a revealed salt without also being handed routeIds and slots.
+   * Both are public the moment probes dispatch. Passing only the salt would make
+   * BadSalt unenforceable and the integrity check meaningless.
+   */
+  async revealCycle(
+    cycleId: number,
+    routeIds: readonly number[],
+    slots: readonly number[],
+    salt: Hex,
+  ): Promise<LedgerWriteResult> {
     const calldata = encodeFunctionData({
       abi: PROBE_LEDGER_ABI,
       functionName: 'revealCycle',
-      args: [cycleId, salt],
+      args: [cycleId, routeIds, slots.map(BigInt), salt],
     })
     if (!this.wallet || !this.address) return dryRunResult(calldata)
     const hash = await this.wallet.sendTransaction({

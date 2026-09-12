@@ -16,6 +16,8 @@ export async function revealCycle(
   stmts: Statements,
   ledger: ProbeLedgerClient,
   cycleId: number,
+  routeIds: readonly number[],
+  slots: readonly number[],
   salt: Hex,
 ): Promise<RevealResult> {
   const cycleRow = stmts.getCycle.get(cycleId) as { probe_count: number } | null
@@ -24,7 +26,7 @@ export async function revealCycle(
   const probes = stmts.getProbesByCycle.all(cycleId) as { status: string }[]
   const published = probes.filter(p => p.status === 'included' || p.status === 'reverted').length
 
-  const result = await ledger.revealCycle(cycleId, salt)
+  const result = await ledger.revealCycle(cycleId, routeIds, slots, salt)
   stmts.revealCycle.run(salt, Date.now(), result.txHash, cycleId)
 
   const intact = published === cycleRow.probe_count

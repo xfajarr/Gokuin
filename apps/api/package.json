@@ -12,7 +12,8 @@
     "@gokuin/core": "workspace:*",
     "elysia": "^1.1.26",
     "viem": "^2.21.0",
-    "@sinclair/typebox": "^0.34.0"
+    "@sinclair/typebox": "^0.34.0",
+    "@gokuin/abi": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

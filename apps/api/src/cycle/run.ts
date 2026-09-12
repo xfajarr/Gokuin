@@ -107,7 +107,7 @@ export async function runCycle(ctx: AppContext, opts: RunCycleOptions): Promise<
   }
 
   // 9. reveal.publish()
-  const reveal = await revealCycle(ctx.stmts, ctx.ledger, opts.cycleId, schedule.salt)
+  const reveal = await revealCycle(ctx.stmts, ctx.ledger, opts.cycleId, schedule.routeIds, schedule.slots, schedule.salt)
 
   return { cycleId: opts.cycleId, scheduleHash, committedTx: commit.txHash, probeIds, reveal }
 }
