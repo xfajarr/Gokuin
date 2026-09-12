@@ -2,14 +2,25 @@
   "name": "gokuin",
   "private": true,
   "type": "module",
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "dev:api": "bun --filter @gokuin/api dev",
     "dev:web": "bun --filter @gokuin/web dev",
     "listener": "bun --filter @gokuin/listener start",
     "test": "bun test",
     "contracts:test": "cd contracts && forge test",
-    "contracts:build": "cd contracts && forge build"
+    "contracts:build": "cd contracts && forge build",
+    "verify": "bun run verify:ts && bun run verify:contracts && bun run verify:build",
+    "verify:ts": "bun test",
+    "verify:contracts": "cd contracts && forge build && forge test",
+    "verify:build": "bun --filter @gokuin/web build && bun --filter @gokuin/mcp typecheck",
+    "abi": "cd contracts && forge build && cd .. && bun run --filter @gokuin/abi gen",
+    "docs": "bun run scripts/gen-metrics-doc.ts"
   },
-  "devDependencies": { "typescript": "^5.6.0" }
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
 }
