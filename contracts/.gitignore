@@ -1,0 +1,6 @@
+# Foundry build artifacts
+cache/
+out/
+
+# Env files that may carry RPC URLs / keys used by Deploy.s.sol
+.env

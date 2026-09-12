@@ -1,0 +1,22 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+script = "script"
+solc = "0.8.26"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+fs_permissions = [{ access = "read", path = "./" }]
+
+# `forge test --fork-url $MAINNET_RPC` exercises testFork_DeriveKnownSandwich (see
+# test/ForkDerive.t.sol). Without MAINNET_RPC set that test self-skips via vm.skip(true).
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+mainnet = "${MAINNET_RPC}"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}" }
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
