@@ -1,0 +1,27 @@
+[package]
+name = "sandwich-detect"
+version = "0.1.0"
+edition = "2021"
+description = "Generic Uniswap V2/V3 sandwich-attack detector Substreams module for Ethereum mainnet"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "sandwich_detect"
+
+[dependencies]
+substreams = "0.6"
+substreams-ethereum = "0.10"
+prost = "0.13"
+hex = "0.4"
+substreams-entity-change = "2"
+
+[build-dependencies]
+prost-build = "0.13"
+protoc-bin-vendored = "3"
+
+[profile.release]
+lto = true
+opt-level = "s"
+strip = "debuginfo"
+panic = "abort"

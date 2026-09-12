@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package gokuin.sandwich.v1;
+
+// One detected sandwich: front-run A, victim V, back-run B, all in the same
+// block, same pool, A and B in opposite directions, A.from == B.from.
+// See substreams/README.md for the exact heuristic and its provenance.
+message Sandwich {
+  // Primary key: the victim's transaction hash (0x-prefixed hex string).
+  // This is what packages/core and the subgraph key Sandwich entities by.
+  string victim_tx_hash = 1;
+
+  // Block number the three transactions share.
+  uint64 block = 2;
+
+  // Pool (pair) contract address touched by all three transactions.
+  // 0x-prefixed hex string, lowercase.
+  string pool = 3;
+
+  // Victim's from-address (the wallet whose trade was sandwiched).
+  string victim = 4;
+
+  // Front-run transaction hash (A).
+  string frontrun_tx = 5;
+
+  // Back-run transaction hash (B).
+  string backrun_tx = 6;
+
+  // Attacker address: A.from == B.from, enforced by construction.
+  string attacker = 7;
+
+  // Best-effort value extracted from the victim, in wei, as a decimal string
+  // (fits in uint256, so it does not fit a native protobuf integer type).
+  // Derived from swap amounts only -- see README "extractedWei heuristic".
+  // "0" when the amount could not be estimated from the decoded swap legs.
+  string extracted_wei = 8;
+
+  // Identifies which build of this module produced the verdict, e.g.
+  // "sandwich-detect v0.1.0". Mirrors SandwichVerdict.moduleVersion in
+  // packages/core/src/metrics.ts.
+  string detected_by = 9;
+
+  // Transaction indices of A, V, B within the block. Included so
+  // downstream consumers (and auditors) can re-verify i < j < k without
+  // re-parsing the block.
+  uint32 frontrun_index = 10;
+  uint32 victim_index = 11;
+  uint32 backrun_index = 12;
+}
+
+message Sandwiches {
+  repeated Sandwich items = 1;
+}

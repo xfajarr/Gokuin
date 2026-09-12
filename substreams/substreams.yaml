@@ -1,0 +1,61 @@
+specVersion: v0.1.0
+
+package:
+  name: sandwich_detect
+  version: v0.1.0
+  url: https://github.com/gokuin/gokuin
+  doc: |
+    Generic sandwich-attack detector for Ethereum mainnet.
+
+    Detects front-run (A) / victim (V) / back-run (B) triples within a
+    single block, on a single Uniswap V2 or V3 pool, where:
+      - A is at transaction index i, V at j > i, B at k > j
+      - A, V, B all touch the same pool address
+      - A and B swap in OPPOSITE directions
+      - A and B have distinct transaction hashes
+      - A.from == B.from (the attacker)
+
+    This module does NOT hardcode any address. It emits every sandwich it
+    finds in a block; a consumer filters the output stream by `attacker`
+    or `victim` to ask "was I sandwiched?" for any wallet whatsoever.
+
+imports:
+  # Only needed by `graph_out`, the small adapter module that turns our
+  # domain-specific Sandwiches into graph-node EntityChanges. `map_sandwiches`
+  # itself has no Graph-specific dependency -- see README "entity-changes
+  # vs substreams-triggers".
+  entity: https://github.com/streamingfast/substreams-sink-entity-changes/releases/download/v2.0.0/substreams-entity-change-v2.0.0.spkg
+
+protobuf:
+  files:
+    - sandwich.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/sandwich_detect.wasm
+
+modules:
+  - name: map_sandwiches
+    kind: map
+    initialBlock: 12369621 # Uniswap V2 factory deployment block (mainnet); earliest block either V2 or V3 pools can exist
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:gokuin.sandwich.v1.Sandwiches
+
+  # Graph-node substreams sink datasource (subgraph/sandwich-subgraph) reads
+  # THIS module, not map_sandwiches directly, per the `graph-entities`
+  # convention: exactly one map module whose output is
+  # sf.substreams.sink.entity.v1.EntityChanges.
+  - name: graph_out
+    kind: map
+    initialBlock: 12369621
+    inputs:
+      - map: map_sandwiches
+    output:
+      type: proto:sf.substreams.sink.entity.v1.EntityChanges
+
+network: mainnet

@@ -1,0 +1,11 @@
+{
+  "name": "@gokuin/sandwich-subgraph",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "deploy": "graph deploy --studio gokuin-sandwich-detect"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.97.1"
+  }
+}

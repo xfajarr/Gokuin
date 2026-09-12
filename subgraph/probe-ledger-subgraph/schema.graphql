@@ -1,0 +1,37 @@
+# Route and Row entities, exactly as specified in PRD.md §5. Populated from
+# `RowRecorded` events on the Sepolia ProbeLedger contract -- see
+# ../README.md for why this lives in its own subgraph, separate from
+# ../sandwich-subgraph.
+type Route @entity(immutable: false) {
+  id: ID!                 # route label, e.g. "public-mempool" -- see
+                           # packages/core/src/types.ts ROUTE_IDS for the
+                           # on-chain routeId <-> label mapping this subgraph
+                           # must stay in sync with.
+  probes: BigInt!
+  leaks: BigInt!
+  sandwiches: BigInt!
+  totalExtractedWei: BigInt!
+  medianDelayBlocks: Int!
+  rows: [Row!]! @derivedFrom(field: "route")
+
+  # Internal bookkeeping, NOT part of the PRD §5 spec -- not meant to be
+  # queried directly. A mapping handler cannot read back a @derivedFrom
+  # relation (the `rows` field above) mid-indexing, so there is no way to
+  # recompute an exact median of every row's delayBlocks from `rows`
+  # itself. Instead we grow this array by one element per RowRecorded and
+  # re-sort it to derive `medianDelayBlocks` on every write. Fine at
+  # hackathon/demo row volumes; see subgraph/README.md "known
+  # simplification" if this ever needs to scale past a full re-sort per row.
+  delayBlocksSamples: [Int!]!
+}
+
+type Row @entity(immutable: true) {
+  id: ID!                 # the ProbeLedger `rowId` (uint256, from RowRecorded), as a decimal string
+  route: Route!
+  mainnetTxHash: Bytes!
+  includedBlock: BigInt!
+  leaked: Boolean!
+  sandwiched: Boolean!
+  extractedWei: BigInt!
+  cycleId: Int!
+}

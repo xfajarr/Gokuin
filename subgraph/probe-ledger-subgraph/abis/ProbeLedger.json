@@ -1,0 +1,52 @@
+[
+  {
+    "type": "event",
+    "name": "RowRecorded",
+    "anonymous": false,
+    "inputs": [
+      { "name": "cycleId", "type": "uint16", "indexed": true },
+      { "name": "routeId", "type": "uint32", "indexed": true },
+      { "name": "rowId", "type": "uint256", "indexed": false },
+      { "name": "mainnetTxHash", "type": "bytes32", "indexed": false }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "CycleCommitted",
+    "anonymous": false,
+    "inputs": [
+      { "name": "cycleId", "type": "uint16", "indexed": true },
+      { "name": "scheduleHash", "type": "bytes32", "indexed": false },
+      { "name": "count", "type": "uint16", "indexed": false }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "CycleRevealed",
+    "anonymous": false,
+    "inputs": [
+      { "name": "cycleId", "type": "uint16", "indexed": true },
+      { "name": "salt", "type": "bytes32", "indexed": false },
+      { "name": "published", "type": "uint16", "indexed": false },
+      { "name": "intact", "type": "bool", "indexed": false }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "rows",
+    "stateMutability": "view",
+    "inputs": [{ "name": "", "type": "uint256" }],
+    "outputs": [
+      { "name": "mainnetTxHash", "type": "bytes32" },
+      { "name": "submittedBlock", "type": "uint64" },
+      { "name": "includedBlock", "type": "uint64" },
+      { "name": "leakedAtBlock", "type": "uint64" },
+      { "name": "extractedWei", "type": "uint128" },
+      { "name": "simOut", "type": "uint128" },
+      { "name": "realOut", "type": "uint128" },
+      { "name": "routeId", "type": "uint32" },
+      { "name": "cycleId", "type": "uint16" },
+      { "name": "sandwiched", "type": "bool" }
+    ]
+  }
+]

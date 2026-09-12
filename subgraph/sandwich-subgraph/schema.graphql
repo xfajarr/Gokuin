@@ -1,0 +1,17 @@
+# Populated entirely by the `substreams-based/graph-entities` datasource in
+# subgraph.yaml -- graph-node ingests EntityChanges produced by the
+# `graph_out` module in ../../substreams (which itself just re-shapes
+# `map_sandwiches`'s output). No AssemblyScript mapping in this subgraph.
+#
+# Matches PRD.md §5 exactly.
+type Sandwich @entity(immutable: true) {
+  id: ID!                 # victimTxHash
+  block: BigInt!
+  pool: Bytes!
+  victim: Bytes!
+  frontrunTx: Bytes!
+  backrunTx: Bytes!
+  attacker: Bytes!
+  extractedWei: BigInt!
+  detectedBy: String!     # module version
+}

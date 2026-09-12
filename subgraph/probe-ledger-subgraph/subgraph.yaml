@@ -1,0 +1,38 @@
+specVersion: 0.0.5
+description: >
+  Indexes RowRecorded events from Gokuin's ProbeLedger contract on Sepolia
+  and aggregates them into per-route scores (Route, Row entities). This is
+  the "5 of 6 metrics anyone can re-derive from public data" ledger, not
+  the generic sandwich detector -- see ../sandwich-subgraph for that.
+repository: https://github.com/gokuin/gokuin
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: ProbeLedger
+    network: sepolia
+    source:
+      # TODO(contracts): replace with the deployed ProbeLedger address once
+      # it exists -- it is being written in parallel with this subgraph.
+      # This placeholder is deliberately the zero address so an accidental
+      # deploy-without-editing fails loudly (indexes nothing) rather than
+      # silently pointing at an unrelated contract.
+      address: "0x0000000000000000000000000000000000000000"
+      abi: ProbeLedger
+      # TODO(contracts): set to ProbeLedger's actual deploy block on Sepolia
+      # once known, to avoid indexing from genesis.
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Route
+        - Row
+      abis:
+        - name: ProbeLedger
+          file: ./abis/ProbeLedger.json
+      eventHandlers:
+        - event: RowRecorded(indexed uint16,indexed uint32,uint256,bytes32)
+          handler: handleRowRecorded
+      file: ./src/mapping.ts
