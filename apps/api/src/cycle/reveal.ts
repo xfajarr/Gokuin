@@ -23,8 +23,12 @@ export async function revealCycle(
   const cycleRow = stmts.getCycle.get(cycleId) as { probe_count: number } | null
   if (!cycleRow) throw new Error(`unknown cycle ${cycleId}`)
 
-  const probes = stmts.getProbesByCycle.all(cycleId) as { status: string }[]
-  const published = probes.filter(p => p.status === 'included' || p.status === 'reverted').length
+  // published = probes that actually produced a ledger row, not probes that merely
+  // made it into a block. A probe whose sandwich verdict was unavailable is settled
+  // nowhere, and the gap must show. Counting inclusion instead would report intact
+  // while rows were missing — the precise dishonesty this check exists to catch.
+  const probes = stmts.getProbesByCycle.all(cycleId) as { id: number; status: string }[]
+  const published = probes.filter(p => stmts.getDerivation.get(p.id) != null).length
 
   const result = await ledger.revealCycle(cycleId, routeIds, slots, salt)
   stmts.revealCycle.run(salt, Date.now(), result.txHash, cycleId)
