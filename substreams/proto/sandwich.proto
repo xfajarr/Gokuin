@@ -31,9 +31,9 @@ message Sandwich {
 
   // Best-effort value extracted from the victim, in wei, as a decimal string
   // (fits in uint256, so it does not fit a native protobuf integer type).
-  // Derived from swap amounts only -- see README "extractedWei heuristic".
+  // Derived from swap amounts only -- see README "attackerRoundTripWei heuristic".
   // "0" when the amount could not be estimated from the decoded swap legs.
-  string extracted_wei = 8;
+  string attacker_round_trip_wei = 8;
 
   // Identifies which build of this module produced the verdict, e.g.
   // "sandwich-detect v0.1.0". Mirrors SandwichVerdict.moduleVersion in

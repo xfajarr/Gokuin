@@ -12,6 +12,17 @@ type Sandwich @entity(immutable: true) {
   frontrunTx: Bytes!
   backrunTx: Bytes!
   attacker: Bytes!
-  extractedWei: BigInt!
+  # The attacker's gross round trip on their own two legs:
+  # backrun.amountOut - frontrun.amountIn, in the token they cycled.
+  #
+  # This is NOT the victim's loss and NOT the same figure as ProbeLedger's
+  # Row.extractedWei, which is simOut - realOut against pre-block state and is
+  # denominated in the token the victim was buying. The two differ in token, in
+  # magnitude, and in definition. They were both called extractedWei once; a
+  # reader querying both would reasonably have concluded the project contradicts
+  # itself. A map module cannot perform the eth_call the ledger definition needs,
+  # so this proxy is the best a Substreams module can do — and it is named for
+  # what it actually measures.
+  attackerRoundTripWei: BigInt!
   detectedBy: String!     # module version
 }

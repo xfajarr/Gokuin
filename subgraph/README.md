@@ -59,7 +59,7 @@ yet.
 # run the sandwich play, anywhere, by anyone?"
 {
   sandwiches(where: { victim: "0xTARGET" }, orderBy: block, orderDirection: desc) {
-    id block pool attacker frontrunTx backrunTx extractedWei detectedBy
+    id block pool attacker frontrunTx backrunTx attackerRoundTripWei detectedBy
   }
 }
 ```
@@ -75,7 +75,7 @@ yet.
   route(id: "mev-blocker") {
     probes leaks sandwiches totalExtractedWei medianDelayBlocks
     rows(orderBy: includedBlock, orderDirection: desc, first: 20) {
-      mainnetTxHash includedBlock leaked sandwiched extractedWei cycleId
+      mainnetTxHash includedBlock leaked sandwiched attackerRoundTripWei cycleId
     }
   }
 }

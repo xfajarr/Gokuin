@@ -10,7 +10,7 @@ import type { Env } from '../env'
 
 const QUERY = `query($id: ID!) {
   sandwich(id: $id) {
-    id block pool victim frontrunTx backrunTx attacker extractedWei detectedBy
+    id block pool victim frontrunTx backrunTx attacker attackerRoundTripWei detectedBy
   }
 }`
 

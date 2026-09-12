@@ -233,7 +233,7 @@ fn map_sandwiches(block: eth::Block) -> Result<Sandwiches, substreams::errors::E
             let v = &legs[j];
             let b = &legs[k];
 
-            // Best-effort extractedWei: A and B round-trip the SAME token
+            // Best-effort attackerRoundTripWei: A and B round-trip the SAME token
             // by construction (opposite directions => B.amount_out is
             // denominated in the same token as A.amount_in). The attacker's
             // realized profit on that round trip is what they got back on
@@ -253,7 +253,7 @@ fn map_sandwiches(block: eth::Block) -> Result<Sandwiches, substreams::errors::E
                 frontrun_tx: to_hex(&a.tx_hash),
                 backrun_tx: to_hex(&b.tx_hash),
                 attacker: to_hex(&a.from),
-                extracted_wei: extracted.to_string(),
+                attacker_round_trip_wei: extracted.to_string(),
                 detected_by: MODULE_VERSION.to_string(),
                 frontrun_index: a.tx_index,
                 victim_index: v.tx_index,
@@ -304,8 +304,8 @@ fn graph_out(
             .set("backrunTx", from_hex(&s.backrun_tx))
             .set("attacker", from_hex(&s.attacker))
             .set(
-                "extractedWei",
-                BigInt::from_str(&s.extracted_wei).unwrap_or_else(|_| BigInt::zero()),
+                "attackerRoundTripWei",
+                BigInt::from_str(&s.attacker_round_trip_wei).unwrap_or_else(|_| BigInt::zero()),
             )
             .set("detectedBy", s.detected_by);
     }
