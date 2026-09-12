@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.output/
+.vinxi/
+.tanstack/
+*.db
+*.db-journal
+.env
+.env.*
+!.env.example
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+substreams/target/
+*.spkg
+.DS_Store
