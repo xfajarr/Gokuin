@@ -1,0 +1,10 @@
+# Never commit real secret values.
+.env
+.env.*
+!.env.example
+
+# Build artifacts.
+workflow/dist/
+*.wasm
+.cre_build_tmp.js
+node_modules/

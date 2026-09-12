@@ -1,0 +1,2 @@
+$ bunx tsc --noEmit
+(exit code 0 — no output means no type errors)

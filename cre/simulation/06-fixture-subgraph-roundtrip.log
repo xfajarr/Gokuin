@@ -1,0 +1,41 @@
+$ bun run simulation/fixture-subgraph-server.ts &
+[fixture-subgraph] serving canned Route data on http://localhost:8555/subgraph
+
+$ curl -s -X POST http://localhost:8555/subgraph -d '{"query":"query GokuinRouteScores { r0: route(id: \"public-mempool\") { ... } }"}'
+{
+    "data": {
+        "r0": {
+            "probes": "40",
+            "leaks": "18",
+            "sandwiches": "9",
+            "medianDelayBlocks": 1,
+            "rows": [
+                {
+                    "cycleId": 12
+                }
+            ]
+        },
+        "r1": {
+            "probes": "40",
+            "leaks": "1",
+            "sandwiches": "0",
+            "medianDelayBlocks": 3,
+            "rows": [
+                {
+                    "cycleId": 12
+                }
+            ]
+        },
+        "r2": {
+            "probes": "40",
+            "leaks": "2",
+            "sandwiches": "1",
+            "medianDelayBlocks": 2,
+            "rows": [
+                {
+                    "cycleId": 12
+                }
+            ]
+        }
+    }
+}

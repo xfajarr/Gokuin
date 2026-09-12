@@ -1,0 +1,31 @@
+staging-settings:
+  user-workflow:
+    workflow-name: gokuin-scorer-staging
+  workflow-artifacts:
+    workflow-path: ./main.ts
+    config-path: ./config.staging.json
+    secrets-path: ../secrets.yaml
+production-settings:
+  user-workflow:
+    workflow-name: gokuin-scorer-production
+  workflow-artifacts:
+    workflow-path: ./main.ts
+    config-path: ./config.production.json
+    secrets-path: ../secrets.yaml
+private-settings:
+  user-workflow:
+    workflow-name: gokuin-scorer-private
+    deployment-registry: private
+  workflow-artifacts:
+    workflow-path: ./main.ts
+    config-path: ./config.staging.json
+    secrets-path: ../secrets.yaml
+simulation-settings:
+  # Local `cre workflow simulate` target — points at the fixture subgraph
+  # server in ../simulation/, not a live one (see project.yaml comment).
+  user-workflow:
+    workflow-name: gokuin-scorer-simulation
+  workflow-artifacts:
+    workflow-path: ./main.ts
+    config-path: ./config.simulation.json
+    secrets-path: ../secrets.yaml

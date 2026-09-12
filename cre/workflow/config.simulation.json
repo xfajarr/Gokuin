@@ -1,0 +1,15 @@
+{
+  "schedule": "0 */15 * * * *",
+  "subgraphUrl": "http://localhost:8555/subgraph",
+  "weightsSecretId": "SCORE_WEIGHTS",
+  "routes": [
+    { "id": 0, "label": "public-mempool" },
+    { "id": 1, "label": "flashbots-protect" },
+    { "id": 2, "label": "mev-blocker" }
+  ],
+  "delayCapBlocks": 32,
+  "chainSelectorName": "ethereum-testnet-sepolia",
+  "scorerAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "500000",
+  "runLabel": "simulation"
+}

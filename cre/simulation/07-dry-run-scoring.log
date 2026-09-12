@@ -1,0 +1,25 @@
+$ bun run dry-run.ts
+weights used for this dry run (NOT the real secret): {
+  leakWeightBps: 5000,
+  sandwichWeightBps: 3000,
+  delayWeightBps: 2000,
+}
+
+route=public-mempool (id=0)
+  leakBps=4500 sandwichBps=2250 medianDelay=1
+  composite=7012 probes=40 lastCycle=12
+  evidenceURI=http://localhost:8555/subgraph?routeLabel=public-mempool&lastCycle=12
+  abi-encoded submitScore payload (384 bytes): 0x000000000000000000000000000000000000000000000000000000000000000000000000...
+
+route=flashbots-protect (id=1)
+  leakBps=250 sandwichBps=0 medianDelay=3
+  composite=9687 probes=40 lastCycle=12
+  evidenceURI=http://localhost:8555/subgraph?routeLabel=flashbots-protect&lastCycle=12
+  abi-encoded submitScore payload (384 bytes): 0x000000000000000000000000000000000000000000000000000000000000000100000000...
+
+route=mev-blocker (id=2)
+  leakBps=500 sandwichBps=250 medianDelay=2
+  composite=9550 probes=40 lastCycle=12
+  evidenceURI=http://localhost:8555/subgraph?routeLabel=mev-blocker&lastCycle=12
+  abi-encoded submitScore payload (384 bytes): 0x000000000000000000000000000000000000000000000000000000000000000200000000...
+

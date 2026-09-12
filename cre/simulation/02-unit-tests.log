@@ -1,0 +1,10 @@
+$ cd workflow && bun install
+(already run — see cre/workflow/bun.lock; showing bun test + typecheck instead, which cover the same install)
+
+$ bun test
+bun test v1.3.11 (af24e281)
+
+ 14 pass
+ 0 fail
+ 38 expect() calls
+Ran 14 tests across 1 file. [122.00ms]
