@@ -98,7 +98,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       // ignore
     }
     throw new GokuinApiError(
-      `Gokuin API at ${url} returned ${res.status} ${res.statusText}. ${body ? `Body: ${body.slice(0, 500)}` : ''}`.trim(),
+      `Gokuin API at ${url} returned ${res.status} ${res.statusText}. ${body ? `Body: ${summariseBody(body)}` : ''}`.trim(),
     )
   }
 
@@ -141,4 +141,19 @@ export const gokuinApi = {
     const qs = params.toString()
     return request<RowsPage>(`/v1/routes/${encodeURIComponent(id)}/rows${qs ? `?${qs}` : ''}`)
   },
+}
+
+/**
+ * An error body goes straight into the calling agent's context, so it is capped
+ * and stripped of markup. A misconfigured API_URL can point at any server on the
+ * machine — during integration this hit an unrelated app and returned a full HTML
+ * document. Untrusted markup from an arbitrary host does not belong in an agent's
+ * context window, and a 200-character JSON error says everything a caller needs.
+ */
+function summariseBody(body: string): string {
+  const trimmed = body.trim()
+  if (trimmed.startsWith('<')) {
+    return `non-JSON response (${trimmed.length} bytes, looks like HTML) — is API_URL pointing at the Gokuin API?`
+  }
+  return trimmed.length > 200 ? `${trimmed.slice(0, 200)}… (${trimmed.length} bytes)` : trimmed
 }
