@@ -139,6 +139,19 @@ Probes run on **mainnet** (a testnet sandwich proves nothing). ENSv2 is **Sepoli
 
 Q&A answer: *the evidence is the mainnet hash; where we index it does not change what anyone can verify.*
 
+### 4.6 Deviations from this spec that shipped
+
+Recorded here rather than left as a surprise for whoever reads the code next.
+
+| Spec said | Shipped | Why |
+|---|---|---|
+| `revealCycle(cycleId, salt)` | `revealCycle(cycleId, routeIds, slots, salt)` | The commitment is over all four. Without them the contract cannot verify a revealed salt and `BadSalt` is unenforceable |
+| `Row` packs into three slots | Four slots | The field widths sum to 111 bytes. 96 is unreachable at any packing — arithmetic, not a packing failure. Field order preserved |
+| `Scorer.submitScore(6 args)` | 8 args, adding `probes` and `lastCycle` | Otherwise two of the six `gokuin.*` keys had no writer, and the alternative — a second authorised path for the API — would have broken the single-writer property the ENS demo asserts |
+| One subgraph | Two | GIP-0053: a subgraph with a substreams dataSource may have only that dataSource, so mainnet detection cannot share a manifest with the Sepolia contract |
+| CRE writes to `Scorer` directly | `ScorerReportReceiver` adapter | CRE's Forwarder only calls `onReport(bytes,bytes)`; no capability invokes a typed function. Without the adapter the workflow computes a score it can never write |
+| `Sandwich.extractedWei` | `Sandwich.attackerRoundTripWei` | Two fields with one name meant different things in different tokens. A reader querying both would have concluded the project contradicts itself |
+
 ---
 
 ## 5. Data model
