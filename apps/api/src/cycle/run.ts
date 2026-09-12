@@ -1,21 +1,28 @@
 // The 9-step cycle orchestration from PRD §7.3, driven by POST /admin/cycles/run.
+//   0. preflight             distributor can cover every probe — BEFORE commit
 //   1. schedule.build()      routes x slots, salt
 //   2. ledger.commitCycle()  Sepolia tx — BEFORE dispatch
-//   3. dispatch.twins()      rotate EOA, build identical swaps, submit
+//   3. dispatch.twins()      rotate EOA, fund it, build identical swaps, submit
 //   4. wait for inclusion    or timeout -> status 'dropped'
 //   5. observe               listeners have been POSTing all along
 //   6. derive.simulate()     eth_call at includedBlock-1
 //   7. derive.sandwich()     GraphQL to Subgraph
-//   8. settle()              compose Row, ledger.record() per probe
+//   8. settle() + sweep()    compose Row, ledger.record(), sweep leftover back
 //   9. reveal.publish()      salt on-chain; assert published == committed
 //
 // Step 2 -> 3 ordering is enforced by CommitBeforeDispatchGuard, not just by
-// this function's own statement order (see cycle/order-guard.ts).
+// this function's own statement order (see cycle/order-guard.ts). The
+// preflight (step 0) is the funding-side mirror of that same principle: a
+// committed cycle the distributor cannot actually fund would create the same
+// committed-vs-published gap that integrity() exists to flag, so it must run
+// — and be allowed to throw — before commitCycle, not after (see
+// chain/distributor.ts's preflightDistributorFunding).
 import { ROUTES, type RouteId } from '@gokuin/core'
 import type { AppContext } from '../context'
 import { scheduleAndHash } from './schedule'
 import { CommitBeforeDispatchGuard } from './order-guard'
 import { buildTwin, minOutForSlippage, rotateEOA, submitLeg, type SwapParams } from './dispatch'
+import { loadFundingConfig, nextFundingDelayMs, planProbeFunding, preflightDistributorFunding } from '../chain/distributor'
 import { settleProbe } from '../derive/settle'
 import { revealCycle } from './reveal'
 
@@ -43,17 +50,22 @@ export interface RunCycleResult {
 export async function runCycle(ctx: AppContext, opts: RunCycleOptions): Promise<RunCycleResult> {
   const routePair = opts.routePair ?? ([ROUTES[0], ROUTES[1]] as [RouteId, RouteId])
   const guard = new CommitBeforeDispatchGuard()
+  const fundingConfig = loadFundingConfig(ctx.env)
 
   // 1. schedule.build()
   const headBlock = Number(await ctx.mainnetPublic.getBlockNumber())
   const { schedule, scheduleHash } = scheduleAndHash(opts.cycleId, headBlock)
+
+  // 0. preflight — BEFORE commitCycle. See module header + chain/distributor.ts.
+  await preflightDistributorFunding(ctx.mainnetPublic, ctx.distributor, routePair.length, opts.amountInWei, fundingConfig)
 
   // 2. ledger.commitCycle() — BEFORE dispatch, always.
   const commit = await ctx.ledger.commitCycle(opts.cycleId, scheduleHash, schedule.routeIds.length)
   ctx.stmts.insertCycle.run(opts.cycleId, scheduleHash, schedule.routeIds.length, Date.now(), commit.txHash)
   guard.markCommitted(commit.txHash) // <-- only after this does dispatch become legal
 
-  // 3. dispatch.twins() — build ONE swap, submit identical calldata to two routes.
+  // 3. dispatch.twins() — build ONE swap, fund each leg's EOA, submit
+  // identical calldata to two routes.
   const sinkAccount = rotateEOA()
   const params: SwapParams = {
     router: opts.router,
@@ -66,7 +78,8 @@ export async function runCycle(ctx: AppContext, opts: RunCycleOptions): Promise<
   const twin = buildTwin(routePair, params, minOutForSlippage(0n, opts.slippageBps))
 
   const probeIds: number[] = []
-  for (const leg of twin.legs) {
+  for (let i = 0; i < twin.legs.length; i++) {
+    const leg = twin.legs[i]
     const route = ctx.routeRegistry[leg.route]
     const probeId = Number(
       ctx.stmts.insertProbe.run(
@@ -80,6 +93,14 @@ export async function runCycle(ctx: AppContext, opts: RunCycleOptions): Promise<
       ).lastInsertRowid,
     )
     probeIds.push(probeId)
+
+    // Fund this probe from the distributor — one probe per funding tx,
+    // amount freshly randomized per probe (never batched, never identical;
+    // see chain/distributor.ts's fingerprint notes).
+    const plan = await planProbeFunding(ctx.mainnetPublic, opts.amountInWei, fundingConfig)
+    const funding = await ctx.distributor.fundProbe(leg.account.address, plan.amountWei, probeId)
+    ctx.stmts.insertFunding.run(probeId, funding.txHash, plan.amountWei.toString(), plan.gasBudgetWei.toString(), Date.now())
+
     const submitted = await submitLeg(
       ctx.mainnetPublic,
       route,
@@ -90,6 +111,14 @@ export async function runCycle(ctx: AppContext, opts: RunCycleOptions): Promise<
       guard,
     )
     ctx.stmts.updateProbeSubmitted.run(submitted.txHash, submitted.submittedBlock, Date.now(), probeId)
+
+    // Space consecutive fundings apart so they don't land in the same block
+    // window as each other — a burst of same-block fundings is itself a
+    // fingerprint (PRD §18). Skipped after the last leg — nothing left to space out.
+    if (i < twin.legs.length - 1) {
+      const delayMs = nextFundingDelayMs(fundingConfig)
+      if (delayMs > 0) await Bun.sleep(delayMs)
+    }
   }
 
   // 4-7. Inclusion / observation / simulate / sandwich are cross-cutting and
@@ -98,11 +127,25 @@ export async function runCycle(ctx: AppContext, opts: RunCycleOptions): Promise<
   // settles whatever has reached 'included' status so far — a real deployment
   // calls this repeatedly (or waits inclusionTimeoutBlocks) between step 3 and 9.
 
-  // 8. settle() each probe that has an included_block recorded.
-  for (const probeId of probeIds) {
+  // 8. settle() + sweep() each probe that has an included_block recorded.
+  for (let i = 0; i < twin.legs.length; i++) {
+    const probeId = probeIds[i]
+    const leg = twin.legs[i]
     const probe = ctx.stmts.getProbe.get(probeId) as { included_block: number | null } | null
     if (probe?.included_block != null) {
       await settleProbe({ env: ctx.env, stmts: ctx.stmts, publicClient: ctx.mainnetPublic, ledger: ctx.ledger }, probeId)
+
+      // Sweep leftover balance back to the distributor so capital
+      // recirculates (this task's requirement 3). Signed by the probe's own
+      // in-memory key — it never touches the distributor's key.
+      const sweep = await ctx.distributor.sweepProbe(leg.account, probeId, fundingConfig)
+      ctx.stmts.recordSweep.run(
+        sweep.txHash,
+        sweep.dustSkipped ? null : sweep.sweptAmountWei.toString(),
+        Date.now(),
+        sweep.dustSkipped ? 1 : 0,
+        probeId,
+      )
     }
   }
 

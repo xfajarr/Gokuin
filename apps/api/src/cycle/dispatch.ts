@@ -4,14 +4,13 @@
 // route (and the sending key, which must differ per probe so routes can't be
 // fingerprinted by a shared sender — see PRD §18 "Probes fingerprinted").
 //
-// Assumption (documented, not hidden): funding the freshly-rotated EOAs is a
-// distributor concern the PRD defers ("funded through a distributor", §18) and
-// is out of this task's scope. Without MAINNET_WS's chain actually extending
-// credit to these addresses, a real broadcast will revert for insufficient
-// funds — exactly like any other unfunded account. `submitLeg` still signs a
-// real, correctly-encoded transaction and always computes its real would-be
-// hash; it only skips the network call when the route is in dryRun (fixture
-// RPC) mode, which is the norm for this hackathon environment.
+// Funding the freshly-rotated EOAs (PRD §18 "funded through a distributor")
+// is handled by chain/distributor.ts and wired in cycle/run.ts: each probe is
+// funded from the distributor account, one probe per funding transaction,
+// before its swap is submitted. `submitLeg` still signs a real,
+// correctly-encoded transaction and always computes its real would-be hash;
+// it only skips the network call when the route is in dryRun (fixture RPC)
+// mode, which is the norm for this hackathon environment.
 import { encodeFunctionData, keccak256, parseGwei, type Hex, type PublicClient } from 'viem'
 import { generatePrivateKey, privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts'
 import { mainnet } from 'viem/chains'
@@ -41,6 +40,12 @@ export const SWAP_ROUTER_ABI = [
     outputs: [{ name: 'amounts', type: 'uint256[]' }],
   },
 ] as const
+
+/** Gas limit budgeted for a probe's own swap tx. Shared with chain/distributor.ts
+ *  so the distributor funds each probe with exactly what this dispatch step
+ *  will actually spend on gas — a single source of truth instead of two
+ *  copies of "250_000" that could silently drift apart. */
+export const SWAP_GAS_LIMIT = 250_000n
 
 export interface SwapParams {
   router: Hex
@@ -117,7 +122,7 @@ export async function submitLeg(
     value,
     nonce: 0, // freshly-rotated EOA — always nonce 0
     chainId: mainnet.id,
-    gas: 250_000n,
+    gas: SWAP_GAS_LIMIT,
     maxFeePerGas: fees?.maxFeePerGas ?? parseGwei('30'),
     maxPriorityFeePerGas: fees?.maxPriorityFeePerGas ?? parseGwei('2'),
     type: 'eip1559',

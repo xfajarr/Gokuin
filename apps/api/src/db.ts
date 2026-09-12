@@ -57,8 +57,26 @@ CREATE TABLE IF NOT EXISTS derivation (
   ledger_tx     TEXT                  -- sepolia record() tx
 );
 
+-- Extends PRD §5's data model: per-probe funding + sweep accounting
+-- (chain/distributor.ts). Every probe must have a traceable cost — this
+-- table is that trace: what it was funded, why (gas budget), and what came
+-- back on sweep (or why nothing did).
+CREATE TABLE IF NOT EXISTS funding (
+  id                INTEGER PRIMARY KEY,
+  probe_id          INTEGER NOT NULL REFERENCES probe(id),
+  funding_tx        TEXT NOT NULL,      -- distributor -> probe transfer (real tx, or dry-run stand-in hash)
+  amount_wei        TEXT NOT NULL,      -- total funded: swap value + gas budget + per-probe jitter
+  gas_budget_wei    TEXT NOT NULL,      -- the gas-only portion of amount_wei
+  funded_at         INTEGER NOT NULL,   -- unix ms
+  sweep_tx          TEXT,               -- probe -> distributor sweep transfer; NULL until swept or dust-skipped
+  swept_amount_wei  TEXT,               -- amount actually recovered; NULL until swept
+  swept_at          INTEGER,            -- unix ms
+  dust_skipped      INTEGER NOT NULL DEFAULT 0  -- 1 = leftover left in place rather than burning gas to move it
+);
+
 CREATE INDEX IF NOT EXISTS idx_probe_cycle ON probe(cycle_id);
 CREATE INDEX IF NOT EXISTS idx_obs_probe   ON observation(probe_id);
+CREATE INDEX IF NOT EXISTS idx_funding_probe ON funding(probe_id);
 `
 
 export function openDb(path: string): Database {
@@ -109,6 +127,18 @@ export function createStatements(db: Database) {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ),
     getDerivation: db.prepare(`SELECT * FROM derivation WHERE probe_id = ?`),
+
+    insertFunding: db.prepare(
+      `INSERT INTO funding (probe_id, funding_tx, amount_wei, gas_budget_wei, funded_at)
+       VALUES (?, ?, ?, ?, ?)`,
+    ),
+    recordSweep: db.prepare(
+      `UPDATE funding SET sweep_tx = ?, swept_amount_wei = ?, swept_at = ?, dust_skipped = ? WHERE probe_id = ?`,
+    ),
+    getFundingByProbe: db.prepare(`SELECT * FROM funding WHERE probe_id = ?`),
+    getFundingByCycle: db.prepare(
+      `SELECT funding.* FROM funding JOIN probe ON probe.id = funding.probe_id WHERE probe.cycle_id = ?`,
+    ),
   }
 }
 

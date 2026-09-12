@@ -22,6 +22,13 @@ export const EnvSchema = Type.Object({
   PROBE_LEDGER_ADDRESS: Type.Optional(Type.String()),
   ROUTE_REGISTRY_ADDRESS: Type.Optional(Type.String()),
   SCORER_ADDRESS: Type.Optional(Type.String()),
+  // Distributor account that funds each freshly-rotated probe EOA and sweeps
+  // its leftover back after settlement (see chain/distributor.ts). Absent ->
+  // dry-run: real fee estimation and real signing happen where a key exists
+  // (sweep, signed by the probe's own key), but funding/sweep broadcasts are
+  // skipped and preflight balance checks are skipped rather than hard-failing
+  // every dev/dry-run cycle.
+  DISTRIBUTOR_PK: Type.Optional(Type.String()),
 
   // --- extensions beyond .env.example (all optional / all with safe defaults) ---
   // Comma-separated allowlist of listener signer addresses. When absent, the
@@ -33,6 +40,15 @@ export const EnvSchema = Type.Object({
   MEV_BLOCKER_RPC: Type.String({ default: 'https://rpc.mevblocker.io' }),
   DB_PATH: Type.String({ default: 'gokuin.db' }),
   PORT: Type.Number({ default: 3000 }),
+
+  // Distributor funding tuning (chain/distributor.ts). All have safe
+  // defaults; a real deployment should set the delay knobs above zero so
+  // fundings don't land back-to-back in the same block window (PRD §18).
+  FUNDING_GAS_HEADROOM_MULTIPLIER: Type.Number({ default: 1.5 }),
+  FUNDING_AMOUNT_JITTER_BPS: Type.Number({ default: 250 }),
+  FUNDING_MIN_DELAY_MS: Type.Number({ default: 0 }),
+  FUNDING_JITTER_DELAY_MS: Type.Number({ default: 0 }),
+  SWEEP_GAS_BUFFER_MULTIPLIER: Type.Number({ default: 1.2 }),
 })
 
 export type Env = Static<typeof EnvSchema>
@@ -40,12 +56,21 @@ export type Env = Static<typeof EnvSchema>
 let cached: Env | undefined
 
 /** Loads and validates env once per process. Pass a source map in tests. */
+const NUMERIC_KEYS = new Set([
+  'PORT',
+  'FUNDING_GAS_HEADROOM_MULTIPLIER',
+  'FUNDING_AMOUNT_JITTER_BPS',
+  'FUNDING_MIN_DELAY_MS',
+  'FUNDING_JITTER_DELAY_MS',
+  'SWEEP_GAS_BUFFER_MULTIPLIER',
+])
+
 export function loadEnv(source: Record<string, string | undefined> = Bun.env as any): Env {
   if (cached) return cached
   const raw: Record<string, unknown> = {}
   for (const key of Object.keys(EnvSchema.properties)) {
     const v = source[key]
-    if (v !== undefined && v !== '') raw[key] = key === 'PORT' ? Number(v) : v
+    if (v !== undefined && v !== '') raw[key] = NUMERIC_KEYS.has(key) ? Number(v) : v
   }
   const withDefaults = Value.Default(EnvSchema, raw) as Env
   if (!Value.Check(EnvSchema, withDefaults)) {

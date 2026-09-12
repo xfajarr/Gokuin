@@ -20,6 +20,11 @@ function makeTestEnv(overrides: Partial<Env> = {}): Env {
     MEV_BLOCKER_RPC: 'https://rpc.mevblocker.io',
     DB_PATH: ':memory:',
     PORT: 3000,
+    FUNDING_GAS_HEADROOM_MULTIPLIER: 1.5,
+    FUNDING_AMOUNT_JITTER_BPS: 250,
+    FUNDING_MIN_DELAY_MS: 0,
+    FUNDING_JITTER_DELAY_MS: 0,
+    SWEEP_GAS_BUFFER_MULTIPLIER: 1.2,
     ...overrides,
   }
 }

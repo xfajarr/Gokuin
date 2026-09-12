@@ -7,6 +7,7 @@ import { openDb, createStatements } from './db'
 import { makeMainnetPublicClient, makeSepoliaPublicClient, makeSepoliaWalletClient } from './chain/clients'
 import { buildRouteRegistry } from './chain/routes'
 import { createLedgerClient } from './chain/ledger'
+import { createDistributorClient } from './chain/distributor'
 import { createScoreReader } from './score/read'
 import { createSelector } from './score/select'
 import { createPublicRoutes } from './routes/public'
@@ -23,6 +24,7 @@ const sepoliaPublic = makeSepoliaPublicClient(env)
 const sepoliaWallet = makeSepoliaWalletClient(env)
 const routeRegistry = buildRouteRegistry(env)
 const ledger = createLedgerClient(env, sepoliaWallet, sepoliaPublic)
+const distributor = createDistributorClient(env, mainnetPublic)
 const scoreReader = createScoreReader(env)
 const selector = createSelector(scoreReader)
 
@@ -35,6 +37,7 @@ export const ctx: AppContext = {
   sepoliaWallet,
   routeRegistry,
   ledger,
+  distributor,
   scoreReader,
   selector,
 }
@@ -46,6 +49,7 @@ export const app = new Elysia()
   .get('/health', () => ({
     ok: true,
     ledgerDryRun: ledger.dryRun,
+    distributorDryRun: distributor.dryRun,
     subgraphConfigured: Boolean(env.SUBGRAPH_URL),
   }))
 
@@ -56,6 +60,7 @@ if (import.meta.main) {
     console.log(
       `gokuin api listening on :${env.PORT}` +
         (ledger.dryRun ? ' [ledger dry-run: no PROBER_PK/PROBE_LEDGER_ADDRESS configured]' : '') +
+        (distributor.dryRun ? ' [distributor dry-run: no DISTRIBUTOR_PK configured]' : '') +
         (env.SUBGRAPH_URL ? '' : ' [no SUBGRAPH_URL: /v1/routes* will 503]'),
     )
   })

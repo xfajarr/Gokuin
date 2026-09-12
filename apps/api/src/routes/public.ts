@@ -44,18 +44,57 @@ function probeDetail(ctx: AppContext, id: number) {
   return { probe, twin, observations, derivation }
 }
 
+interface FundingAccountingRow {
+  amount_wei: string
+  swept_amount_wei: string | null
+  dust_skipped: number
+}
+
+/**
+ * Per-cycle funding total (this task's requirement 4): the real cost of a
+ * measurement should be visible, not hidden. `netCostWei` = funded - swept
+ * (dust left in place counts against the cycle's cost, on purpose — a
+ * skipped sweep is still capital that did not come back).
+ */
+function cycleFundingTotals(ctx: AppContext, cycleId: number) {
+  const rows = ctx.stmts.getFundingByCycle.all(cycleId) as FundingAccountingRow[]
+  let fundedWei = 0n
+  let sweptWei = 0n
+  let dustSkippedCount = 0
+  for (const row of rows) {
+    fundedWei += BigInt(row.amount_wei)
+    if (row.swept_amount_wei) sweptWei += BigInt(row.swept_amount_wei)
+    if (row.dust_skipped) dustSkippedCount += 1
+  }
+  return {
+    probesFunded: rows.length,
+    totalFundedWei: fundedWei.toString(),
+    totalSweptWei: sweptWei.toString(),
+    netCostWei: (fundedWei - sweptWei).toString(),
+    dustSkippedCount,
+  }
+}
+
 async function cycleIntegrity(ctx: AppContext, id: number) {
+  const funding = cycleFundingTotals(ctx, id)
+
   // Prefer the contract's own view function — it is the on-chain source of
   // truth (PRD §6.1 integrity()). Fall back to the local SQLite tally when no
   // ledger address is configured (dry-run / no deployment yet).
   const onChain = await ctx.ledger.integrity(id)
-  if (onChain) return { ...onChain, source: 'ledger' as const }
+  if (onChain) return { ...onChain, source: 'ledger' as const, funding }
 
   const cycle = ctx.stmts.getCycle.get(id) as { probe_count: number } | null
   if (!cycle) return null
   const probes = ctx.stmts.getProbesByCycle.all(id) as { status: string }[]
   const published = probes.filter(p => p.status === 'included' || p.status === 'reverted').length
-  return { committed: cycle.probe_count, published, intact: published === cycle.probe_count, source: 'sqlite-dry-run' as const }
+  return {
+    committed: cycle.probe_count,
+    published,
+    intact: published === cycle.probe_count,
+    source: 'sqlite-dry-run' as const,
+    funding,
+  }
 }
 
 export function createPublicRoutes(ctx: AppContext) {
