@@ -114,13 +114,13 @@ as both `owner` and `resolver` of every subnode it creates), so `setScore`'s
 - `RouteRegistry.setScore(uint32 routeId, string calldata key, string calldata value)` is
   `onlyScorer`-gated; the backend should call it only via `Scorer.submitScore`, never
   directly, since only the deployed `Scorer` address is authorised.
-- `Scorer.submitScore` writes four of the six `gokuin.*` text keys
-  (`leakBps`, `sandwichBps`, `medianDelay`, `evidenceURI`); it does **not** write
-  `gokuin.probes` or `gokuin.lastCycle` — it is never handed a probe count or cycle id.
-  Whichever admin path composes the full route summary should write those two directly
-  through `RouteRegistry.setScore` (still `onlyScorer`-gated, so it must go through a
-  contract authorised as `scorer`, i.e. `Scorer` itself needs an additional function if
-  those two keys are to be written on-chain at all).
+- `Scorer.submitScore(uint32 routeId, uint16 leakBps, uint16 sandwichBps, uint16 medianDelay, uint16 composite, uint32 probes, uint16 lastCycle, string calldata evidenceURI)`
+  writes all six `gokuin.*` text keys in one call
+  (`leakBps`, `sandwichBps`, `medianDelay`, `probes`, `lastCycle`, `evidenceURI`).
+  `probes` and `lastCycle` are ordinary parameters, not looked up on-chain: the CRE
+  workflow already knows both, since it derived the score from the same rows. There is
+  still exactly one authorised writer into `RouteRegistry` — `Scorer` itself — and no
+  second path in; `composite` is emitted in `Scored` but is not one of the six text keys.
 
 ## What is live vs. designed-but-unbuilt
 
