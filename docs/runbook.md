@@ -116,7 +116,10 @@ from any address other than `Scorer` reverts.
 
 ## 3. Publish the Substreams package
 
+Install the CLI first — `make pack` checks for it and tells you how:
+
 ```bash
+brew install streamingfast/tap/substreams
 cd substreams && make build && make pack
 ```
 
@@ -124,9 +127,15 @@ cd substreams && make build && make pack
 alone. Do not skip this — the fixtures exist so you find out here rather than on
 camera.
 
+Needs a free Substreams token (streamingfast.io, pinax.network or thegraph.market)
+in `SUBSTREAMS_API_TOKEN`:
+
 ```bash
-substreams run ./sandwich-detect-v0.1.0.spkg map_sandwiches -s 22450093 -t +1
-substreams run ./sandwich-detect-v0.1.0.spkg map_sandwiches -s 22450094 -t +1
+export SUBSTREAMS_API_TOKEN=...
+substreams run ./sandwich-detect-v0.1.0.spkg map_sandwiches \
+  -e $SUBSTREAMS_ENDPOINT -s 22450093 -t +1   # must find the sandwich
+substreams run ./sandwich-detect-v0.1.0.spkg map_sandwiches \
+  -e $SUBSTREAMS_ENDPOINT -s 22450094 -t +1   # must find nothing
 ```
 
 ## 4. Deploy both subgraphs
@@ -188,8 +197,12 @@ happens is more convincing than one that always finds a villain.
 
 ```bash
 cre login                    # needs CRE_API_KEY with Confidential Workflows enrolled
-cd cre && cre workflow simulate
+cd cre
+cre workflow simulate ./workflow --target=simulation-settings --non-interactive --trigger-index 0
 ```
+
+`cre workflow simulate` takes the workflow folder as an argument; without it the CLI
+just prints usage.
 
 Put the real weight vector in the Vault secret named in `cre/secrets.yaml`. Never
 commit it — `cre/weights.example.json` holds placeholders and exists to show the

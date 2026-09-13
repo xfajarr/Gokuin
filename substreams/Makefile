@@ -12,7 +12,16 @@ ENDPOINT ?= mainnet.eth.streamingfast.io:443
 build: ## Compile the Rust module to WASM (requires: rustup target add wasm32-unknown-unknown)
 	cargo build --target $(TARGET) --release
 
-pack: build ## Produce the .spkg the subgraph datasource and `substreams gui/run` consume
+# `make pack` used to die with a bare 'No such file or directory' when the CLI was
+# absent, which reads like a broken Makefile rather than a missing tool.
+check-cli:
+	@command -v substreams >/dev/null 2>&1 || { \
+	  echo "substreams CLI not found."; \
+	  echo "  brew install streamingfast/tap/substreams"; \
+	  echo "  or: https://github.com/streamingfast/substreams/releases"; \
+	  exit 1; }
+
+pack: check-cli build ## Produce the .spkg the subgraph datasource and `substreams gui/run` consume
 	substreams pack ./substreams.yaml -o $(PKG)
 
 run: pack ## Stream map_sandwiches over a block range: make run BLOCKS=12300000:12300100

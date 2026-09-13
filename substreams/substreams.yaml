@@ -3,7 +3,11 @@ specVersion: v0.1.0
 package:
   name: sandwich_detect
   version: v0.1.0
-  url: https://github.com/gokuin/gokuin
+  url: https://github.com/xfajarr/Gokuin
+  description: >-
+    Generic single-block sandwich-attack detector for Ethereum mainnet. Takes any
+    address — it hardcodes none — so anyone can point it at their own wallet and
+    ask whether they have been sandwiched.
   doc: |
     Generic sandwich-attack detector for Ethereum mainnet.
 
