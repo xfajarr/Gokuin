@@ -19,7 +19,8 @@
     "verify:contracts": "cd contracts && forge build && forge test",
     "verify:build": "bun --filter @gokuin/web build && bun --filter @gokuin/mcp typecheck && bun --filter @gokuin/api typecheck && bun --filter @gokuin/cre typecheck",
     "abi": "cd contracts && forge build && cd .. && bun run --filter @gokuin/abi gen",
-    "docs": "bun run scripts/gen-metrics-doc.ts"
+    "docs": "bun run scripts/gen-metrics-doc.ts",
+    "deploy:sepolia": "bash scripts/deploy-sepolia.sh"
   },
   "devDependencies": {
     "typescript": "^5.6.0"

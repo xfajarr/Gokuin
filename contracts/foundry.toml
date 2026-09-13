@@ -13,7 +13,7 @@ fs_permissions = [{ access = "read", path = "./" }]
 # `forge test --fork-url $MAINNET_RPC` exercises testFork_DeriveKnownSandwich (see
 # test/ForkDerive.t.sol). Without MAINNET_RPC set that test self-skips via vm.skip(true).
 [rpc_endpoints]
-sepolia = "${SEPOLIA_RPC_URL}"
+sepolia = "${SEPOLIA_RPC}"
 mainnet = "${MAINNET_RPC}"
 
 [etherscan]

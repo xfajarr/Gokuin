@@ -26,17 +26,37 @@ Copy `.env.example` to `.env` and fill as you go.
 ## 1. Deploy contracts to Sepolia
 
 ```bash
-cd contracts
-forge script script/Deploy.s.sol \
-  --rpc-url $SEPOLIA_RPC --private-key $DEPLOYER_PK --broadcast --verify
+bun run deploy:sepolia
 ```
 
-Wiring order matters and the script handles it, but know why: `RouteRegistry.scorer`
-must be the `Scorer` address, and `Scorer.creForwarder` must be the
-**`ScorerReportReceiver`** address — not Chainlink's raw Forwarder. Getting that
-backwards silently breaks the confidential write path.
+Foundry auto-loads `.env` from the Foundry project root (`contracts/`), not the repo
+root where this project keeps its single `.env`. The script loads the root one and
+refuses with a named variable if anything required is blank, rather than letting
+forge fail halfway through a broadcast.
 
-**Worked when:** three addresses printed, and a non-scorer `setScore` call reverts.
+Fill these in `.env` first — `PROBER_ADDRESS` is derived, not invented:
+
+```bash
+cast wallet address --private-key $PROBER_PK    # -> PROBER_ADDRESS
+```
+
+`CRE_FORWARDER` is Chainlink's own Forwarder on Sepolia, from the CRE docs.
+`ENS_REGISTRY` defaults to the long-standing ENS registry address in `.env.example`.
+
+**Wiring, because getting it backwards fails silently:**
+
+```
+Chainlink Forwarder -> ScorerReportReceiver -> Scorer -> RouteRegistry
+```
+
+`Scorer.creForwarder` is the **adapter**, not Chainlink's Forwarder. The Forwarder
+only ever calls `onReport(bytes,bytes)`; `Scorer` takes eight typed arguments. Point
+`Scorer` at the raw Forwarder and every confidential score is rejected, with nothing
+reverting at deploy time to tell you. `contracts/test/Deploy.t.sol` asserts this
+wiring, so the script cannot ship mis-wired.
+
+**Worked when:** four addresses printed, and `forge test --match-contract DeployTest`
+passes against them.
 
 Record them in `.env`: `PROBE_LEDGER_ADDRESS`, `ROUTE_REGISTRY_ADDRESS`, `SCORER_ADDRESS`.
 
