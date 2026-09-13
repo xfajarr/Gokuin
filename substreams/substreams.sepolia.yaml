@@ -1,0 +1,78 @@
+specVersion: v0.1.0
+
+# Sepolia-pointed twin of substreams.yaml, for the staged demo harness in
+# tools/sandwich-harness/. See tools/sandwich-harness/README.md "Detector
+# configuration: why a second manifest" for the full rationale; short
+# version:
+#
+#   - substreams.yaml's `network: mainnet` is correct and stays untouched —
+#     PRD.md §4 is explicit that probes (the real measurement) run on
+#     mainnet, a testnet sandwich against a real route proves nothing.
+#   - GIP-0053 (see PRD.md §4.6 "Deviations") means a subgraph with a
+#     substreams dataSource may have only that one dataSource, which is why
+#     sandwich-subgraph and probe-ledger-subgraph are already two separate
+#     subgraphs. The same constraint means a single manifest cannot declare
+#     two `network:` targets for one module either — Substreams pins a
+#     manifest to exactly one chain.
+#   - So: same module code (map_sandwiches, graph_out — this file changes
+#     zero Rust), same protobuf schema, same binary. Only `network` and
+#     `initialBlock` differ, because the two networks don't share block
+#     numbers or genesis. The Uniswap V2/V3 Swap-log decoding in
+#     substreams/src/lib.rs takes no address and no per-chain branch — it
+#     decodes any Uniswap V2/V3-shaped Swap event on any EVM chain, so the
+#     exact same .wasm works unmodified against Sepolia blocks.
+#
+# This manifest is for the demo path only. Do not point subgraph/sandwich-
+# subgraph/subgraph.yaml at it — that subgraph's job is real mainnet
+# measurement and must stay on the mainnet package.
+package:
+  name: sandwich_detect_sepolia
+  version: v0.1.0
+  url: https://github.com/xfajarr/Gokuin
+  description: >-
+    Sepolia-network build of sandwich_detect, used only by
+    tools/sandwich-harness's staged demonstration (see docs/credibility.md
+    "The sandwich in the demo video is one we caused"). Same detection
+    heuristic, same .wasm, same protobuf schema as the mainnet package —
+    only `network` and `initialBlock` differ, because Substreams pins one
+    manifest to one chain.
+
+imports:
+  entity: https://github.com/streamingfast/substreams-sink-entity-changes/releases/download/v2.0.0/substreams-entity-change-v2.0.0.spkg
+
+protobuf:
+  files:
+    - sandwich.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/sandwich_detect.wasm
+
+modules:
+  - name: map_sandwiches
+    kind: map
+    # Sepolia Uniswap V3 factory (0x0227628f3F023bb0B980b67D528571c95c6DaC1c)
+    # deployment block, found by binary-searching `cast code` against
+    # $SEPOLIA_RPC (first block with non-empty code): 3518270. Earliest
+    # block a V3 pool — and hence a V3 Swap log — can exist on Sepolia.
+    # (Uniswap's Universal Router deployment notes say V2 is not supported
+    # on Sepolia — see README.md's "Sepolia deployment used" — so unlike the
+    # mainnet manifest's V2-factory-block floor, this one only needs to cover V3.)
+    initialBlock: 3518270
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:gokuin.sandwich.v1.Sandwiches
+
+  - name: graph_out
+    kind: map
+    initialBlock: 3518270
+    inputs:
+      - map: map_sandwiches
+    output:
+      type: proto:sf.substreams.sink.entity.v1.EntityChanges
+
+network: sepolia

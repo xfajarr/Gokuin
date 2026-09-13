@@ -5,7 +5,8 @@
   "workspaces": [
     "packages/*",
     "apps/*",
-    "cre/workflow"
+    "cre/workflow",
+    "tools/*"
   ],
   "scripts": {
     "dev:api": "bun --filter @gokuin/api dev",

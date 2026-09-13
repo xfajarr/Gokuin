@@ -210,6 +210,30 @@ Run several pairs before the take you record. If the live one comes back clean,
 say so on camera and show the row — a ledger that stays honest when nothing
 happens is more convincing than one that always finds a villain.
 
+### The staged sandwich, for the detection-path shot specifically
+
+A sandwich cannot be summoned against a real route, but the shot in §16 that
+shows the detector working ("Explorer: three transactions in one block") does
+not need one to be organic — see `docs/credibility.md`'s "The sandwich in the
+demo video is one we caused". `tools/sandwich-harness/` is exactly that: a
+standalone, Sepolia-only tool that stages a real sandwich against Gokuin's own
+probe address (never a third party — enforced in code, see its README) and
+marks the resulting row `staged`, which `scoreRoute()` already excludes from
+every figure. Run it with:
+
+```bash
+cd tools/sandwich-harness
+bun src/cli.ts setup       # one-time: wrap ETH, approve the router
+bun src/cli.ts run --attempts=5
+```
+
+`tools/sandwich-harness/README.md` has the full reproduction sequence, the
+three real Sepolia transaction hashes and block from the run this repo has
+already verified, the exact Uniswap Sepolia addresses used (all verified with
+`cast call`), and an honest account of trying Flashbots bundle submission on
+Sepolia (real, but unreliable there today — gas-priority laddering is what
+this actually uses, measured across repeated live attempts).
+
 ## 6. CRE
 
 ```bash
