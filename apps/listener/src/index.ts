@@ -99,7 +99,7 @@ export function createListener(env: Env) {
       }
     }
 
-    console.log(`[listener:${env.LISTENER_REGION}] FIXTURE MODE — no MAINNET_WS configured, replaying bundled pending-tx stream`)
+    console.log(`[listener:${env.LISTENER_REGION}] FIXTURE MODE, no MAINNET_WS configured, replaying bundled pending-tx stream`)
     let i = 0
     timers.push(
       setInterval(() => {

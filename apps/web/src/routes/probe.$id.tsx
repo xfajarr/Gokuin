@@ -31,7 +31,7 @@ interface CheckItem {
   evidence?: string
 }
 
-/** The four observations that make a sandwich a sandwich — checked against the
+/** The four observations that make a sandwich a sandwich, checked against the
  * ACTUAL block view for this probe, not asserted. A reader should be able to
  * verify the verdict themselves from what is on screen. */
 function buildSandwichChecklist(block: ProbeDetail['block']): CheckItem[] {
@@ -41,7 +41,7 @@ function buildSandwichChecklist(block: ProbeDetail['block']): CheckItem[] {
         key: 'pool',
         title: '1. Same pool',
         status: 'unknown',
-        detail: 'No block view — this probe was not bracketed in the same block, so there is nothing to check.',
+        detail: 'No block view, this probe was not bracketed in the same block, so there is nothing to check.',
       },
       { key: 'direction', title: '2. Opposite directions at the ends', status: 'unknown', detail: 'No block view.' },
       { key: 'attacker', title: '3. Same attacker at positions 1 and 3', status: 'unknown', detail: 'No block view.' },
@@ -72,9 +72,9 @@ function buildSandwichChecklist(block: ProbeDetail['block']): CheckItem[] {
       status: oppositeDirection === undefined ? 'unknown' : oppositeDirection ? 'pass' : 'fail',
       detail:
         oppositeDirection === undefined
-          ? 'Trade direction was not reported for one or both bracketing transactions — this endpoint cannot confirm it, so it is left unknown rather than assumed.'
+          ? 'Trade direction was not reported for one or both bracketing transactions, this endpoint cannot confirm it, so it is left unknown rather than assumed.'
           : oppositeDirection
-            ? 'The front-run and back-run trade in opposite directions — buy, then sell back — which is what turns bracketing into extraction.'
+            ? 'The front-run and back-run trade in opposite directions (buy, then sell back) which is what turns bracketing into extraction.'
             : 'The front-run and back-run trade in the SAME direction. That is not the sandwich pattern.',
       evidence: front?.direction && back?.direction ? `front-run: ${front.direction} · back-run: ${back.direction}` : undefined,
     },
@@ -83,7 +83,7 @@ function buildSandwichChecklist(block: ProbeDetail['block']): CheckItem[] {
       title: '3. Same attacker at positions 1 and 3',
       status: front && back ? (sameAttacker ? 'pass' : 'fail') : 'unknown',
       detail: sameAttacker
-        ? 'The front-run and back-run were sent from the identical address — one actor, both ends of the bracket.'
+        ? 'The front-run and back-run were sent from the identical address, one actor, both ends of the bracket.'
         : 'The front-run and back-run addresses differ. Without one actor on both ends this is not a sandwich.',
       evidence: front && back ? `front-run from ${truncateAddress(front.from)} · back-run from ${truncateAddress(back.from)}` : undefined,
     },
@@ -115,7 +115,7 @@ function ProbeDemo() {
     extractedWei: `${weiToEth(derivation.extractedWei)} ETH`,
     delayBlocks: `${derivation.delayBlocks} blocks`,
     reverted: derivation.reverted ? 'yes' : 'no',
-    rebate: derivation.rebate ? `${weiToEth(derivation.rebate)} ETH` : 'n/a — not yet instrumented',
+    rebate: derivation.rebate ? `${weiToEth(derivation.rebate)} ETH` : 'n/a, not yet instrumented',
     leaked: derivation.leaked ? `leaked at block ${derivation.leakedAtBlock}` : 'not observed pre-inclusion',
   }
 
@@ -128,19 +128,19 @@ function ProbeDemo() {
   return (
     <main>
       <div className="page-head">
-        <div className="eyebrow">Probe #{probe.id ?? id} — twin group {probe.twinGroup}</div>
+        <div className="eyebrow">Probe #{probe.id ?? id}: twin group {probe.twinGroup}</div>
         <h1>
           {ROUTE_LABELS[probe.route]} vs. {ROUTE_LABELS[twin.route]}
         </h1>
         <p>
           Two identical swaps, dispatched in the same cycle through different routes. Same pool, same amount, same
-          slippage, same block target — the only variable is the route.
+          slippage, same block target, the only variable is the route.
         </p>
       </div>
 
       {sample && (
         <div className="sample-banner">
-          SAMPLE DATA — the Gokuin API at API_URL did not respond for probe {id}. Fixture probe shown below.
+          SAMPLE DATA, the Gokuin API at API_URL did not respond for probe {id}. Fixture probe shown below.
         </div>
       )}
 
@@ -172,18 +172,18 @@ function ProbeDemo() {
               <dt>status</dt>
               <dd>{p.status}</dd>
               <dt>submitted</dt>
-              <dd>{p.submittedBlock ?? '—'}</dd>
+              <dd>{p.submittedBlock ?? ':'}</dd>
               <dt>included</dt>
-              <dd>{p.includedBlock ?? '—'}</dd>
+              <dd>{p.includedBlock ?? ':'}</dd>
               <dt>tx</dt>
-              <dd>{p.txHash ? <TxHashLink hash={p.txHash} /> : '—'}</dd>
+              <dd>{p.txHash ? <TxHashLink hash={p.txHash} /> : ':'}</dd>
             </dl>
           </div>
         ))}
       </div>
-      <p className="small muted">Green values are identical across both legs of the twin — the only lever is the route.</p>
+      <p className="small muted">Green values are identical across both legs of the twin, the only lever is the route.</p>
 
-      <h2 className="section-title">Block view — {block ? `block ${block.number}` : 'no sandwich observed'}</h2>
+      <h2 className="section-title">Block view: {block ? `block ${block.number}` : 'no sandwich observed'}</h2>
       {block ? (
         <>
           <div className="table-scroll">
@@ -205,7 +205,7 @@ function ProbeDemo() {
                       <VerdictBadge bad={tx.role !== 'victim'} badLabel={tx.role} goodLabel="victim" />
                     </td>
                     <td>{truncateAddress(tx.from)}</td>
-                    <td>{tx.direction ?? '—'}</td>
+                    <td>{tx.direction ?? ':'}</td>
                     <td>
                       <TxHashLink hash={tx.hash} />
                     </td>
@@ -217,7 +217,7 @@ function ProbeDemo() {
 
           <div className="trap-note">
             <strong>Why "From", never "sender".</strong> The address column above is each transaction&rsquo;s{' '}
-            <code>from</code> — the EOA that signed it. In a Uniswap <code>Swap</code> event the log&rsquo;s{' '}
+            <code>from</code>: the EOA that signed it. In a Uniswap <code>Swap</code> event the log&rsquo;s{' '}
             <code>sender</code> field is populated by the <em>router contract</em>, which is identical for the
             attacker&rsquo;s transactions and the victim&rsquo;s alike, since both went through the same router. An
             attacker identified by <code>sender</code> would be indistinguishable from every other trader in the
@@ -228,7 +228,7 @@ function ProbeDemo() {
           <h3 style={{ fontSize: '0.95rem', margin: '1.5rem 0 0.25rem' }}>The four-point sandwich check</h3>
           <p className="small muted" style={{ marginBottom: 0 }}>
             A sandwich is these four observations holding together, not a single number. Checked against the actual
-            row above — verify it yourself.
+            row above, verify it yourself.
           </p>
           <div className="checklist">
             {checklist.map((c) => (
@@ -245,13 +245,13 @@ function ProbeDemo() {
             <span className="small muted">
               {passCount} of {checklist.length} checks satisfied · module verdict:{' '}
               {derivation.sandwiched ? 'sandwiched' : 'not sandwiched'}
-              {!checklistAgrees && ' — checklist evidence does not fully confirm the verdict; see the unmet check(s) above'}
+              {!checklistAgrees && ': checklist evidence does not fully confirm the verdict; see the unmet check(s) above'}
             </span>
           </p>
         </>
       ) : (
         <p className="muted">
-          This probe was not sandwiched in the same block — no bracketing transactions to show, and the checklist
+          This probe was not sandwiched in the same block, no bracketing transactions to show, and the checklist
           below has nothing to check against.
         </p>
       )}
@@ -261,7 +261,7 @@ function ProbeDemo() {
         <strong style={{ color: 'var(--ink)', fontWeight: 400 }}>public</strong> means anyone can re-derive this
         figure from block data alone.{' '}
         <strong style={{ color: 'var(--accent)', fontWeight: 400 }}>attested</strong> means it rests on our own
-        listeners' observation — cross-checkable against third-party mempool archives, never independently provable
+        listeners' observation, cross-checkable against third-party mempool archives, never independently provable
         the way the others are.
       </p>
       <div className="table-scroll">
@@ -287,7 +287,7 @@ function ProbeDemo() {
         </table>
       </div>
       <p className="small muted">
-        Provenance comes straight from <code>PROVENANCE</code> in <code>@gokuin/core</code> — this table cannot
+        Provenance comes straight from <code>PROVENANCE</code> in <code>@gokuin/core</code>: this table cannot
         drift from what the API and MCP server declare.
       </p>
 
@@ -317,7 +317,7 @@ function ProbeDemo() {
                 <td>{o.region}</td>
                 <td className="num">{o.seenBlock}</td>
                 <td className="num">{new Date(o.firstSeen).toISOString()}</td>
-                <td>{o.fromUncle ? 'yes — excluded' : 'no'}</td>
+                <td>{o.fromUncle ? 'yes, excluded' : 'no'}</td>
                 <td className="mono small">{o.signature.slice(0, 14)}…</td>
               </tr>
             ))}

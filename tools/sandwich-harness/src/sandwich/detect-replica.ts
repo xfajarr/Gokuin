@@ -5,7 +5,7 @@
 // Why this exists instead of just running the real Substreams module: the
 // real pipeline needs a StreamingFast/Pinax/thegraph.market API key
 // (SUBSTREAMS_API_KEY in repo-root .env.example) to stream Sepolia blocks,
-// and none is configured in this environment — see README.md "Detector
+// and none is configured in this environment, see README.md "Detector
 // verification: what was actually run" for the full explanation and what
 // running this for real against `substreams/substreams.sepolia.yaml` would
 // look like with a key. This replica proves the HEURISTIC (same ordering
@@ -15,10 +15,10 @@
 //
 // Kept intentionally scoped to V3 Swap logs on ONE pool (this harness only
 // ever touches WETH_USDC_POOL) rather than reproducing lib.rs's full
-// block-wide, multi-pool generality — the parts that matter for "does the
+// block-wide, multi-pool generality, the parts that matter for "does the
 // heuristic flag THIS sandwich" are reproduced exactly:
-//   A before V before B, same block (implicit — one eth_getLogs call), same
-//   pool (implicit — one address filter), opposite directions, distinct
+//   A before V before B, same block (implicit, one eth_getLogs call), same
+//   pool (implicit, one address filter), opposite directions, distinct
 //   hashes, A.from == B.from.
 import { decodeAbiParameters, type Hex, type PublicClient } from 'viem'
 import { V3_SWAP_TOPIC0 } from '../chain/addresses'
@@ -55,7 +55,7 @@ function decodeV3Direction(data: Hex): Direction | null {
  * SwapLeg (tx index, hash, sender, direction), and applies the exact
  * heuristic: for every victim position strictly between a same-from,
  * opposite-direction, distinct-hash attacker pair, report the tightest
- * enclosing pair — mirrors lib.rs step 2b.
+ * enclosing pair, mirrors lib.rs step 2b.
  */
 export async function detectSandwichesInBlock(
   publicClient: PublicClient,
@@ -81,7 +81,7 @@ export async function detectSandwichesInBlock(
     toBlock: blockNumber,
   })
 
-  // topic0 sanity check — belt and braces against ever decoding the wrong event.
+  // topic0 sanity check, belt and braces against ever decoding the wrong event.
   const raw = logs.filter(l => l.topics[0]?.toLowerCase() === V3_SWAP_TOPIC0)
 
   const legs: SwapLeg[] = []

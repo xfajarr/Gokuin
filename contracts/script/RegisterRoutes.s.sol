@@ -15,12 +15,12 @@ interface IRegistryView {
 
 /// @notice Registers the three routes as ENSv2 subnames of RouteRegistry's own namespace.
 ///         Separate from `Deploy` because it depends on something no contract can do for
-///         itself: `gokuin.eth`'s ENSv2 subregistry must already point at `RouteRegistry` —
+///         itself: `gokuin.eth`'s ENSv2 subregistry must already point at `RouteRegistry` :
 ///         only the name's owner (or an address it granted `ROLE_SET_SUBREGISTRY`) can set
 ///         that, via `ETHRegistry.setSubregistry`.
 ///
 ///         Folding this into the deploy meant one revert here rolled back four
-///         contract deployments — which is exactly what happened the first time.
+///         contract deployments, which is exactly what happened the first time.
 ///
 /// Required env vars:
 ///   ROUTE_REGISTRY_ADDRESS  from the deploy output.
@@ -55,7 +55,7 @@ contract RegisterRoutes is Script {
         }
 
         // Idempotent on purpose. Re-running a completed step should report that it
-        // is done, not revert — a finished job that looks like a failure sends you
+        // is done, not revert, a finished job that looks like a failure sends you
         // debugging something that already works.
         vm.startBroadcast();
         uint256 created;

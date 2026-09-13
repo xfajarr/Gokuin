@@ -53,7 +53,7 @@ interface FundingAccountingRow {
 /**
  * Per-cycle funding total (this task's requirement 4): the real cost of a
  * measurement should be visible, not hidden. `netCostWei` = funded - swept
- * (dust left in place counts against the cycle's cost, on purpose — a
+ * (dust left in place counts against the cycle's cost, on purpose, a
  * skipped sweep is still capital that did not come back).
  */
 function cycleFundingTotals(ctx: AppContext, cycleId: number) {
@@ -78,7 +78,7 @@ function cycleFundingTotals(ctx: AppContext, cycleId: number) {
 async function cycleIntegrity(ctx: AppContext, id: number) {
   const funding = cycleFundingTotals(ctx, id)
 
-  // Prefer the contract's own view function — it is the on-chain source of
+  // Prefer the contract's own view function, it is the on-chain source of
   // truth (PRD §6.1 integrity()). Fall back to the local SQLite tally when no
   // ledger address is configured (dry-run / no deployment yet).
   const onChain = await ctx.ledger.integrity(id)

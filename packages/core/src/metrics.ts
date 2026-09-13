@@ -6,7 +6,7 @@ import type { Observation, Row, RouteScore, RouteId } from './types'
 export const MIN_LISTENER_AGREEMENT = 2
 
 /**
- * leaked — the treatment tx hash was observed in the PUBLIC mempool by at least
+ * leaked, the treatment tx hash was observed in the PUBLIC mempool by at least
  * MIN_LISTENER_AGREEMENT independent signed listeners, at a block height STRICTLY
  * BELOW its inclusion block. Uncle re-broadcasts are excluded (logged separately).
  */
@@ -21,7 +21,7 @@ export function isLeaked(obs: Observation[], includedBlock: number) {
 }
 
 /**
- * extractedWei — simOut minus realOut, where simOut is an eth_call of the IDENTICAL
+ * extractedWei, simOut minus realOut, where simOut is an eth_call of the IDENTICAL
  * calldata against state at (includedBlock - 1). Never negative.
  */
 export function computeExtracted(simOut: bigint, realOut: bigint): bigint {
@@ -29,13 +29,13 @@ export function computeExtracted(simOut: bigint, realOut: bigint): bigint {
   return d > 0n ? d : 0n
 }
 
-/** delayBlocks — includedBlock minus the chain head at the moment of dispatch. */
+/** delayBlocks, includedBlock minus the chain head at the moment of dispatch. */
 export function delayBlocks(submittedBlock: number, includedBlock: number) {
   return Math.max(0, includedBlock - submittedBlock)
 }
 
 /**
- * sandwiched — A before ours and B after, SAME block, SAME pool, OPPOSITE directions,
+ * sandwiched. A before ours and B after, SAME block, SAME pool, OPPOSITE directions,
  * distinct hashes, A.from == B.from. Detected by the Substreams module; this type
  * only records the module's verdict plus the hashes that prove it.
  */
@@ -60,7 +60,7 @@ export function median(xs: number[]) {
  * A staged row is one where we executed the sandwich ourselves against our own
  * probe. That demonstrates the detector works; it says nothing about whether the
  * route failed its promise. Letting it into sandwichBps would mean publishing a
- * manufactured figure about a named company — the precise thing this project
+ * manufactured figure about a named company, the precise thing this project
  * exists to object to.
  */
 export function scoreRoute(route: RouteId, rows: Row[]): RouteScore {

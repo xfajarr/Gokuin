@@ -1,5 +1,5 @@
 // Canonical message signed over (txHash, firstSeen, region, seenBlock).
-// KEEP THIS BYTE-IDENTICAL to apps/api/src/observe/canonical.ts — the API
+// KEEP THIS BYTE-IDENTICAL to apps/api/src/observe/canonical.ts, the API
 // recovers the signer from exactly this string, this process signs exactly
 // this string. Duplicated intentionally: this task's scope is apps/api +
 // apps/listener only, and this glue is protocol-level, not one of the metric

@@ -33,7 +33,7 @@ contract ScorerTest is Test {
     }
 
     // Asserts: a legitimate CRE submission emits `Scored` with the full tuple and lands
-    // ALL SIX `gokuin.*` text keys in `RouteRegistry` — not just the four the previous,
+    // ALL SIX `gokuin.*` text keys in `RouteRegistry`: not just the four the previous,
     // narrower signature had data for. `probes` and `lastCycle` are now first-class
     // parameters instead of an unwritten gap.
     function test_SubmitScoreWritesAllSixKeys() public {
@@ -53,7 +53,7 @@ contract ScorerTest is Test {
     }
 
     // Asserts the property the ENS demo moment actually rests on: exactly one address
-    // — `registry.scorer()`, i.e. this `Scorer` contract — can ever write a score text
+    // (`registry.scorer()`, i.e. this `Scorer` contract) can ever write a score text
     // record. Fuzzed over arbitrary callers (excluding the real scorer) so this isn't
     // just "the one stranger we happened to try" but "no address other than the one
     // authorised writer", which is the claim made on camera.
@@ -63,8 +63,8 @@ contract ScorerTest is Test {
         vm.expectRevert(RouteRegistry.NotScorer.selector);
         registry.setScore(2, "gokuin.leakBps", "1");
 
-        // And the one address that is authorised — the Scorer contract itself, called
-        // the only legitimate way (via submitScore, gated onlyCRE) — does succeed.
+        // And the one address that is authorised, the Scorer contract itself, called
+        // the only legitimate way (via submitScore, gated onlyCRE): does succeed.
         assertEq(registry.scorer(), address(scorer));
         vm.prank(creForwarder);
         scorer.submitScore(2, 1, 1, 1, 1, 1, 1, "ipfs://evidence");

@@ -21,7 +21,7 @@ import {Scorer} from "./Scorer.sol";
 ///        CRE Forwarder --onReport--> ScorerReportReceiver --submitScore--> Scorer
 ///                                                          --setScore--> RouteRegistry
 contract ScorerReportReceiver is IReceiver {
-    /// @notice Chainlink's CRE Forwarder. Immutable — a rotatable relay address
+    /// @notice Chainlink's CRE Forwarder. Immutable, a rotatable relay address
     ///         would be a second authorized writer wearing a disguise.
     address public immutable forwarder;
 

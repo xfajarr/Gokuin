@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
-// Entry point. Picks stdio (default — for Claude Code / Cursor running this
-// as a local subprocess) or HTTP (MCP_TRANSPORT=http — for hosted use) based
+// Entry point. Picks stdio (default, for Claude Code / Cursor running this
+// as a local subprocess) or HTTP (MCP_TRANSPORT=http, for hosted use) based
 // on env, per PRD §10.
 
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'

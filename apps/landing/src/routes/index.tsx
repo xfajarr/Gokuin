@@ -31,7 +31,7 @@ const TREE_ROWS: Array<{
   { level: 'l1', label: '.public', chevron: 'down' },
 ]
 
-// Line numbers skip 4 on purpose — matches the reference mock exactly.
+// Line numbers skip 4 on purpose, matches the reference mock exactly.
 const LINE_NUMBERS = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
 
 const LOGOS: Array<{ key: string; name: string; src: string }> = [
@@ -292,25 +292,25 @@ function Home() {
         { ...elOpts, easing: EASE_SOFT },
       ]
 
-      // 80 — brand
+      // 80, brand
       play(brandRef.current, [
         { opacity: 0, transform: 'scale(.92)' },
         { opacity: 1, transform: 'scale(1)' },
       ], { delay: 80, duration: 560, easing: EASE_SOFT })
 
-      // 160 — nav items, +40ms each
+      // 160, nav items, +40ms each
       navRefs.current.forEach((el, i) => {
         const [kf, opts] = lifted({ delay: 160 + i * 40, duration: 500 })
         play(el, kf, opts)
       })
 
-      // 300 — actions (Sign In, Register, burger), +60ms each
+      // 300, actions (Sign In, Register, burger), +60ms each
       actionRefs.current.forEach((el, i) => {
         const [kf, opts] = lifted({ delay: 300 + i * 60, duration: 500 })
         play(el, kf, opts)
       })
 
-      // 420 / 540 — headline lines unmask, 950ms, 120ms apart
+      // 420 / 540, headline lines unmask, 950ms, 120ms apart
       headlineRefs.current.forEach((el, i) => {
         play(el, [{ transform: 'translateY(130%)' }, { transform: 'translateY(0)' }], {
           delay: 420 + i * 120,
@@ -319,25 +319,25 @@ function Home() {
         })
       })
 
-      // 780 — subtitle
+      // 780, subtitle
       {
         const [kf, opts] = lifted({ delay: 780, duration: 620 })
         play(subRef.current, kf, opts)
       }
 
-      // 920 — CTAs, +70ms each
+      // 920. CTAs, +70ms each
       ctaRefs.current.forEach((el, i) => {
         const [kf, opts] = lifted({ delay: 920 + i * 70, duration: 520 })
         play(el, kf, opts)
       })
 
-      // 1000 — editor rises
+      // 1000, editor rises
       play(editorRef.current, [
         { opacity: 0, transform: `translateY(${rise})` },
         { opacity: 1, transform: 'translateY(0)' },
       ], { delay: 1000, duration: 660, easing: EASE_EXPO })
 
-      // 1180 — chrome dots, +45ms each, 340ms
+      // 1180, chrome dots, +45ms each, 340ms
       dotRefs.current.forEach((el, i) => {
         play(el, [
           { opacity: 0, transform: 'scale(.72)' },
@@ -345,26 +345,26 @@ function Home() {
         ], { delay: 1180 + i * 45, duration: 340, easing: EASE_SOFT })
       })
 
-      // 1260 — File Manager / project / tab, +55ms each
+      // 1260. File Manager / project / tab, +55ms each
       ;[eyebrowRef.current, projectRef.current, tabRef.current].forEach((el, i) => {
         const [kf, opts] = lifted({ delay: 1260 + i * 55, duration: 420 })
         play(el, kf, opts)
       })
 
-      // 1360 — tree rows, +38ms x --ed-detail
+      // 1360, tree rows, +38ms x --ed-detail
       treeRowRefs.current.forEach((el, i) => {
         const [kf, opts] = lifted({ delay: 1360 + i * 38 * edDetail, duration: 420 })
         play(el, kf, opts)
       })
 
-      // 1440 — line numbers fade
+      // 1440, line numbers fade
       play(linenumsRef.current, [{ opacity: 0 }, { opacity: 1 }], {
         delay: 1440,
         duration: 400,
         easing: EASE_SOFT,
       })
 
-      // 1480 — code lines, +28ms x --ed-detail
+      // 1480, code lines, +28ms x --ed-detail
       codeLineRefs.current.forEach((el, i) => {
         const [kf, opts] = lifted({ delay: 1480 + i * 28 * edDetail, duration: 360 })
         play(el, kf, opts)

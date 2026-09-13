@@ -21,10 +21,10 @@ function Scoreboard() {
   return (
     <main>
       <div className="page-head">
-        <div className="eyebrow">Gokuin — measured, not asserted</div>
+        <div className="eyebrow">Gokuin, measured, not asserted</div>
         <h1>Route scoreboard</h1>
         <p>
-          One row per Ethereum transaction route. Every cell links to the evidence rows that produced it — the
+          One row per Ethereum transaction route. Every cell links to the evidence rows that produced it, the
           mainnet transaction hash, not our word. Five of six measurements below are things anyone can re-derive
           from public block data; one rests on our own listeners. See <Link to="/method">/method</Link> for exactly
           which is which.
@@ -33,7 +33,7 @@ function Scoreboard() {
 
       {sample && (
         <div className="sample-banner">
-          SAMPLE DATA — the Gokuin API at API_URL did not respond. These are fixture numbers, not measurements.
+          SAMPLE DATA, the Gokuin API at API_URL did not respond. These are fixture numbers, not measurements.
         </div>
       )}
 
@@ -44,27 +44,27 @@ function Scoreboard() {
         </div>
         <div>
           <dt>Leaks</dt>
-          <dd>seen in the public mempool before inclusion — attested, see /method</dd>
+          <dd>seen in the public mempool before inclusion, attested, see /method</dd>
         </div>
         <div>
           <dt>Sandwich %</dt>
-          <dd>front-run + back-run around ours, same block — public, re-derivable</dd>
+          <dd>front-run + back-run around ours, same block, public, re-derivable</dd>
         </div>
         <div>
           <dt>ETH lost</dt>
-          <dd>simulated output minus real output — public, re-derivable</dd>
+          <dd>simulated output minus real output, public, re-derivable</dd>
         </div>
       </dl>
 
       <div className="integrity" title="Cycle integrity: committed schedules that were published without a gap">
-        <span>cycle {lastCycle || '—'} integrity:</span>
+        <span>cycle {lastCycle || ':'} integrity:</span>
         <span className="num">committed 100</span>
         <span className="integrity-sep">·</span>
         <span className="num">published 100</span>
         <span className="integrity-sep">·</span>
         <IntegrityBadge intact={totalProbes > 0} />
         <span className="muted small">
-          — see{' '}
+         : see{' '}
           <Link to="/cycle/$id" params={{ id: String(lastCycle || 1) }}>
             cycle {lastCycle || 1}
           </Link>
@@ -91,7 +91,7 @@ function Scoreboard() {
         <div className="stat">
           <div className="stat-label">Staged rows excluded</div>
           <div className="stat-value num">{totalStagedExcluded}</div>
-          <div className="stat-note">rows we caused ourselves — never counted in the figures above</div>
+          <div className="stat-note">rows we caused ourselves, never counted in the figures above</div>
         </div>
       </div>
 
@@ -169,7 +169,7 @@ function Scoreboard() {
         </table>
       </div>
       <p className="small muted">
-        A route with zero probes reads as "no data", never as a clean 0% — see{' '}
+        A route with zero probes reads as "no data", never as a clean 0%: see{' '}
         <code>packages/core/test/staged-exclusion.test.ts</code> for the rule this table honours.
       </p>
     </main>

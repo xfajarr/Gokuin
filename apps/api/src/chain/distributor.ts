@@ -23,7 +23,7 @@
 //   2. One distributor transaction touching more than one probe. A single
 //      funding tx with multiple recipients, or several funding txs mined in
 //      the same block, visibly ties every probe it touches together before
-//      the swap even happens — worse than fingerprinting a single address,
+//      the swap even happens, worse than fingerprinting a single address,
 //      it fingerprints the whole cohort at once. Mitigated structurally:
 //      `DistributorClient.fundProbe` takes exactly one `to` address and
 //      sends exactly one transaction. `cycle/run.ts` calls it once per leg
@@ -39,7 +39,7 @@
 //      clear it, rather than submitting anyway.
 //
 // ------------------------------------------------------------------------
-// FINGERPRINTS THIS MODULE DOES **NOT** DEFEND AGAINST — said plainly per
+// FINGERPRINTS THIS MODULE DOES **NOT** DEFEND AGAINST, said plainly per
 // this task's brief, rather than implying more anonymity than exists
 // ------------------------------------------------------------------------
 //
@@ -48,11 +48,11 @@
 //     back to that same address. Anyone clustering addresses by "funded by
 //     / swept to X" links every probe in the fleet to Gokuin, permanently.
 //     Breaking this would need a mixer, CoinJoin-style batched settlement,
-//     or a chain of disposable intermediate funders — none of that is built
+//     or a chain of disposable intermediate funders, none of that is built
 //     here.
 //   - Calldata / gas-parameter fingerprinting. Both legs of a twin share
 //     byte-identical swap calldata and the same fee-estimation logic
-//     (cycle/dispatch.ts) — deliberately, since that identity is what makes
+//     (cycle/dispatch.ts): deliberately, since that identity is what makes
 //     the twin comparison meaningful. A route operator fingerprinting by
 //     calldata shape or fee curve, rather than by funding, is untouched by
 //     this module.
@@ -68,18 +68,18 @@
 //     never rotates.
 //
 // ------------------------------------------------------------------------
-// DRY-RUN CONVENTION — and why it differs from dispatch.ts's
+// DRY-RUN CONVENTION, and why it differs from dispatch.ts's
 // ------------------------------------------------------------------------
 // dispatch.ts's probe legs always have a real key (`rotateEOA` generates one
 // on the spot), so submitLeg always *signs* for real and only skips the
 // network call. The distributor has no such luxury: without `DISTRIBUTOR_PK`
 // there is no key at all to sign a funding transaction with. So `fundProbe`
-// follows chain/ledger.ts's convention instead — real fee estimation always
+// follows chain/ledger.ts's convention instead, real fee estimation always
 // happens against the real (possibly fixture) RPC, and only the
 // signature+broadcast step is replaced with a deterministic, clearly logged
 // stand-in hash when no key is configured. `sweepProbe`, by contrast, is
 // signed by the *probe's* own in-memory key (always real, exactly like
-// dispatch.ts) — only its broadcast is skipped when the distributor has
+// dispatch.ts): only its broadcast is skipped when the distributor has
 // nothing configured to sweep back to.
 import { encodePacked, keccak256, parseGwei, type Hex, type PublicClient } from 'viem'
 import { mainnet } from 'viem/chains'
@@ -87,12 +87,12 @@ import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts'
 import type { Env } from '../env'
 import { SWAP_GAS_LIMIT } from '../cycle/dispatch'
 
-/** Plain ETH transfer gas limit — funding and sweep transactions carry no calldata. */
+/** Plain ETH transfer gas limit, funding and sweep transactions carry no calldata. */
 export const FUND_TRANSFER_GAS_LIMIT = 21_000n
 export const SWEEP_TRANSFER_GAS_LIMIT = 21_000n
 
 export interface FundingConfig {
-  /** Multiplier applied to (gas limit * fee) to size the gas portion of a probe's funding — headroom against fee spikes between funding and dispatch. */
+  /** Multiplier applied to (gas limit * fee) to size the gas portion of a probe's funding, headroom against fee spikes between funding and dispatch. */
   gasHeadroomMultiplier: number
   /** Max size, in bps of (swap value + gas budget), of the random surplus added on top so funding amounts are never identical or round. */
   amountJitterBps: number
@@ -127,7 +127,7 @@ export function gasBudgetWei(gasLimit: bigint, maxFeePerGas: bigint, headroomMul
  * A random, non-zero surplus in [1, maxJitter] wei, where maxJitter is a
  * small bps fraction of `baseWei`. Uses `crypto.getRandomValues` (never
  * `Math.random`, which is not a fingerprinting-safe source) so it cannot be
- * predicted or replayed. Always >= 1n when baseWei > 0 and jitterBps > 0 —
+ * predicted or replayed. Always >= 1n when baseWei > 0 and jitterBps > 0 :
  * this is what keeps the final funded amount off a round number, on top of
  * making it differ probe-to-probe.
  */
@@ -168,7 +168,7 @@ async function feeParams(publicClient: PublicClient): Promise<{ maxFeePerGas: bi
   }
 }
 
-/** Deterministic worst-case funding figure (full jitter headroom, not a random sample) — used only for preflight, so a lucky/unlucky random draw at actual funding time can never exceed what preflight checked for. */
+/** Deterministic worst-case funding figure (full jitter headroom, not a random sample): used only for preflight, so a lucky/unlucky random draw at actual funding time can never exceed what preflight checked for. */
 export function maxFundingAmountWei(swapValueWei: bigint, gasBudget: bigint, jitterBps: number): bigint {
   const base = swapValueWei + gasBudget
   if (jitterBps <= 0 || base <= 0n) return base
@@ -201,12 +201,12 @@ export async function estimateCycleFundingRequirement(
  * the funding-side mirror of that same principle (this task's requirement
  * 5): a cycle that is committed but then cannot actually execute creates
  * exactly the committed-vs-published gap that `ProbeLedger.integrity()` is
- * built to flag as dishonesty. Call this — and let it throw — BEFORE
+ * built to flag as dishonesty. Call this (and let it throw) BEFORE
  * `ledger.commitCycle()`, not after.
  *
  * When no `DISTRIBUTOR_PK` is configured at all, there is no real balance to
  * check against, so this logs the computed requirement and passes rather
- * than hard-failing every dry-run/dev cycle — consistent with the rest of
+ * than hard-failing every dry-run/dev cycle, consistent with the rest of
  * this codebase's "unconfigured -> dry-run, never a crash" convention.
  */
 export async function preflightDistributorFunding(
@@ -219,7 +219,7 @@ export async function preflightDistributorFunding(
   const requirement = await estimateCycleFundingRequirement(publicClient, probeCount, swapValueWei, config)
   if (distributor.dryRun) {
     console.warn(
-      `[distributor:dry-run] no DISTRIBUTOR_PK configured — skipping balance preflight. ` +
+      `[distributor:dry-run] no DISTRIBUTOR_PK configured, skipping balance preflight. ` +
         `would require ~${requirement.totalRequiredWei} wei to cover ${probeCount} probe(s).`,
     )
     return requirement
@@ -237,7 +237,7 @@ export interface ProbeFundingPlan {
   jitterWei: bigint
 }
 
-/** The real, randomized per-probe funding figure — sampled fresh for each probe, right before it is sent. */
+/** The real, randomized per-probe funding figure, sampled fresh for each probe, right before it is sent. */
 export async function planProbeFunding(
   publicClient: PublicClient,
   swapValueWei: bigint,
@@ -269,7 +269,7 @@ export interface SweepOutcome {
 }
 
 export class DistributorClient {
-  /** True when there is no DISTRIBUTOR_PK at all — nothing to fund with or sweep back to. */
+  /** True when there is no DISTRIBUTOR_PK at all, nothing to fund with or sweep back to. */
   readonly dryRun: boolean
 
   constructor(
@@ -289,7 +289,7 @@ export class DistributorClient {
   }
 
   /**
-   * Funds exactly one probe address with exactly one transaction — never
+   * Funds exactly one probe address with exactly one transaction, never
    * fold more than one probe into a single distributor tx (see module
    * header, fingerprint #2). Fee estimation always hits the real (possibly
    * fixture) RPC; only signing+broadcast is stood in for when no
@@ -300,7 +300,7 @@ export class DistributorClient {
     if (!this.account) {
       const txHash = keccak256(encodePacked(['string', 'address', 'uint256', 'uint256'], ['fund', to, amountWei, BigInt(probeId)]))
       console.warn(
-        `[distributor:dry-run] no DISTRIBUTOR_PK configured — not funding probe ${probeId} (${to}) with ${amountWei} wei. stand-in hash ${txHash}`,
+        `[distributor:dry-run] no DISTRIBUTOR_PK configured, not funding probe ${probeId} (${to}) with ${amountWei} wei. stand-in hash ${txHash}`,
       )
       return { txHash, dryRun: true }
     }
@@ -323,7 +323,7 @@ export class DistributorClient {
   /**
    * Sweeps a settled probe's leftover balance back to the distributor so
    * capital recirculates (this task's requirement 3). Signed by the probe's
-   * own in-memory key — always real, exactly like dispatch.ts's submitLeg —
+   * own in-memory key, always real, exactly like dispatch.ts's submitLeg :
    * but skips broadcasting (and skips the transfer entirely when there is no
    * real distributor address to send it to) when this client is dry-run.
    * When the leftover balance would not clear its own gas cost to move, this
@@ -337,7 +337,7 @@ export class DistributorClient {
 
     if (balance <= sweepGasCost) {
       console.warn(
-        `[distributor:sweep] probe ${probeId} (${account.address}) leftover ${balance} wei <= sweep cost budget ${sweepGasCost} wei — leaving dust in place rather than burning gas to move it`,
+        `[distributor:sweep] probe ${probeId} (${account.address}) leftover ${balance} wei <= sweep cost budget ${sweepGasCost} wei, leaving dust in place rather than burning gas to move it`,
       )
       return { txHash: null, sweptAmountWei: 0n, dustSkipped: true, dryRun: this.dryRun }
     }
@@ -346,7 +346,7 @@ export class DistributorClient {
     const to = this.address
     if (!to) {
       // No real distributor address configured at all, so there is no real
-      // destination to build a genuine transaction against — same shape of
+      // destination to build a genuine transaction against, same shape of
       // problem fundProbe hits with no key. We still report the true
       // recoverable amount (it is a real, fully-computed number; only the
       // "where does it go" half is missing) via a deterministic stand-in
@@ -354,13 +354,13 @@ export class DistributorClient {
       // inventing a destination to sign a real transfer against.
       const txHash = keccak256(encodePacked(['string', 'address', 'uint256'], ['sweep', account.address, sweepAmountWei]))
       console.warn(
-        `[distributor:dry-run] no DISTRIBUTOR_PK configured — probe ${probeId} has ${sweepAmountWei} wei sweepable but nowhere configured to sweep it to. stand-in hash ${txHash}`,
+        `[distributor:dry-run] no DISTRIBUTOR_PK configured, probe ${probeId} has ${sweepAmountWei} wei sweepable but nowhere configured to sweep it to. stand-in hash ${txHash}`,
       )
       return { txHash, sweptAmountWei: sweepAmountWei, dustSkipped: false, dryRun: true }
     }
 
     // `to` is only non-null when a distributor account is configured, so
-    // this is always the "real" path — really signed by the probe's own
+    // this is always the "real" path, really signed by the probe's own
     // key, and really broadcast. There is no separate "signed but not
     // broadcast" state here: either there's a real destination and this
     // goes out for real, or there isn't (handled above) and we never reach

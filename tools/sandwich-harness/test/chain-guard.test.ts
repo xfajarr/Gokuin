@@ -1,5 +1,5 @@
 // Constraint 1's own test: the chain guard must reject anything that is not
-// Sepolia (11155111) and accept only Sepolia. No env var, no flag — just
+// Sepolia (11155111) and accept only Sepolia. No env var, no flag, just
 // what the RPC itself reports via eth_chainId.
 import { describe, expect, it } from 'bun:test'
 import { assertSepolia, SEPOLIA_CHAIN_ID, WrongChainError, type ChainIdSource } from '../src/guards/chain-guard'

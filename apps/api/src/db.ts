@@ -1,4 +1,4 @@
-// bun:sqlite — operational, off-chain store. Schema is the exact DDL from
+// bun:sqlite, operational, off-chain store. Schema is the exact DDL from
 // PRD.md §5. This is metadata only: scores are read from the Subgraph
 // (see src/score/read.ts), never from these tables.
 import { Database } from 'bun:sqlite'
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS derivation (
 );
 
 -- Extends PRD §5's data model: per-probe funding + sweep accounting
--- (chain/distributor.ts). Every probe must have a traceable cost — this
+-- (chain/distributor.ts). Every probe must have a traceable cost, this
 -- table is that trace: what it was funded, why (gas budget), and what came
 -- back on sweep (or why nothing did).
 CREATE TABLE IF NOT EXISTS funding (

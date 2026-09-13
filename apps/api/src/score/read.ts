@@ -15,7 +15,7 @@ const ROUTE_FIELDS = `id probes leaks sandwiches totalExtractedWei medianDelayBl
 
 // Same rounding as the internal bps() helper inside scoreRoute() in
 // packages/core/src/metrics.ts. Duplicated only because the subgraph's Route
-// entity (PRD §5) stores raw counts, not bps — this is presentation
+// entity (PRD §5) stores raw counts, not bps, this is presentation
 // arithmetic on numbers the subgraph already computed, not a redefinition of
 // what counts as a leak, a sandwich, or extracted value.
 function bps(n: number, total: number): number {
@@ -65,7 +65,7 @@ export interface RowsPage {
 export function createScoreReader(env: Env) {
   async function gql<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
     if (!env.SUBGRAPH_URL) {
-      throw new ScoreReadUnavailable('SUBGRAPH_URL not configured — no Graph, no scores (PRD §5, §12).')
+      throw new ScoreReadUnavailable('SUBGRAPH_URL not configured, no Graph, no scores (PRD §5, §12).')
     }
     const res = await fetch(env.SUBGRAPH_URL, {
       method: 'POST',

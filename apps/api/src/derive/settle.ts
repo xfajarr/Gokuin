@@ -1,6 +1,6 @@
 // Compose one Row from probe + observations + derivation, write it through
 // ProbeLedger.record() (PRD §7.3 step 8). The metric math is imported from
-// @gokuin/core exclusively — this file only wires plumbing around it.
+// @gokuin/core exclusively, this file only wires plumbing around it.
 import { computeExtracted, isLeaked, ROUTE_IDS, type Observation, type Row, type RouteId } from '@gokuin/core'
 import type { Hex, PublicClient } from 'viem'
 import type { Statements } from '../db'
@@ -26,7 +26,7 @@ interface ProbeRow {
   submitted_block: number | null
   included_block: number | null
   status: string
-  /** 0 or 1 — sqlite has no boolean. See db.ts for what staged means. */
+  /** 0 or 1, sqlite has no boolean. See db.ts for what staged means. */
   staged: number
 }
 

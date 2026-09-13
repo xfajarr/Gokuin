@@ -4,7 +4,7 @@
 export const ROUTES = ['public-mempool', 'flashbots-protect', 'mev-blocker'] as const
 export type RouteId = (typeof ROUTES)[number]
 
-/** routeId used on-chain — index into ROUTES, stable forever. Never reorder. */
+/** routeId used on-chain, index into ROUTES, stable forever. Never reorder. */
 export const ROUTE_IDS: Record<RouteId, number> = {
   'public-mempool': 0,
   'flashbots-protect': 1,
@@ -24,7 +24,7 @@ export interface Observation {
   region: Region
   firstSeen: number      // unix ms
   seenBlock: number      // chain head at observation
-  fromUncle: boolean     // uncle re-broadcast — logged, excluded from leak
+  fromUncle: boolean     // uncle re-broadcast, logged, excluded from leak
   signature: `0x${string}`
 }
 
@@ -56,7 +56,7 @@ export interface Row {
   cycleId: number
   sandwiched: boolean
   /**
-   * True when we caused this outcome ourselves — a sandwich executed against our
+   * True when we caused this outcome ourselves, a sandwich executed against our
    * own probe to demonstrate the detection path, because a real one cannot be
    * scheduled for a recording.
    *

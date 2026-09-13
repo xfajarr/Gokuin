@@ -3,7 +3,7 @@
 // DETECTOR, not about the ROUTE.
 //
 // If a staged row reached sandwichBps, Gokuin would be publishing a manufactured
-// figure about a named company — the exact thing it exists to object to. These
+// figure about a named company, the exact thing it exists to object to. These
 // tests make that structurally impossible rather than a matter of discipline.
 import { describe, expect, it } from 'bun:test'
 import { scoreRoute, type Row } from '../src/index'
@@ -36,7 +36,7 @@ describe('staged rows never reach a route score', () => {
     expect(withStaged.probes).toBe(clean.probes)
   })
 
-  it('an organic sandwich still does move it — the exclusion is not a mute button', () => {
+  it('an organic sandwich still does move it, the exclusion is not a mute button', () => {
     const s = scoreRoute('public-mempool', [row(), row(), row(), row({ sandwiched: true })])
     expect(s.sandwichBps).toBe(2500)
   })

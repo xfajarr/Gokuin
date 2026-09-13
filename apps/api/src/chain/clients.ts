@@ -1,7 +1,7 @@
-// viem clients: one mainnet public client (probes + simulation live on mainnet —
+// viem clients: one mainnet public client (probes + simulation live on mainnet :
 // PRD §4 "a testnet sandwich proves nothing"), one Sepolia public + wallet client
 // (ProbeLedger lives on Sepolia). The wallet client is null when PROBER_PK is
-// absent — callers (chain/ledger.ts) treat that as dry-run, not a crash.
+// absent, callers (chain/ledger.ts) treat that as dry-run, not a crash.
 import { createPublicClient, createWalletClient, http, webSocket, type PublicClient, type WalletClient } from 'viem'
 import { mainnet, sepolia } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
@@ -16,7 +16,7 @@ export function makeSepoliaPublicClient(env: Env): PublicClient {
   return createPublicClient({ chain: sepolia, transport: http(env.SEPOLIA_RPC) }) as PublicClient
 }
 
-/** null when no PROBER_PK is configured — the ledger writer must run dry-run. */
+/** null when no PROBER_PK is configured, the ledger writer must run dry-run. */
 export function makeSepoliaWalletClient(env: Env): WalletClient | null {
   if (!env.PROBER_PK) return null
   const account = privateKeyToAccount(env.PROBER_PK as `0x${string}`)

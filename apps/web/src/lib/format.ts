@@ -1,7 +1,7 @@
 // Pure, client-and-server-safe formatting helpers. No env access here.
 
 export function weiToEth(wei: string | bigint | null | undefined, digits = 4): string {
-  if (wei === null || wei === undefined) return '—'
+  if (wei === null || wei === undefined) return 'n/a'
   const v = typeof wei === 'bigint' ? wei : BigInt(wei || '0')
   const sign = v < 0n ? '-' : ''
   const abs = v < 0n ? -v : v
@@ -36,6 +36,6 @@ export function etherscanBlock(block: number, network: 'mainnet' | 'sepolia' = '
 }
 
 export function formatTimestamp(ms: number | null | undefined): string {
-  if (!ms) return '—'
+  if (!ms) return 'n/a'
   return new Date(ms).toISOString().replace('T', ' ').replace(/\.\d+Z$/, 'Z')
 }

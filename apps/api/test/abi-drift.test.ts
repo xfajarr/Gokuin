@@ -1,7 +1,7 @@
 // The API once hand-declared ProbeLedger's ABI and drifted from the contract:
 // revealCycle took (cycleId, salt) while the deployed function took
 // (cycleId, routeIds, slots, salt). That kind of drift is invisible until the
-// transaction reverts on chain — which, for the reveal, means the integrity
+// transaction reverts on chain, which, for the reveal, means the integrity
 // check silently never works.
 //
 // These tests encode every ledger write against the ABI generated from
@@ -29,7 +29,7 @@ describe('ProbeLedger ABI is the generated one', () => {
       }),
     ).not.toThrow()
 
-    // the shape the API used to send — must now be rejected
+    // the shape the API used to send, must now be rejected
     expect(() =>
       encodeFunctionData({ abi: ProbeLedgerAbi, functionName: 'revealCycle', args: [1, ZERO32] as never }),
     ).toThrow()

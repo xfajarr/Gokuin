@@ -5,7 +5,7 @@ export class WrongChainError extends Error {
     super(
       `refusing to continue: this harness only ever runs against Sepolia ` +
         `(chain id ${SEPOLIA_CHAIN_ID}). The configured RPC reports chain id ` +
-        `${actualChainId} instead. This is a hard abort, not a warning — there ` +
+        `${actualChainId} instead. This is a hard abort, not a warning, there ` +
         `is no override for it.`,
     )
     this.name = 'WrongChainError'
@@ -19,7 +19,7 @@ export interface ChainIdSource {
 /**
  * Asks the configured RPC what chain it actually is (not what we assume it is)
  * and throws WrongChainError on anything other than Sepolia. Call this before
- * any other chain interaction — watching, signing, or broadcasting.
+ * any other chain interaction, watching, signing, or broadcasting.
  */
 export async function assertSepolia(client: ChainIdSource): Promise<void> {
   const chainId = await client.getChainId()

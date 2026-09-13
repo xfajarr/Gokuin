@@ -1,12 +1,12 @@
 // Watches the public mempool for the victim probe transaction, the same
 // approach apps/listener/src/index.ts uses (viem watchPendingTransactions
-// over a websocket transport) — reused here rather than re-invented, since
+// over a websocket transport): reused here rather than re-invented, since
 // this is exactly the "is this transaction visible in the public mempool"
 // question the listener already answers for the real system.
 //
 // Once the victim's hash is seen, `onVictimSeen` fires immediately so the
 // caller can broadcast the front-run and back-run with as little delay as
-// possible — every millisecond spent here is a millisecond less margin for
+// possible, every millisecond spent here is a millisecond less margin for
 // the fee ladder in fee-ladder.ts to actually land the three legs in order.
 import type { PublicClient } from 'viem'
 
@@ -38,7 +38,7 @@ export function watchForVictim(opts: WatchForVictimOptions): () => void {
           }
         } catch {
           // Transaction dropped from the pool between the hash notification
-          // and the lookup — routine on a public testnet mempool, not an error.
+          // and the lookup, routine on a public testnet mempool, not an error.
         }
       }
     },

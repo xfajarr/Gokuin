@@ -6,7 +6,7 @@ package:
   url: https://github.com/xfajarr/Gokuin
   description: >-
     Generic single-block sandwich-attack detector for Ethereum mainnet. Takes any
-    address — it hardcodes none — so anyone can point it at their own wallet and
+    address (it hardcodes none) so anyone can point it at their own wallet and
     ask whether they have been sandwiched.
 imports:
   # Only needed by `graph_out`, the small adapter module that turns our

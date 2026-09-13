@@ -15,7 +15,7 @@ export const Route = createFileRoute('/method')({
 })
 
 // A tiny worked example run through the REAL functions from @gokuin/core at
-// render time — not restated logic. If these functions change, this page's
+// render time, not restated logic. If these functions change, this page's
 // numbers change with them.
 const exampleLeak = isLeaked(
   [
@@ -63,14 +63,14 @@ const DEFINITIONS: {
     metric: 'reverted',
     label: 'reverted',
     prose: 'Probe transaction landed on-chain with a reverted status. Read directly off the receipt.',
-    live: 'Read from probe.status at settle time — designed, not yet surfaced on this page.',
+    live: 'Read from probe.status at settle time, designed, not yet surfaced on this page.',
   },
   {
     metric: 'rebate',
     label: 'rebate',
     prose:
       'Value returned to the sender by routes that share MEV back with builders/searchers (e.g. MEV-Blocker refunds). Net against extractedWei when present.',
-    live: 'Designed but unbuilt — no route in this deployment currently pays a measurable rebate.',
+    live: 'Designed but unbuilt, no route in this deployment currently pays a measurable rebate.',
   },
 ]
 
@@ -82,7 +82,7 @@ function Method() {
         <h1>Method</h1>
         <p>
           These definitions are rendered from <code>PROVENANCE</code> and the measurement functions exported by{' '}
-          <code>@gokuin/core</code> — the same module the API and the MCP server import. One definition, three
+          <code>@gokuin/core</code>: the same module the API and the MCP server import. One definition, three
           consumers; this page cannot quietly drift from what actually runs.
         </p>
       </div>
@@ -116,7 +116,7 @@ function Method() {
       </div>
       <p className="small muted">
         {Object.values(PROVENANCE).filter((p) => p === 'public').length} of {Object.keys(PROVENANCE).length}{' '}
-        metrics need no trust in Gokuin at all — anyone can re-derive them from public block data. Routes measured:{' '}
+        metrics need no trust in Gokuin at all, anyone can re-derive them from public block data. Routes measured:{' '}
         {ROUTES.join(', ')}. Listener regions: {REGIONS.join(', ')}.
       </p>
 
@@ -127,13 +127,13 @@ function Method() {
           rebate all derive from public block data via an open-source module.
         </li>
         <li>
-          <strong>The leak flag is the one observation</strong> — mitigated four ways: multiple signed listeners;
+          <strong>The leak flag is the one observation</strong>: mitigated four ways: multiple signed listeners;
           TEE-attested observation; a third-party mempool archive as independent cross-check; anyone may run a
           listener.
         </li>
         <li>
           <strong>Commit-reveal kills cherry-picking and omission together.</strong> A gap between committed and
-          published is on-chain forever — see any <code>/cycle/$id</code> page.
+          published is on-chain forever, see any <code>/cycle/$id</code> page.
         </li>
         <li>
           <strong>Rows public, weights private.</strong> The score is a convenience; the rows are the truth. Don't
@@ -159,7 +159,7 @@ function Method() {
         <div className="stat">
           <div className="stat-label">Simulated</div>
           <div className="small">
-            <code>extractedWei</code> via <code>eth_call</code> against historical state — deterministic, but not a
+            <code>extractedWei</code> via <code>eth_call</code> against historical state, deterministic, but not a
             second on-chain transaction.
           </div>
         </div>

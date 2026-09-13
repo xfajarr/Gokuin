@@ -1,7 +1,7 @@
 // Distributor funding/sweep/preflight (chain/distributor.ts). This task's
 // required coverage:
 //   1. preflight refuses an underfunded cycle (cycle/run.ts calls this
-//      before ledger.commitCycle — see its comments and module header)
+//      before ledger.commitCycle, see its comments and module header)
 //   2. funding amounts differ between probes in the same cycle
 //   3. sweep skips a dust balance rather than burning gas to move it
 // Plus the supporting invariants those three depend on: gas budget math,
@@ -93,7 +93,7 @@ describe('preflightDistributorFunding', () => {
   const swapValue = 10_000_000_000_000_000n
   const config = testConfig()
 
-  test('refuses (throws) an underfunded cycle — this must run before commitCycle in cycle/run.ts', async () => {
+  test('refuses (throws) an underfunded cycle, this must run before commitCycle in cycle/run.ts', async () => {
     const account = privateKeyToAccount(generatePrivateKey())
     const client = fakePublicClient({ getBalance: async () => 1n })
     const distributor = new DistributorClient(client, account)
@@ -192,11 +192,11 @@ describe('fundProbe dry-run parity', () => {
     expect(r1.txHash).not.toBe(r2.txHash)
   })
 
-  test('never batches more than one probe per funding call — one `to` address per invocation', async () => {
+  test('never batches more than one probe per funding call, one `to` address per invocation', async () => {
     // Structural guarantee: fundProbe's signature takes exactly one address,
     // so there is no code path through it that funds two probes at once.
     const client = fakePublicClient()
     const distributor = new DistributorClient(client, null)
-    expect(distributor.fundProbe.length).toBeLessThanOrEqual(3) // (to, amountWei, probeId) — no batch/array parameter
+    expect(distributor.fundProbe.length).toBeLessThanOrEqual(3) // (to, amountWei, probeId): no batch/array parameter
   })
 })

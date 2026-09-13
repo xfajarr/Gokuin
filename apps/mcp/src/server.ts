@@ -1,4 +1,4 @@
-// Builds the Gokuin MCP server: three tools, both wired to the same rule —
+// Builds the Gokuin MCP server: three tools, both wired to the same rule :
 // no route is ever picked, and no number is ever reported, without a `reason`
 // and `evidence` attached. See PRD §10, §12.
 
@@ -31,8 +31,8 @@ function errorResult(message: string): CallToolResult {
 function describeRouteScore(score: RouteScore): string {
   return (
     `${score.route}: ${score.probes} probes so far, ${score.leaks} leaked ` +
-    `(${score.leakBps} bps — the one attested metric, cross-checked against listener signatures), ` +
-    `${score.sandwiches} sandwiched (${score.sandwichBps} bps — publicly re-derivable from block data), ` +
+    `(${score.leakBps} bps, the one attested metric, cross-checked against listener signatures), ` +
+    `${score.sandwiches} sandwiched (${score.sandwichBps} bps, publicly re-derivable from block data), ` +
     `median inclusion delay ${score.medianDelayBlocks} blocks, ${score.totalExtractedWei} wei extracted in total, ` +
     `last scored in cycle ${score.lastCycle}.`
   )
@@ -42,7 +42,7 @@ function describeRouteScore(score: RouteScore): string {
  * Primary evidence source for gokuin_explain: the route's own recent ledger
  * rows, each one a real mainnet tx hash with the number it produced. Empty
  * (never thrown) if the endpoint is unreachable or the route has no rows yet
- * — callers fall back to `collectEvidenceFromSelect` in that case.
+ *: callers fall back to `collectEvidenceFromSelect` in that case.
  */
 async function collectEvidenceFromRows(route: string): Promise<EvidenceItem[]> {
   try {
@@ -64,7 +64,7 @@ async function collectEvidenceFromRows(route: string): Promise<EvidenceItem[]> {
  * Fallback evidence for a specific route id, gathered by asking /v1/select
  * for every `need` and keeping whatever evidence it attaches whenever this
  * route comes back as the winner. Used only when row-level evidence isn't
- * available — real hashes when the route has won something recently, an
+ * available, real hashes when the route has won something recently, an
  * explicit empty result (never a fabricated hash) when it hasn't.
  */
 async function collectEvidenceFromSelect(route: string): Promise<EvidenceItem[]> {
@@ -78,7 +78,7 @@ async function collectEvidenceFromSelect(route: string): Promise<EvidenceItem[]>
         }
       } catch {
         // A single need failing to resolve shouldn't blank out evidence we
-        // already gathered from the others — gokuin_explain still reports
+        // already gathered from the others, gokuin_explain still reports
         // what it has, and callers can see the record is possibly partial.
       }
     }),
@@ -95,7 +95,7 @@ async function collectEvidenceForRoute(route: string): Promise<{ evidence: Evide
 
 /**
  * `server.registerTool` infers a generic over every field of both schemas, and
- * the MCP SDK's own generics compound it — tsc reported TS2589, "type
+ * the MCP SDK's own generics compound it, tsc reported TS2589, "type
  * instantiation is excessively deep", and before the shapes were annotated it
  * ran past two minutes and died on a heap abort that looked like a crash.
  *
@@ -146,7 +146,7 @@ export function buildServer(): McpServer {
             ? err.reason
             : `Submitting through route "${pick.route}" failed: ${String(err)}`
         return errorResult(
-          `${reason} (Gokuin selected route "${pick.route}" because: ${pick.reason} — the transaction was NOT sent.)`,
+          `${reason} (Gokuin selected route "${pick.route}" because: ${pick.reason}: the transaction was NOT sent.)`,
         )
       }
 
@@ -167,7 +167,7 @@ export function buildServer(): McpServer {
       description:
         'Lists every route Gokuin has probed, with its current measured scores (leak rate, sandwich rate, ' +
         'median inclusion delay, total value extracted, probe count). Reads live from the Gokuin API\'s ' +
-        'GET /v1/routes, which itself reads only from the Substreams-powered subgraph — never a local cache. ' +
+        'GET /v1/routes, which itself reads only from the Substreams-powered subgraph, never a local cache. ' +
         'Use this to decide which route to ask gokuin_explain about, or before calling gokuin_submit if you want ' +
         'to see the numbers yourself first.',
       inputSchema: routesInputShape,
@@ -201,7 +201,7 @@ export function buildServer(): McpServer {
       title: "Explain one route's full record and evidence",
       description:
         'Returns one route\'s full measured record (from GET /v1/routes/:id) plus the real mainnet transaction ' +
-        'hashes that back its numbers — its own recent ledger rows when available, or recent route-selection ' +
+        'hashes that back its numbers, its own recent ledger rows when available, or recent route-selection ' +
         'evidence otherwise. Use this before trusting gokuin_submit\'s choice, or to answer "why did/should this ' +
         'route be picked" with something checkable.',
       inputSchema: explainInputShape,
@@ -226,7 +226,7 @@ export function buildServer(): McpServer {
             ? ` Evidence below is this route's own most recent ledger rows (GET /v1/routes/:id/rows), each a real mainnet tx.`
             : source === 'select'
               ? ` Row-level evidence wasn't available; the hashes below are drawn from recent route selections that picked this route instead.`
-              : ` No row-level or recent-selection evidence was available for this route — the record above is still ` +
+              : ` No row-level or recent-selection evidence was available for this route, the record above is still ` +
                 `live from the subgraph, but no fresh mainnet hashes were available to attach.`)
         : `Gokuin has no score on file for route "${args.route}".`
 

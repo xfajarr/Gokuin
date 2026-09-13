@@ -27,7 +27,7 @@ function CycleDetail() {
 
       {sample && (
         <div className="sample-banner">
-          SAMPLE DATA — the Gokuin API at API_URL did not respond for cycle {id}. Fixture integrity shown below.
+          SAMPLE DATA, the Gokuin API at API_URL did not respond for cycle {id}. Fixture integrity shown below.
         </div>
       )}
 
@@ -42,7 +42,7 @@ function CycleDetail() {
         </div>
         <div>
           <dt>Intact</dt>
-          <dd>committed count equals published count — no probe was quietly dropped or added after the fact</dd>
+          <dd>committed count equals published count, no probe was quietly dropped or added after the fact</dd>
         </div>
       </dl>
 
@@ -59,7 +59,7 @@ function CycleDetail() {
       {gap !== 0 && (
         <div className="sample-banner" style={{ color: 'var(--bad)', borderColor: 'var(--bad)' }}>
           Gap of {Math.abs(gap)} between committed and published rows. This is exactly the discrepancy commit-reveal
-          exists to surface — it is on-chain and permanent.
+          exists to surface, it is on-chain and permanent.
         </div>
       )}
 
@@ -67,7 +67,7 @@ function CycleDetail() {
         <div className="stat">
           <div className="stat-label">Schedule hash</div>
           <div className="stat-value num" style={{ fontSize: '0.95rem' }}>
-            {data.scheduleHash ? `${data.scheduleHash.slice(0, 18)}…` : '—'}
+            {data.scheduleHash ? `${data.scheduleHash.slice(0, 18)}…` : ':'}
           </div>
         </div>
         <div className="stat">
@@ -94,7 +94,7 @@ function CycleDetail() {
 
       <h2 className="section-title">Why this is checkable</h2>
       <p>
-        The commit transaction fixes <code>schedule_hash</code> before dispatch. Nobody — including Gokuin — can
+        The commit transaction fixes <code>schedule_hash</code> before dispatch. Nobody (including Gokuin) can
         change which slots ran which route after the fact without the hash failing to match. Reveal then publishes
         the salt, and anyone can recompute <code>hashSchedule()</code> from <code>@gokuin/core</code> and check it
         against the commit. A committed count that doesn&rsquo;t match the published row count is cherry-picking or

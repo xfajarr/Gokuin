@@ -1,5 +1,5 @@
 // Typed env for the standalone listener process (PRD §7.4). Deployed twice,
-// once per region — LISTENER_REGION is the only thing that differs between
+// once per region. LISTENER_REGION is the only thing that differs between
 // the two deployments.
 import { Type, type Static } from '@sinclair/typebox'
 import { Value } from '@sinclair/typebox/value'

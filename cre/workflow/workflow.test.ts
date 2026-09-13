@@ -1,10 +1,10 @@
-// Unit tests for the pure logic in workflow.ts — the parts that can be tested
+// Unit tests for the pure logic in workflow.ts, the parts that can be tested
 // without a TEE or a network: weight parsing, the composite formula, the
 // subgraph query/response shape, and the ABI encoding that must match
 // contracts/src/Scorer.sol::submitScore exactly.
 //
 // These do not exercise `runScoring` itself (that needs a real TeeRuntime,
-// which only exists inside `cre workflow simulate` / a real enclave) — see
+// which only exists inside `cre workflow simulate` / a real enclave): see
 // cre/simulation/ for that evidence instead.
 import { describe, expect, test } from 'bun:test'
 import { decodeAbiParameters } from 'viem'
@@ -40,7 +40,7 @@ describe('parseWeights', () => {
 	})
 })
 
-describe('scoreRoute — the confidential computation', () => {
+describe('scoreRoute, the confidential computation', () => {
 	const weights = { leakWeightBps: 5000, sandwichWeightBps: 3000, delayWeightBps: 2000 }
 
 	test('a clean route (no leaks, no sandwiches, fast inclusion) scores near the top', () => {
@@ -98,7 +98,7 @@ describe('clampU16', () => {
 	})
 })
 
-describe('buildRouteQuery / parseRouteStats — the public half', () => {
+describe('buildRouteQuery / parseRouteStats, the public half', () => {
 	test('builds one aliased query per configured route, in order', () => {
 		const q = buildRouteQuery([
 			{ id: 0, label: 'public-mempool' },
@@ -132,7 +132,7 @@ describe('evidenceUriFor', () => {
 	})
 })
 
-describe('encodeSubmitScore — must match Scorer.submitScore exactly', () => {
+describe('encodeSubmitScore, must match Scorer.submitScore exactly', () => {
 	test('round-trips through the same ABI Scorer.sol declares', () => {
 		const score = {
 			routeId: 2,

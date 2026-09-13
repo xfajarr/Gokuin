@@ -33,14 +33,14 @@ function RouteDetail() {
           {hasData
             ? `${score.probes} non-staged probes measured through cycle ${score.lastCycle}.`
             : 'No non-staged probes have been measured on this route yet.'}{' '}
-          Every row below is one twin probe&rsquo;s evidence — the mainnet tx hash links to the public explorer, no
+          Every row below is one twin probe&rsquo;s evidence, the mainnet tx hash links to the public explorer, no
           number here is asserted without it.
         </p>
       </div>
 
       {sample && (
         <div className="sample-banner">
-          SAMPLE DATA — the Gokuin API at API_URL did not respond for this route. Fixture numbers below.
+          SAMPLE DATA, the Gokuin API at API_URL did not respond for this route. Fixture numbers below.
         </div>
       )}
 
@@ -48,9 +48,9 @@ function RouteDetail() {
         <div className="note-banner">
           <NoDataBadge /> This route has {score.stagedExcluded > 0 ? 'only staged rows' : 'no rows'} on record.{' '}
           {score.stagedExcluded > 0
-            ? `${score.stagedExcluded} row(s) were excluded because we caused them ourselves (see below) — they cannot count as evidence about this route.`
+            ? `${score.stagedExcluded} row(s) were excluded because we caused them ourselves (see below): they cannot count as evidence about this route.`
             : 'It has not been probed yet this cycle.'}{' '}
-          This reads as no data, not as a clean 0% — a route scored on nothing but staged rows must never look like a
+          This reads as no data, not as a clean 0%: a route scored on nothing but staged rows must never look like a
           passing record.
         </div>
       )}
@@ -85,11 +85,11 @@ function RouteDetail() {
       {score.stagedExcluded > 0 && hasData && (
         <p className="small muted">
           {score.stagedExcluded} additional row(s) on this route were staged by us and are excluded from every figure
-          above — see the marked row(s) below.
+          above, see the marked row(s) below.
         </p>
       )}
 
-      <h2 className="section-title">Evidence rows — cycle {score.lastCycle}</h2>
+      <h2 className="section-title">Evidence rows, cycle {score.lastCycle}</h2>
       <div className="table-scroll">
         <table>
           <thead>

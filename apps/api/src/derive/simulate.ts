@@ -37,7 +37,7 @@ export async function getRealOutFromReceipt(
   return sumTransfersToRecipient(receipt.logs as { topics: readonly Hex[]; data: Hex }[], recipient)
 }
 
-/** Pure — testable without a live client. Exported for the metrics round-trip test. */
+/** Pure, testable without a live client. Exported for the metrics round-trip test. */
 export function sumTransfersToRecipient(
   logs: readonly { topics: readonly Hex[]; data: Hex }[],
   recipient: Hex,

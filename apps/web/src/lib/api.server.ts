@@ -7,12 +7,12 @@ import type { CycleRunInput, CycleRunResult, Fetched, Integrity, ProbeDetail, Ro
 const API_URL = process.env.API_URL ?? 'http://localhost:4000'
 // Bearer token for POST /admin/cycles/run (apps/api/src/routes/admin.ts). Read
 // only here, at module scope of a file that is never imported outside a
-// createServerFn handler — same containment as API_URL above. Confirmed by
+// createServerFn handler, same containment as API_URL above. Confirmed by
 // inspecting `bun run build`'s client chunk output: neither this token nor
 // its literal env key name appear in dist/client/**.
 const API_ADMIN_TOKEN = process.env.API_ADMIN_TOKEN
 const TIMEOUT_MS = 4_000
-// The live cycle run can take longer than a read — dispatch alone is two
+// The live cycle run can take longer than a read, dispatch alone is two
 // signed mainnet sends before the endpoint responds.
 const RUN_TIMEOUT_MS = 15_000
 
@@ -35,7 +35,7 @@ async function withFallback<T>(fallback: T, path: string, init?: RequestInit): P
 }
 
 // The API sends 256-bit amounts as decimal strings (same convention as
-// RouteScore.totalExtractedWei in @gokuin/core) — bigint isn't valid JSON.
+// RouteScore.totalExtractedWei in @gokuin/core): bigint isn't valid JSON.
 // This mirrors that back onto the bigint fields Row declares.
 interface WireRow extends Omit<Row, 'extractedWei' | 'simOut' | 'realOut'> {
   extractedWei: string
@@ -85,18 +85,18 @@ export function postSelect(
 }
 
 /**
- * POST /admin/cycles/run — drives the live six-stage runner on /console
+ * POST /admin/cycles/run, drives the live six-stage runner on /console
  * (PRD §7.3, §9.2, §16). Deliberately has NO sample-data fallback, unlike
  * every other function in this file: this is the one page that claims to run
  * a live probe cycle on camera, and rendering a fixture cycle here would
  * present invented evidence as a real measurement. Sample fallback stays
- * correct for the read-only pages (index, route, probe, cycle) — it would be
+ * correct for the read-only pages (index, route, probe, cycle): it would be
  * a lie on this one. Do not "fix" this by adding a fallback; let it throw and
  * let the console route surface the failure.
  */
 export async function postAdminCycleRun(body: CycleRunInput): Promise<CycleRunResult> {
   if (!API_ADMIN_TOKEN) {
-    throw new Error('API_ADMIN_TOKEN is not configured on the web server — cannot run a live cycle.')
+    throw new Error('API_ADMIN_TOKEN is not configured on the web server, cannot run a live cycle.')
   }
   const res = await fetch(`${API_URL}/admin/cycles/run`, {
     method: 'POST',

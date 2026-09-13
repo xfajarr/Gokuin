@@ -1,10 +1,10 @@
 // ProbeLedger writes via viem. The ABI is GENERATED from `forge build` output
-// by packages/abi — never hand-declared. A hand-written signature that drifts
+// by packages/abi, never hand-declared. A hand-written signature that drifts
 // from the deployed contract fails at broadcast, not at compile time, and the
 // first place we would notice is a reverted reveal on camera.
 //
 // Dry-run behaviour: the call is ALWAYS abi-encoded for real via
-// `encodeFunctionData` — that part of the code path is never stubbed. If a
+// `encodeFunctionData`: that part of the code path is never stubbed. If a
 // wallet client and a deployed address are both configured, the encoded call
 // is actually sent. Otherwise the encoded calldata is hashed into a
 // deterministic, clearly-labelled stand-in tx hash so callers (cycle
@@ -23,7 +23,7 @@ export interface LedgerWriteResult {
 
 function dryRunResult(calldata: Hex): LedgerWriteResult {
   const txHash = keccak256(calldata)
-  console.warn(`[ledger:dry-run] no PROBER_PK/PROBE_LEDGER_ADDRESS configured — not broadcasting. calldata hash ${txHash}`)
+  console.warn(`[ledger:dry-run] no PROBER_PK/PROBE_LEDGER_ADDRESS configured, not broadcasting. calldata hash ${txHash}`)
   return { txHash, dryRun: true }
 }
 

@@ -1,12 +1,12 @@
 // Predicts the front-run's actual USDC output via eth_call simulation
-// (publicClient.simulateContract — no state change, no gas spent) so the
+// (publicClient.simulateContract, no state change, no gas spent) so the
 // back-run's amountIn can be sized correctly in USDC's own 6-decimal units.
 //
 // This exists because of a real bug this harness hit on its first live
 // Sepolia attempt: the back-run's amountIn was built from the WETH-scaled
 // (18-decimal) input amount instead of the USDC-scaled (6-decimal) amount
 // the front-run would actually produce, asking the router to move ~1.8e15
-// raw USDC units against an attacker balance of ~1.67e7 — an immediate
+// raw USDC units against an attacker balance of ~1.67e7, an immediate
 // revert. The back-run's Swap log never fired, so the on-chain data for
 // that attempt was only a two-leg pattern, and detect-replica correctly
 // found nothing (see README.md "A bug this harness hit for real").
@@ -39,7 +39,7 @@ export async function quoteWethToUsdc(publicClient: PublicClient, from: Hex, amo
 
 /**
  * Safety margin taken off the simulated quote before using it as the
- * back-run's real amountIn — guards against small state drift between the
+ * back-run's real amountIn, guards against small state drift between the
  * simulation (against current chain head) and actual inclusion (one block
  * later, potentially after the front-run itself has nudged the price).
  * 99% leaves ample room while still selling back almost everything acquired.

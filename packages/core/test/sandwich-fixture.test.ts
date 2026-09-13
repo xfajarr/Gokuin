@@ -7,13 +7,13 @@
 // mainnet at the same block, replays the same victim transaction, and must
 // assert the exact same extractedWei value asserted here. Both read the
 // numbers from packages/core/src/fixtures.ts (Solidity hardcodes a copy,
-// since it can't import TS — see the comment at the top of that file).
+// since it can't import TS, see the comment at the top of that file).
 import { describe, expect, it } from 'bun:test'
 import { computeExtracted } from '../src/metrics'
 import { KNOWN_CLEAN_BLOCK, KNOWN_SANDWICH, KNOWN_SANDWICH_DERIVED } from '../src/fixtures'
 
 describe('known-sandwich fixture (block 22450093, Uniswap V2 WETH/RATO)', () => {
-  it('computeExtracted(simOut, realOut) equals the pinned extractedWei — same value ForkDerive.t.sol must produce', () => {
+  it('computeExtracted(simOut, realOut) equals the pinned extractedWei, same value ForkDerive.t.sol must produce', () => {
     const extracted = computeExtracted(KNOWN_SANDWICH_DERIVED.simOut, KNOWN_SANDWICH_DERIVED.realOut)
     expect(extracted).toBe(KNOWN_SANDWICH_DERIVED.extractedWei)
     expect(extracted).toBe(12913434669342331n)
@@ -23,7 +23,7 @@ describe('known-sandwich fixture (block 22450093, Uniswap V2 WETH/RATO)', () => 
     expect(KNOWN_SANDWICH_DERIVED.realOut).toBe(KNOWN_SANDWICH.victim.amountOutRaw)
   })
 
-  it('extractedWei is positive — the front-run made the victim strictly worse off', () => {
+  it('extractedWei is positive, the front-run made the victim strictly worse off', () => {
     expect(KNOWN_SANDWICH_DERIVED.extractedWei > 0n).toBe(true)
     expect(KNOWN_SANDWICH_DERIVED.simOut > KNOWN_SANDWICH_DERIVED.realOut).toBe(true)
   })

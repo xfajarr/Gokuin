@@ -32,7 +32,7 @@ export const EnvSchema = Type.Object({
 
   // --- extensions beyond .env.example (all optional / all with safe defaults) ---
   // Comma-separated allowlist of listener signer addresses. When absent, the
-  // address derived from LISTENER_PK is used as the sole allowed signer — fine
+  // address derived from LISTENER_PK is used as the sole allowed signer, fine
   // for a single-region dev setup, insufficient for the real two-region deploy.
   ALLOWED_LISTENER_ADDRESSES: Type.Optional(Type.String()),
   // Public RPC endpoints for the two protected routes. These are not secrets.
@@ -47,7 +47,7 @@ export const EnvSchema = Type.Object({
   SUBSTREAMS_ENDPOINT: Type.Optional(Type.String()),
   SUBSTREAMS_API_KEY: Type.Optional(Type.String()),
   /** Hard lifetime ceiling on real spend. Enforced in chain/budget.ts, not by intent.
-   *  A decimal STRING, parsed with parseEther — float arithmetic loses wei. */
+   *  A decimal STRING, parsed with parseEther, float arithmetic loses wei. */
   PROBE_BUDGET_ETH: Type.String({ default: '0.004' }),
   /** Refuse to dispatch above this. Gas has moved 500x before; a spike must not
    *  be allowed to consume the whole budget in one cycle. Decimal string, parseGwei. */

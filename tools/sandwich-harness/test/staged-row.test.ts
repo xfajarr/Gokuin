@@ -2,7 +2,7 @@
 // harness registers is stored with staged=1 in the real apps/api schema,
 // and the Row this harness would hand to ProbeLedger.record() (mirroring
 // apps/api/src/derive/settle.ts's own `staged: probe.staged === 1` line)
-// carries staged: true and is excluded from scoreRoute()'s figures — using
+// carries staged: true and is excluded from scoreRoute()'s figures, using
 // REAL-shaped hashes/blocks, not just the synthetic fixture in
 // packages/core/test/staged-exclusion.test.ts.
 import { describe, expect, it, beforeEach, afterEach } from 'bun:test'
@@ -16,7 +16,7 @@ const VICTIM = '0x00000000000000000000000000000000000AbC'
 const POOL = '0x3289680dD4d6C10bb19b899729cda5eEF58AEfF1'
 
 // A real-shaped victim tx hash, in the same sense the harness's own live run
-// produces one — 32 bytes, lowercase, distinct from the frontrun/backrun hashes.
+// produces one. 32 bytes, lowercase, distinct from the frontrun/backrun hashes.
 const VICTIM_TX = `0x${'ab'.repeat(32)}` as `0x${string}`
 
 describe('staged row: end to end from db insert to scoreRoute exclusion', () => {

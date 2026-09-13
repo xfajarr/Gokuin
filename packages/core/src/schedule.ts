@@ -1,7 +1,7 @@
 import { keccak256, encodeAbiParameters, parseAbiParameters } from 'viem'
 
 /** Committed BEFORE dispatch. A gap between committedCount and published rows is
- *  visible on-chain forever — this is what makes cherry-picking and omission detectable. */
+ *  visible on-chain forever, this is what makes cherry-picking and omission detectable. */
 export interface Schedule {
   cycleId: number
   routeIds: number[]

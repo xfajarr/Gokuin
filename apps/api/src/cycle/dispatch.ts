@@ -2,7 +2,7 @@
 // EOA per probe, build ONE swap's calldata, and submit the IDENTICAL calldata
 // through two different routes so the only variable between the pair is the
 // route (and the sending key, which must differ per probe so routes can't be
-// fingerprinted by a shared sender — see PRD §18 "Probes fingerprinted").
+// fingerprinted by a shared sender, see PRD §18 "Probes fingerprinted").
 //
 // Funding the freshly-rotated EOAs (PRD §18 "funded through a distributor")
 // is handled by chain/distributor.ts and wired in cycle/run.ts: each probe is
@@ -18,11 +18,11 @@ import type { RouteId } from '@gokuin/core'
 import type { RouteDef } from '../chain/routes'
 import { CommitBeforeDispatchGuard } from './order-guard'
 
-/** Mainnet WETH — path[0] for the bait swap. Not a secret, just a well-known address. */
+/** Mainnet WETH, path[0] for the bait swap. Not a secret, just a well-known address. */
 export const WETH_MAINNET: Hex = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
 // Minimal UniswapV2-router-shaped ABI. `pool` in probe rows is used as the
-// bait pool's output-token address for calldata-building purposes only — the
+// bait pool's output-token address for calldata-building purposes only, the
 // metrics under test (leak / sandwich / delay / extracted value) depend on
 // the tx being real and the calldata being identical between legs, not on
 // which DEX flavour is targeted.
@@ -43,20 +43,20 @@ export const SWAP_ROUTER_ABI = [
 
 /** Gas limit budgeted for a probe's own swap tx. Shared with chain/distributor.ts
  *  so the distributor funds each probe with exactly what this dispatch step
- *  will actually spend on gas — a single source of truth instead of two
+ *  will actually spend on gas, a single source of truth instead of two
  *  copies of "250_000" that could silently drift apart. */
 export const SWAP_GAS_LIMIT = 250_000n
 
 export interface SwapParams {
   router: Hex
   pool: Hex // bait pool's output token
-  recipient: Hex // fixed across both legs — required for calldata identity
+  recipient: Hex // fixed across both legs, required for calldata identity
   amountInWei: bigint
   slippageBps: number
   deadline: bigint
 }
 
-/** amountOutMin computed off the bait's own slippage tolerance — thin pool, deliberately aggressive (PRD §14 P2). */
+/** amountOutMin computed off the bait's own slippage tolerance, thin pool, deliberately aggressive (PRD §14 P2). */
 export function minOutForSlippage(quotedOut: bigint, slippageBps: number): bigint {
   const keepBps = 10_000n - BigInt(slippageBps)
   return (quotedOut * keepBps) / 10_000n
@@ -85,7 +85,7 @@ export interface Twin {
   legs: [TwinLeg, TwinLeg]
 }
 
-/** Builds one swap and a fresh sending EOA per route — the calldata is byte-identical across legs. */
+/** Builds one swap and a fresh sending EOA per route, the calldata is byte-identical across legs. */
 export function buildTwin(routes: [RouteId, RouteId], params: SwapParams, amountOutMin: bigint): Twin {
   const calldata = buildSwapCalldata(params, amountOutMin)
   const legs = routes.map(route => ({ route, account: rotateEOA() })) as [TwinLeg, TwinLeg]
@@ -120,7 +120,7 @@ export async function submitLeg(
     to,
     data,
     value,
-    nonce: 0, // freshly-rotated EOA — always nonce 0
+    nonce: 0, // freshly-rotated EOA, always nonce 0
     chainId: mainnet.id,
     gas: SWAP_GAS_LIMIT,
     maxFeePerGas: fees?.maxFeePerGas ?? parseGwei('30'),

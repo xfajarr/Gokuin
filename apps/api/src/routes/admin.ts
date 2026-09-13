@@ -1,4 +1,4 @@
-// POST /admin/cycles/run (bearer) — drives the cycle orchestration in
+// POST /admin/cycles/run (bearer): drives the cycle orchestration in
 // src/cycle/run.ts (PRD §7.2, §7.3).
 import { Elysia, t } from 'elysia'
 import type { AppContext } from '../context'

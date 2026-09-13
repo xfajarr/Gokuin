@@ -1,6 +1,6 @@
 // Hard ordering constraint (PRD §7.3): commitCycle must land on-chain BEFORE
 // any probe is dispatched. Enforced in code via CommitBeforeDispatchGuard, not
-// just by statement order — these tests attack it directly, including through
+// just by statement order, these tests attack it directly, including through
 // the real dispatch.submitLeg code path.
 import { describe, expect, test } from 'bun:test'
 import type { PublicClient } from 'viem'

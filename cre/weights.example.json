@@ -1,5 +1,5 @@
 {
-  "_comment": "EXAMPLE ONLY — obviously placeholder values, equal thirds. This file documents the SHAPE of the SCORE_WEIGHTS Vault secret; it is never read by workflow/workflow.ts at runtime (the real weights only ever exist inside the enclave, fetched via runtime.getSecrets — see cre/README.md 'why the weights are secret'). Do not treat these numbers as Gokuin's real weighting. The real vector is chosen by whoever operates the workflow and is supplied only as an enclave secret, never committed.",
+  "_comment": "EXAMPLE ONLY, obviously placeholder values, equal thirds. This file documents the SHAPE of the SCORE_WEIGHTS Vault secret; it is never read by workflow/workflow.ts at runtime (the real weights only ever exist inside the enclave, fetched via runtime.getSecrets, see cre/README.md 'why the weights are secret'). Do not treat these numbers as Gokuin's real weighting. The real vector is chosen by whoever operates the workflow and is supplied only as an enclave secret, never committed.",
   "leakWeightBps": 3334,
   "sandwichWeightBps": 3333,
   "delayWeightBps": 3333

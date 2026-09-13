@@ -1,6 +1,6 @@
 // The sandwich verdict for one probe, read from the Substreams module itself.
 //
-// This used to query a substreams-powered subgraph. That architecture is gone —
+// This used to query a substreams-powered subgraph. That architecture is gone :
 // The Graph's Studio now rejects it outright: "Substreams-powered Subgraphs,
 // originally intended for non-EVM chains, are no longer supported." So the module
 // is consumed standalone, from the published package:
@@ -17,7 +17,7 @@
 //                                   company's route, and the row is permanent.
 //
 // The second throws. A probe with no verdict gets no Row, the cycle's published
-// count falls short of its committed count, and integrity reports false — the
+// count falls short of its committed count, and integrity reports false, the
 // honest outcome. A measurement we could not take should cost us our own
 // integrity score, not be papered over as someone else's clean route.
 //
@@ -85,7 +85,7 @@ export async function fetchSandwichVerdict(
 
   const pkg = await fetchSubstream(env.SUBSTREAMS_PACKAGE)
   const registry = createRegistry(pkg)
-  // createNodeTransport's 4th parameter is Headers, not interceptors — the auth
+  // createNodeTransport's 4th parameter is Headers, not interceptors, the auth
   // token is the 2nd argument and the transport attaches it itself.
   const transport = createNodeTransport(env.SUBSTREAMS_ENDPOINT, env.SUBSTREAMS_API_KEY, registry)
   const request = createRequest({
@@ -113,7 +113,7 @@ export async function fetchSandwichVerdict(
   }
 
   // The module ran over the probe's own block and found no triple around it.
-  // This false is a measurement, not an assumption — that distinction is the
+  // This false is a measurement, not an assumption, that distinction is the
   // whole reason the unconfigured case above throws instead of landing here.
   return { sandwiched: false, moduleVersion: `${MODULE}@${env.SUBSTREAMS_PACKAGE}` }
 }

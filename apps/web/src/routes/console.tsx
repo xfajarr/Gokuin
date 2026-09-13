@@ -15,12 +15,12 @@ export const Route = createFileRoute('/console')({
 
 // Bait config defaults (PRD §14 P2: "thin pool, 8% slippage, small size").
 // Same pool as the fixture data in sample-data.ts so a clean run and a sample
-// page describe the same market. Router is Uniswap V2 mainnet — a
+// page describe the same market. Router is Uniswap V2 mainnet, a
 // well-known, non-secret address.
 const DEFAULT_POOL = '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640'
 const DEFAULT_ROUTER = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const DEFAULT_AMOUNT_IN_WEI = '50000000000000000' // 0.05 ETH
-const DEFAULT_SLIPPAGE_BPS = 800 // 8% — deliberately aggressive bait
+const DEFAULT_SLIPPAGE_BPS = 800 // 8%: deliberately aggressive bait
 
 // Polling: /admin/cycles/run is synchronous but does not itself wait for
 // mainnet inclusion (see apps/api/src/cycle/run.ts's own comment on steps
@@ -36,12 +36,12 @@ type StageKey = 'commit' | 'dispatch' | 'observe' | 'block' | 'derive' | 'record
 type StageStatus = 'pending' | 'active' | 'done' | 'error'
 
 const STAGE_ORDER: { key: StageKey; label: string; title: string }[] = [
-  { key: 'commit', label: '01', title: 'Commit — schedule hash before dispatch' },
-  { key: 'dispatch', label: '02', title: 'Dispatch — twin transactions, identical params' },
-  { key: 'observe', label: '03', title: 'Observe — two listener regions' },
-  { key: 'block', label: '04', title: 'Block — sandwich detection' },
-  { key: 'derive', label: '05', title: 'Derive — simOut vs realOut' },
-  { key: 'record', label: '06', title: 'Record — ledger row & integrity' },
+  { key: 'commit', label: '01', title: 'Commit, schedule hash before dispatch' },
+  { key: 'dispatch', label: '02', title: 'Dispatch, twin transactions, identical params' },
+  { key: 'observe', label: '03', title: 'Observe, two listener regions' },
+  { key: 'block', label: '04', title: 'Block, sandwich detection' },
+  { key: 'derive', label: '05', title: 'Derive, simOut vs realOut' },
+  { key: 'record', label: '06', title: 'Record, ledger row & integrity' },
 ]
 
 const METRIC_LABEL: Record<keyof typeof PROVENANCE, string> = {
@@ -54,7 +54,7 @@ const METRIC_LABEL: Record<keyof typeof PROVENANCE, string> = {
 }
 
 function genCycleId(): number {
-  // uint16 on-chain (ProbeLedger.Cycle) — keep well under 65,536 and fresh
+  // uint16 on-chain (ProbeLedger.Cycle): keep well under 65,536 and fresh
   // per second so back-to-back demo runs don't collide with CycleExists.
   return Math.floor(Date.now() / 1000) % 60_000
 }
@@ -91,7 +91,7 @@ function DerivationMini({ route, derivation }: { route: RouteId; derivation: Der
     extractedWei: `${weiToEth(derivation.extractedWei)} ETH`,
     delayBlocks: `${derivation.delayBlocks} blocks`,
     reverted: derivation.reverted ? 'yes' : 'no',
-    rebate: derivation.rebate ? `${weiToEth(derivation.rebate)} ETH` : 'n/a — not yet instrumented',
+    rebate: derivation.rebate ? `${weiToEth(derivation.rebate)} ETH` : 'n/a, not yet instrumented',
     leaked: derivation.leaked ? `leaked at block ${derivation.leakedAtBlock}` : 'not observed pre-inclusion',
   }
   return (
@@ -171,11 +171,11 @@ function Console() {
       if (cancelRef.current) return
 
       // Rule: never render sample/fixture data on this page. If a read
-      // endpoint fell back, that means the API went unreachable mid-poll —
+      // endpoint fell back, that means the API went unreachable mid-poll :
       // say so plainly and stop, keeping whatever real data we already have.
       if (controlRes.sample || treatmentRes?.sample || integrityRes.sample) {
         setPollNote(
-          'The API became unreachable while polling for progress. Showing the last real data received — ' +
+          'The API became unreachable while polling for progress. Showing the last real data received: ' +
             'this page never falls back to sample data.',
         )
         return
@@ -196,7 +196,7 @@ function Console() {
         obsCount > 0 ? 'done' : 'active',
         obsCount > 0
           ? `${obsCount} signed observation(s) received so far`
-          : `listening for signed observations — attempt ${attempt}/${MAX_POLLS}`,
+          : `listening for signed observations, attempt ${attempt}/${MAX_POLLS}`,
       )
 
       const controlDerivation = controlRes.data.derivation
@@ -209,15 +209,15 @@ function Console() {
           'block',
           'done',
           sandwiched
-            ? 'sandwich detected — see block view below'
-            : 'clean — no sandwich in either leg this cycle',
+            ? 'sandwich detected, see block view below'
+            : 'clean, no sandwich in either leg this cycle',
         )
         updateStage('derive', 'done', 'simOut vs realOut settled for both legs')
         updateStage('record', 'done', 'row(s) recorded, integrity checked')
         return
       }
 
-      const progress = `awaiting settlement — attempt ${attempt}/${MAX_POLLS}`
+      const progress = `awaiting settlement, attempt ${attempt}/${MAX_POLLS}`
       updateStage('block', 'active', progress)
       updateStage('derive', 'active', progress)
       updateStage('record', 'active', progress)
@@ -228,7 +228,7 @@ function Console() {
     setPollNote(
       `No settlement observed after ${MAX_POLLS} polls (~${Math.round(
         (MAX_POLLS * POLL_INTERVAL_MS) / 1000,
-      )}s). Inclusion and derivation may still be pending server-side — this is an honest incomplete state, not an error.`,
+      )}s). Inclusion and derivation may still be pending server-side, this is an honest incomplete state, not an error.`,
     )
     updateStage('block', 'pending', 'not yet settled')
     updateStage('derive', 'pending', 'not yet settled')
@@ -246,7 +246,7 @@ function Console() {
     setPollNote(null)
     setAttempts(0)
     setStages(initialStages())
-    updateStage('commit', 'active', 'posting schedule hash to Sepolia — before any probe dispatches')
+    updateStage('commit', 'active', 'posting schedule hash to Sepolia, before any probe dispatches')
 
     const input: CycleRunInput = {
       cycleId,
@@ -262,7 +262,7 @@ function Console() {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setRunError(message)
-      updateStage('commit', 'error', 'commit failed — see error below')
+      updateStage('commit', 'error', 'commit failed, see error below')
       updateStage('dispatch', 'error', 'cycle never started')
       updateStage('observe', 'error', 'cycle never started')
       updateStage('block', 'error', 'cycle never started')
@@ -298,7 +298,7 @@ function Console() {
   return (
     <main>
       <div className="page-head">
-        <div className="eyebrow">Live probe runner — screen-recording surface</div>
+        <div className="eyebrow">Live probe runner, screen-recording surface</div>
         <h1>Console</h1>
         <p>
           Runs one real cycle against <code>POST /admin/cycles/run</code>, then polls the same read endpoints{' '}
@@ -340,7 +340,7 @@ function Console() {
 
       {runError && (
         <div className="error-banner">
-          LIVE CYCLE FAILED — {runError}. This page never falls back to sample data; fix the API connection (or the{' '}
+          LIVE CYCLE FAILED: {runError}. This page never falls back to sample data; fix the API connection (or the{' '}
           <code>API_ADMIN_TOKEN</code> / <code>API_URL</code> the web server was started with) and run again.
         </div>
       )}
@@ -368,11 +368,11 @@ function Console() {
                     <dt>cycle id</dt>
                     <dd>{runResult?.cycleId ?? cycleId}</dd>
                     <dt>schedule hash</dt>
-                    <dd className="mono small">{runResult?.scheduleHash ?? '—'}</dd>
+                    <dd className="mono small">{runResult?.scheduleHash ?? ':'}</dd>
                     <dt>commit tx (sepolia)</dt>
-                    <dd>{runResult ? <TxHashLink hash={runResult.committedTx} network="sepolia" /> : '—'}</dd>
+                    <dd>{runResult ? <TxHashLink hash={runResult.committedTx} network="sepolia" /> : ':'}</dd>
                     <dt>committed count</dt>
-                    <dd>{runResult ? runResult.probeIds.length : '—'}</dd>
+                    <dd>{runResult ? runResult.probeIds.length : ':'}</dd>
                   </dl>
                 )}
 
@@ -404,15 +404,15 @@ function Console() {
                               <dt>status</dt>
                               <dd>{p.status}</dd>
                               <dt>submitted block</dt>
-                              <dd>{p.submittedBlock ?? '—'}</dd>
+                              <dd>{p.submittedBlock ?? ':'}</dd>
                               <dt>tx</dt>
-                              <dd>{p.txHash ? <TxHashLink hash={p.txHash} /> : '—'}</dd>
+                              <dd>{p.txHash ? <TxHashLink hash={p.txHash} /> : ':'}</dd>
                             </dl>
                           </div>
                         ))}
                       </div>
                       <p className="small muted">
-                        Green values are identical across both legs — the only variable is the route and the
+                        Green values are identical across both legs, the only variable is the route and the
                         single-use sending address.
                       </p>
                     </>
@@ -449,7 +449,7 @@ function Console() {
                             badLabel="leaked"
                             goodLabel="not leaked"
                           />{' '}
-                          control leg — {controlData.derivation.agreeingRegions.length} of {REGIONS.length} listeners
+                          control leg: {controlData.derivation.agreeingRegions.length} of {REGIONS.length} listeners
                           agree
                         </p>
                       )}
@@ -488,10 +488,10 @@ function Console() {
                     </div>
                   ) : (
                     <p>
-                      <VerdictBadge bad={false} badLabel="sandwiched" goodLabel="clean — no sandwich detected" /> —
+                      <VerdictBadge bad={false} badLabel="sandwiched" goodLabel="clean, no sandwich detected" /> :
                       neither leg was bracketed by a front-run/back-run pair in the same block this cycle. A ledger
                       that stays honest when nothing happens is more convincing than one that always finds a villain
-                      — the row still gets recorded below.
+                     : the row still gets recorded below.
                     </p>
                   ))}
 
@@ -512,7 +512,7 @@ function Console() {
                             <dt>route</dt>
                             <dd>{ROUTE_LABELS[route]}</dd>
                             <dt>included block</dt>
-                            <dd>{probe?.includedBlock ?? '—'}</dd>
+                            <dd>{probe?.includedBlock ?? ':'}</dd>
                             <dt>leaked</dt>
                             <dd>
                               <VerdictBadge bad={derivation.leaked} badLabel="leaked" goodLabel="clean" />

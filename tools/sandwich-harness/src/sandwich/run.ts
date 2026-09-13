@@ -2,7 +2,7 @@
 // router), submit the victim probe, watch for it in the public mempool, and
 // fire the front-run/back-run with the fee ladder from fee-ladder.ts. Every
 // entrypoint here calls assertSepolia() and resolveProbeVictim() before
-// doing anything irreversible — see guards/.
+// doing anything irreversible, see guards/.
 import { keccak256, type Hex, type PublicClient } from 'viem'
 import type { PrivateKeyAccount } from 'viem/accounts'
 import { assertSepolia } from '../guards/chain-guard'
@@ -27,7 +27,7 @@ export interface RunOptions {
   db: Database
   victim: PrivateKeyAccount
   attacker: PrivateKeyAccount
-  /** WETH amount each leg trades, in wei. Deliberately small — see calldata.ts. */
+  /** WETH amount each leg trades, in wei. Deliberately small, see calldata.ts. */
   amountInWei: bigint
   dryRun: boolean
   chainId: number
@@ -35,7 +35,7 @@ export interface RunOptions {
 
 const GAS_LIMIT = 300_000n
 
-/** One-time prep: wrap ETH into WETH and set router allowances for both accounts. Idempotent-ish — safe to re-run; approvals are set to max each time. */
+/** One-time prep: wrap ETH into WETH and set router allowances for both accounts. Idempotent-ish, safe to re-run; approvals are set to max each time. */
 export async function prepareAccounts(
   publicClient: PublicClient,
   accounts: { victim: PrivateKeyAccount; attacker: PrivateKeyAccount },
@@ -103,7 +103,7 @@ export interface SandwichResult {
  * as one ordered Flashbots-style bundle to the next `blockSpan` upcoming
  * Sepolia blocks, and poll for inclusion up to `timeoutMs`. Returns null
  * (never throws on non-inclusion) if the bundle does not land in order
- * within that window — see sandwich/bundle.ts and README.md for why this is
+ * within that window, see sandwich/bundle.ts and README.md for why this is
  * expected to fail more often than not on Sepolia today, and why the caller
  * (cli.ts) always has the fee-ladder path (attemptSandwich) as a fallback
  * rather than treating this as the only path.
@@ -133,7 +133,7 @@ export async function attemptSandwichBundle(
 
   const frontrunAmountInWei = opts.amountInWei * 3n
   // amountIn for the sell-back leg must be in USDC's own 6-decimal units, not
-  // reused from the WETH-scaled (18-decimal) frontrun amount — see quote.ts's
+  // reused from the WETH-scaled (18-decimal) frontrun amount, see quote.ts's
   // header for the bug this fixes. Simulated (eth_call, no state change).
   const quotedUsdcOut = await quoteWethToUsdc(opts.publicClient, opts.attacker.address, frontrunAmountInWei)
   const backrunAmountIn = applySafetyMargin(quotedUsdcOut)
@@ -171,16 +171,16 @@ export async function attemptSandwichBundle(
       if (ordered) {
         return { victimTxHash: victimHash, frontrunTxHash: frontrunHash, backrunTxHash: backrunHash, attempt: 1, method: 'bundle' }
       }
-      return null // landed, but not as an ordered sandwich — do not report a false positive
+      return null // landed, but not as an ordered sandwich, do not report a false positive
     }
   }
-  return null // did not land within timeoutMs — caller falls back to the fee-ladder path
+  return null // did not land within timeoutMs, caller falls back to the fee-ladder path
 }
 
 /**
  * Runs one attempt: submits the victim swap, watches for it in the public
  * mempool, and immediately fires front-run + back-run with laddered fees.
- * Returns as soon as all three are broadcast — caller is responsible for
+ * Returns as soon as all three are broadcast, caller is responsible for
  * waiting for inclusion and checking order (see cli.ts / README.md's
  * reliability notes on retrying when a same-block, correct-order landing
  * does not happen on the first try).
@@ -224,7 +224,7 @@ export async function attemptSandwich(opts: RunOptions): Promise<SandwichResult>
       type: 'eip1559',
     })
     // Dry-run only: no broadcast happens, so there is no real chain state to
-    // simulate the frontrun's output against yet. 1n is a placeholder — the
+    // simulate the frontrun's output against yet. 1n is a placeholder, the
     // live path below (and attemptSandwichBundle) always uses a real
     // simulated quote instead. See quote.ts's header for why this matters.
     const backrun = await opts.attacker.signTransaction({
@@ -262,15 +262,15 @@ export async function attemptSandwich(opts: RunOptions): Promise<SandwichResult>
 
   const broadcastVictim = opts.publicClient.sendRawTransaction({ serializedTransaction: victimTx })
 
-  // Fire the front-run immediately (do not wait for the watcher — the point
+  // Fire the front-run immediately (do not wait for the watcher, the point
   // of the fee ladder is that ordering is enforced by tip, not by
   // send-order), then wait briefly for the watcher to confirm visibility
   // before firing the back-run so the back-run is built against the
   // front-run's actual USDC-received amount where possible.
   // Simulated (eth_call, no state change, no gas) against the current chain
-  // head — a very close proxy for what the frontrun will actually produce,
+  // head, a very close proxy for what the frontrun will actually produce,
   // since the frontrun is first-in-block and no state changes before it.
-  // Sized in USDC's own 6-decimal units — see quote.ts's header for the bug
+  // Sized in USDC's own 6-decimal units, see quote.ts's header for the bug
   // this replaced (backrun amountIn built from the wrong token's decimals,
   // which reverted the backrun leg on this harness's first live attempt).
   const quotedUsdcOut = await quoteWethToUsdc(opts.publicClient, opts.attacker.address, frontrunAmountInWei)

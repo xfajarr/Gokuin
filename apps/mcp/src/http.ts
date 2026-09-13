@@ -1,5 +1,5 @@
 // HTTP transport for hosted use. Uses the SDK's web-standard Streamable HTTP
-// transport directly against Bun.serve's fetch handler — no Node http shim
+// transport directly against Bun.serve's fetch handler, no Node http shim
 // needed since Bun implements the Fetch API natively.
 
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'

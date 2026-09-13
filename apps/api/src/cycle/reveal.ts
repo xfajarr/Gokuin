@@ -26,7 +26,7 @@ export async function revealCycle(
   // published = probes that actually produced a ledger row, not probes that merely
   // made it into a block. A probe whose sandwich verdict was unavailable is settled
   // nowhere, and the gap must show. Counting inclusion instead would report intact
-  // while rows were missing — the precise dishonesty this check exists to catch.
+  // while rows were missing, the precise dishonesty this check exists to catch.
   const probes = stmts.getProbesByCycle.all(cycleId) as { id: number; status: string }[]
   const published = probes.filter(p => stmts.getDerivation.get(p.id) != null).length
 

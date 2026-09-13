@@ -1,13 +1,13 @@
 // Stand-in for subgraph/probe-ledger-subgraph, which is not deployed yet
 // (subgraph/probe-ledger-subgraph/subgraph.yaml still carries the zero-address
-// TODO placeholder — see subgraph/README.md). This serves the exact response
+// TODO placeholder, see subgraph/README.md). This serves the exact response
 // shape workflow/workflow.ts::buildRouteQuery expects, with fixture numbers
 // chosen to make the confidential weighting visible: public-mempool leaks and
 // gets sandwiched a lot (it is the unprotected baseline route), the other two
 // barely do.
 //
 // This is test-harness plumbing, not the workflow. It is committed because
-// the simulation logs in this directory are meaningless without it — anyone
+// the simulation logs in this directory are meaningless without it, anyone
 // re-running the simulation needs the same fixture server. Once the real
 // subgraph is deployed, only `subgraphUrl` in workflow/config.staging.json
 // changes; nothing in workflow.ts does.

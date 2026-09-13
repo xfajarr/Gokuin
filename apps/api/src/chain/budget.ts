@@ -2,15 +2,15 @@
 //
 // The operator's constraint is a real one: this is a hackathon, not a funded
 // desk, and mainnet gas moved 500x within living memory. A budget that lives in
-// someone's intention is not a budget — the first gas spike drains the wallet
+// someone's intention is not a budget, the first gas spike drains the wallet
 // while nobody is watching a 3am cron.
 //
 // Two independent brakes, because they fail differently:
 //
-//   spend cap   — cumulative, read from what has actually been spent on chain.
+//   spend cap  : cumulative, read from what has actually been spent on chain.
 //                 Survives restarts, because it is derived from the funding
 //                 ledger rather than a counter in memory.
-//   gas ceiling — refuses to dispatch at all above a set gas price. Stops a
+//   gas ceiling, refuses to dispatch at all above a set gas price. Stops a
 //                 spike from consuming the whole remaining budget in one cycle.
 //
 // The spend cap alone is not enough: it would happily let a single 400 gwei
@@ -25,7 +25,7 @@ export class BudgetExceeded extends Error {
     super(
       `probe budget exhausted: ${fmt(spentWei)} already spent of a ${fmt(capWei)} cap, ` +
         `and this cycle needs ${fmt(wouldSpendWei)} more. Raise PROBE_BUDGET_ETH deliberately ` +
-        `or stop probing — nothing here will quietly overspend it.`,
+        `or stop probing, nothing here will quietly overspend it.`,
     )
     this.name = 'BudgetExceeded'
   }
@@ -64,7 +64,7 @@ export async function assertWithinBudget(
   wouldSpendWei: bigint,
 ): Promise<{ spentWei: bigint; remainingWei: bigint; gasPriceWei: bigint }> {
   // Parsed exactly from a decimal string, never via float arithmetic.
-  // Math.round(0.009 * 1e18) is 8999999999999999 — a wei short. On a money path
+  // Math.round(0.009 * 1e18) is 8999999999999999, a wei short. On a money path
   // that is the wrong kind of approximately.
   const capWei = parseEther(env.PROBE_BUDGET_ETH)
   const ceilingWei = parseGwei(env.MAX_GAS_PRICE_GWEI)

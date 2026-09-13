@@ -6,7 +6,7 @@ import {RouteRegistry} from "./RouteRegistry.sol";
 /// @title Scorer
 /// @notice Receives the weighted score from the CRE Confidential Workflow and forwards
 ///         it into `RouteRegistry` as ENS text records.
-/// @dev Weights never appear on-chain — only their output does. `creForwarder` is the
+/// @dev Weights never appear on-chain, only their output does. `creForwarder` is the
 ///      only address permitted to call `submitScore`; in the deployed system that is
 ///      the Chainlink CRE forwarder that relays the Confidential Workflow's output.
 ///
@@ -17,7 +17,7 @@ import {RouteRegistry} from "./RouteRegistry.sol";
 ///      its score from the rows it read, so it necessarily knows both values, and
 ///      passing them through here adds no new trust assumption and no second writer.
 ///      `RouteRegistry.scorer` stays the only address ever authorised to call
-///      `setScore` — the entire "only the Scorer can write, enforced by the contract"
+///      `setScore`: the entire "only the Scorer can write, enforced by the contract"
 ///      claim depends on there being exactly one such writer, and that must not be
 ///      diluted by giving any other contract (e.g. the API) its own path in.
 ///      `composite` is not one of the six text keys; it is only ever emitted in
@@ -39,7 +39,7 @@ contract Scorer {
     }
 
     /// @param creForwarder_ the CRE forwarder address permitted to submit scores.
-    /// @param registry_ the `RouteRegistry` this scorer is authorised to write into —
+    /// @param registry_ the `RouteRegistry` this scorer is authorised to write into :
     ///        that registry must have been deployed with this contract's address (or
     ///        the address this contract will be deployed to) as its `scorer`.
     constructor(address creForwarder_, RouteRegistry registry_) {
@@ -55,7 +55,7 @@ contract Scorer {
     /// @param sandwichBps sandwich rate in basis points.
     /// @param medianDelay median inclusion delay, in blocks.
     /// @param composite the weighted composite score; emitted only, not a text record.
-    /// @param probes number of probes contributing to this score — the CRE workflow
+    /// @param probes number of probes contributing to this score, the CRE workflow
     ///        counted these rows itself, so this is not a new trust assumption.
     /// @param lastCycle the most recent cycle id folded into this score.
     /// @param evidenceURI a pointer to the evidence backing this score (e.g. a subgraph

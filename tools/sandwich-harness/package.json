@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Standalone Sepolia demonstration harness: stages a sandwich against Gokuin's own probe address to prove the detection path end to end. Not part of the running system — see README.md.",
+  "description": "Standalone Sepolia demonstration harness: stages a sandwich against Gokuin's own probe address to prove the detection path end to end. Not part of the running system, see README.md.",
   "scripts": {
     "test": "bun test",
     "typecheck": "tsc --noEmit",

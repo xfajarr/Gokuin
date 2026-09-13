@@ -4,7 +4,7 @@
 //   bun src/cli.ts run [--attempts N] -- the real thing: submits victim, watches, fires front/back-run, retries on bad ordering
 //   bun src/cli.ts detect <blockNumber> -- runs the detector replica against a mined block and prints findings
 //
-// Every path funnels through assertSepolia() and resolveProbeVictim() first —
+// Every path funnels through assertSepolia() and resolveProbeVictim() first :
 // see guards/. There is no flag on this CLI that skips either.
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import { loadHarnessEnv } from './env'
@@ -18,7 +18,7 @@ import { buildStagedRow } from './row'
 import { WETH_USDC_POOL } from './chain/addresses'
 import { scoreRoute } from '../../../packages/core/src/index'
 
-const AMOUNT_IN_WEI = 200_000_000_000_000n // 0.0002 WETH per leg — see calldata.ts for why size doesn't matter to detection
+const AMOUNT_IN_WEI = 200_000_000_000_000n // 0.0002 WETH per leg, see calldata.ts for why size doesn't matter to detection
 const WRAP_AMOUNT_WEI = AMOUNT_IN_WEI * 10n // headroom for both victim and attacker's several legs
 
 async function main() {
@@ -55,7 +55,7 @@ async function main() {
     // Reuses ATTACKER_PK if already funded from a prior `setup` run; generates
     // (and prints) a fresh one otherwise. Either way this account needs real
     // Sepolia ETH of its own before prepareAccounts can wrap any of it into
-    // WETH — fund it from the victim/deployer key first if it's new.
+    // WETH, fund it from the victim/deployer key first if it's new.
     const attackerPk = (process.env.ATTACKER_PK as `0x${string}`) ?? generatePrivateKey()
     if (!process.env.ATTACKER_PK) {
       console.log(`[setup] generated attacker key (fund it with Sepolia ETH before re-running setup)`)
@@ -118,7 +118,7 @@ async function main() {
         console.log(`  https://sepolia.etherscan.io/tx/${bundleResult.victimTxHash}`)
         return
       }
-      console.warn('[run] bundle did not land as an ordered sandwich within the timeout — falling back to gas-priority laddering')
+      console.warn('[run] bundle did not land as an ordered sandwich within the timeout, falling back to gas-priority laddering')
     }
 
     const maxAttempts = Number(rest.find(a => a.startsWith('--attempts='))?.split('=')[1] ?? 3)
@@ -175,7 +175,7 @@ async function main() {
         console.log('[detect-replica] findings in block:', findings)
         return
       }
-      console.warn('[run] ordering did not land as intended this attempt — retrying with a fresh attempt')
+      console.warn('[run] ordering did not land as intended this attempt, retrying with a fresh attempt')
     }
     console.error(`[run] gave up after ${maxAttempts} attempts without a correctly-ordered same-block landing`)
     process.exit(1)

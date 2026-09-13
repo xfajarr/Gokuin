@@ -7,7 +7,7 @@ import { z, type ZodRawShape } from 'zod'
 // Each *Shape below is annotated ZodRawShape rather than left to inference.
 // Without the annotation tsc re-derives the full generic tree of every field at
 // each registerTool call site, and combined with the MCP SDK's own generics it
-// stops being slow and starts being unbounded — the typecheck ran past two
+// stops being slow and starts being unbounded, the typecheck ran past two
 // minutes and died on a heap abort, which reads as a crash rather than as a type
 // that is simply too expensive to name.
 import { ROUTES } from '@gokuin/core'
@@ -65,7 +65,7 @@ export const routesOutputShape: ZodRawShape = {
     .array(evidenceItemSchema)
     .describe(
       'Best-effort tx hashes surfaced while compiling this list. Aggregate scores carry no row-level hashes by ' +
-        'themselves — call gokuin_explain(route) for the full evidence trail behind any one route.',
+        'themselves, call gokuin_explain(route) for the full evidence trail behind any one route.',
     ),
 }
 export const routesOutputSchema = z.object(routesOutputShape)

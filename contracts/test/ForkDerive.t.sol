@@ -5,9 +5,9 @@ import {Test} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 
 /// @notice Mainnet-fork pin for the `extractedWei` metric definition. Forks mainnet at
-///         a known historical sandwich block and asserts `simOut - realOut` — an
+///         a known historical sandwich block and asserts `simOut - realOut`: an
 ///         on-chain replay of the victim's IDENTICAL calldata against state at
-///         `includedBlock - 1`, compared to the victim's real, already-decoded output —
+///         `includedBlock - 1`, compared to the victim's real, already-decoded output :
 ///         equals the same value `packages/core/src/metrics.ts::computeExtracted()`
 ///         produces off-chain against the identical fixture. PRD.md §15: "the fork test
 ///         and the TypeScript metric test consume the same fixture and must agree. If
@@ -16,22 +16,22 @@ import {Vm} from "forge-std/Vm.sol";
 ///
 ///         Every numeric/address constant below is a hardcoded copy of
 ///         `packages/core/src/fixtures.ts` (`KNOWN_SANDWICH` / `KNOWN_SANDWICH_DERIVED`)
-///         — Solidity can't import TypeScript, so that file is the single source of
+///        : Solidity can't import TypeScript, so that file is the single source of
 ///         truth and this file must stay byte-identical to it. If you change one, change
 ///         the other and re-run both suites.
 ///
 ///         The real sandwich: Ethereum mainnet block 22450093, Uniswap V2 WETH/RATO
 ///         pool. The front-run (tx index 10) and back-run (tx index 12) are not replayed
-///         here — the TS suite's structural-precondition tests already pin their shape
+///         here, the TS suite's structural-precondition tests already pin their shape
 ///         (i<j<k, same pool, same attacker, distinct hashes). This test only needs to
 ///         replay the victim's own transaction (tx index 11) against pre-front-run state
 ///         to derive `simOut`, since that is the only side of the `extractedWei`
 ///         calculation that requires an EVM replay rather than a log decode.
-/// @dev NEEDS `MAINNET_RPC` (an archive-capable mainnet RPC URL — `eth.drpc.org` is
+/// @dev NEEDS `MAINNET_RPC` (an archive-capable mainnet RPC URL: `eth.drpc.org` is
 ///      known to work for this exact block as of 2026-09). Without it, this test
 ///      self-skips via `vm.skip(true)` (that guard is legitimate: CI without network
 ///      access, or a rate-limited/down public RPC, should not fail the suite). With
-///      MAINNET_RPC set, it MUST run and pass — there is no other skip condition.
+///      MAINNET_RPC set, it MUST run and pass, there is no other skip condition.
 ///      Run it with:
 ///        `MAINNET_RPC=https://eth.drpc.org forge test --match-test testFork_DeriveKnownSandwich -vv`
 contract ForkDeriveTest is Test {
@@ -56,7 +56,7 @@ contract ForkDeriveTest is Test {
 
     // realOut: RATO the victim actually received, decoded from the pool's Swap log in the
     // REAL block 22450093 (with the front-run already applied). Independently re-derived
-    // via `cast logs`/`cast receipt` — see substreams/fixtures/known-sandwich.md.
+    // via `cast logs`/`cast receipt`: see substreams/fixtures/known-sandwich.md.
     uint256 constant REAL_OUT = 157358171477322859;
 
     // extractedWei = simOut - realOut, floored at zero (mirrors computeExtracted() in
@@ -92,7 +92,7 @@ contract ForkDeriveTest is Test {
     }
 
     /// @dev Scans the logs recorded during the replay for the pool's Swap event and
-    ///      decodes `amount1Out` (RATO, token1) — the amount the pool sent to the router
+    ///      decodes `amount1Out` (RATO, token1): the amount the pool sent to the router
     ///      for the victim's swap, absent any front-run.
     function _decodeAmount1OutFromPool() internal returns (uint256 amount1Out) {
         Vm.Log[] memory logs = vm.getRecordedLogs();
@@ -100,7 +100,7 @@ contract ForkDeriveTest is Test {
         for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].emitter == POOL && logs[i].topics.length > 0 && logs[i].topics[0] == SWAP_TOPIC) {
                 (,, uint256 a0Out, uint256 a1Out) = abi.decode(logs[i].data, (uint256, uint256, uint256, uint256));
-                // token0 is WETH, token1 is RATO — the victim swaps WETH -> RATO, so the
+                // token0 is WETH, token1 is RATO, the victim swaps WETH -> RATO, so the
                 // pool's output leg is amount1Out.
                 assertEq(a0Out, 0, "expected a WETH-in / RATO-out swap (amount0Out should be zero)");
                 amount1Out = a1Out;

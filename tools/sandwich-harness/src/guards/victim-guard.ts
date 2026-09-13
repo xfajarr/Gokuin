@@ -1,16 +1,16 @@
 // Constraint 2: this harness may only ever target an address that is
-// genuinely ours — one already on record as a Gokuin probe. Sandwiching a
+// genuinely ours, one already on record as a Gokuin probe. Sandwiching a
 // third party takes real money from a real person; that is not a
 // configuration option here, it is a guard with its own test
 // (test/victim-guard.test.ts) that runs before anything else.
 //
 // Two sources of truth, both under our control, neither an env var:
 //
-//   1. apps/api's own SQLite `probe` table (apps/api/src/db.ts) — the same
+//   1. apps/api's own SQLite `probe` table (apps/api/src/db.ts): the same
 //      table the real system records probes into. If the harness (or the
 //      real API) has already registered this address as a probe, it is ours
 //      by construction.
-//   2. KNOWN_PROBE_ALLOWLIST below — a short, hardcoded, committed-to-source
+//   2. KNOWN_PROBE_ALLOWLIST below, a short, hardcoded, committed-to-source
 //      list of addresses we control. Hardcoded on purpose: an allowlist read
 //      from an environment variable could be pointed at anything by whoever
 //      sets that variable, which is exactly the override this constraint
@@ -24,7 +24,7 @@ import type { Database } from 'bun:sqlite'
 /**
  * Addresses we control and have explicitly designated as our own demo
  * probes. Sourced from repo-root .env's PROBER_ADDRESS at the time this file
- * was written (`cast wallet address --private-key $PROBER_PK`) — the same
+ * was written (`cast wallet address --private-key $PROBER_PK`): the same
  * address apps/api's ProbeLedger.prober is deployed to sign for. Add an
  * address here only when it is genuinely one of ours; this is read by
  * source review, not by a script.
@@ -36,7 +36,7 @@ export class UnknownVictimError extends Error {
     super(
       `refusing to target ${address}: it is not in the probe table and not in ` +
         `KNOWN_PROBE_ALLOWLIST. This harness may only target addresses we ` +
-        `already control as our own probes — sandwiching anyone else is out of ` +
+        `already control as our own probes, sandwiching anyone else is out of ` +
         `scope structurally, not by policy.`,
     )
     this.name = 'UnknownVictimError'
@@ -53,7 +53,7 @@ export interface ResolvedVictim {
 /**
  * Resolves and authorizes a victim address against the probe table, falling
  * back to the hardcoded allowlist. Throws UnknownVictimError if neither
- * source recognises it — the caller must not catch this and proceed anyway.
+ * source recognises it, the caller must not catch this and proceed anyway.
  */
 export function resolveProbeVictim(db: Database, address: string): ResolvedVictim {
   const normalized = address.toLowerCase() as `0x${string}`

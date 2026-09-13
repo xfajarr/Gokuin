@@ -1,6 +1,6 @@
 # CRE project settings for the Gokuin scoring workflow.
 #
-# Settlement/write chain is Sepolia (chain-name `ethereum-testnet-sepolia`) — the
+# Settlement/write chain is Sepolia (chain-name `ethereum-testnet-sepolia`): the
 # same network contracts/ deploys ProbeLedger, RouteRegistry and Scorer to (PRD.md
 # §4 "Network split"). Ethereum mainnet is listed only because that is where probes
 # themselves run (the evidence hash each row carries); this workflow never writes
@@ -8,7 +8,7 @@
 #
 # `workflow-owner-address` below is a PLACEHOLDER (Anvil's well-known default
 # account #0). Replace it with the real deployer/operator address before any
-# `cre workflow deploy` — see cre/README.md "what the operator must supply".
+# `cre workflow deploy`: see cre/README.md "what the operator must supply".
 staging-settings:
   account:
     workflow-owner-address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
@@ -32,12 +32,12 @@ private-settings:
     - chain-name: ethereum-testnet-sepolia
       url: https://ethereum-sepolia-rpc.publicnode.com
 
-# `cre workflow simulate` target used in cre/simulation/ — points `subgraphUrl`
+# `cre workflow simulate` target used in cre/simulation/: points `subgraphUrl`
 # at a local fixture server (see cre/simulation/README.md) because
 # subgraph/probe-ledger-subgraph is not deployed yet (still has the zero-address
 # TODO placeholder in subgraph.yaml). `scorerAddress` is left at the zero-address
 # default, so the workflow computes and logs every route's score but does not
-# attempt to broadcast a write — see cre/README.md "why the write step still runs
+# attempt to broadcast a write, see cre/README.md "why the write step still runs
 # with nothing deployed".
 simulation-settings:
   rpcs:

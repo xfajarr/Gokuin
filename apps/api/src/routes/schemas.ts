@@ -1,5 +1,5 @@
 // TypeBox response schemas mirroring the shapes of @gokuin/core's types.
-// These validate/serialize API responses; they do not redefine any metric —
+// These validate/serialize API responses; they do not redefine any metric :
 // the numbers themselves always come from core functions or subgraph reads.
 import { t } from 'elysia'
 

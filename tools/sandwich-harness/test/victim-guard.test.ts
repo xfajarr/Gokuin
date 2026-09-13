@@ -1,6 +1,6 @@
 // Constraint 2's own test: the harness may only target an address already
 // on record as our own probe (via the SQLite probe table) or on the
-// hardcoded allowlist — never an arbitrary address, and never via an env
+// hardcoded allowlist, never an arbitrary address, and never via an env
 // var override (there is no such override to test against; this test
 // instead proves the refusal path is real).
 import { describe, expect, it, beforeEach, afterEach } from 'bun:test'

@@ -1,5 +1,5 @@
 // Env for the standalone harness. Reads the repo-root .env (this tool lives
-// at tools/sandwich-harness, two levels below repo root) — the same file
+// at tools/sandwich-harness, two levels below repo root): the same file
 // apps/api and apps/listener read, so there is exactly one SEPOLIA_RPC and
 // one set of keys for the whole project, not a second copy that could drift.
 //
@@ -12,9 +12,9 @@ import { join, dirname } from 'node:path'
 
 export interface HarnessEnv {
   sepoliaRpc: string
-  /** Attacker/setup broadcasting key. Falls back to DEPLOYER_PK, then PROBER_PK — both hold the same Sepolia testnet ETH per repo-root .env. */
+  /** Attacker/setup broadcasting key. Falls back to DEPLOYER_PK, then PROBER_PK, both hold the same Sepolia testnet ETH per repo-root .env. */
   operatorPk: `0x${string}`
-  /** The prober's own key — used only to prove the victim probe belongs to us; never used to sign the attack legs. */
+  /** The prober's own key, used only to prove the victim probe belongs to us; never used to sign the attack legs. */
   proberPk?: `0x${string}`
   proberAddress?: `0x${string}`
   dbPath: string
@@ -57,12 +57,12 @@ export function loadHarnessEnv(): HarnessEnv {
 
   const sepoliaRpc = source.SEPOLIA_RPC
   if (!sepoliaRpc) {
-    throw new Error('SEPOLIA_RPC is not set in the repo-root .env — cannot run without a Sepolia RPC endpoint.')
+    throw new Error('SEPOLIA_RPC is not set in the repo-root .env, cannot run without a Sepolia RPC endpoint.')
   }
 
   const operatorPk = (source.DEPLOYER_PK || source.PROBER_PK) as `0x${string}` | undefined
   if (!operatorPk) {
-    throw new Error('Neither DEPLOYER_PK nor PROBER_PK is set — need a funded Sepolia key to run the harness for real.')
+    throw new Error('Neither DEPLOYER_PK nor PROBER_PK is set, need a funded Sepolia key to run the harness for real.')
   }
 
   cached = {

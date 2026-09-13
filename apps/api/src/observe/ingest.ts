@@ -19,7 +19,7 @@ export interface ObservationInput {
 /**
  * Listener signers allowed to write observations. ALLOWED_LISTENER_ADDRESSES
  * (comma-separated) is the multi-region production allowlist; when unset, the
- * address derived from LISTENER_PK is used as the sole allowed signer — a
+ * address derived from LISTENER_PK is used as the sole allowed signer, a
  * reasonable single-region dev default, insufficient for the real two-region
  * deployment (document this in ops config before going live).
  */

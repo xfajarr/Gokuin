@@ -1,5 +1,5 @@
 // Re-uses apps/api's own SQLite schema and statements (apps/api/src/db.ts)
-// rather than defining a second copy that could drift from the real one —
+// rather than defining a second copy that could drift from the real one :
 // the whole point of constraint 3 is that this harness plugs into the exact
 // same `probe` table and `staged` column the real settlement path
 // (apps/api/src/derive/settle.ts) reads, not a lookalike.
@@ -17,11 +17,11 @@ export interface StagedProbeRow {
 
 /**
  * Registers our own address as a probe for this demo AND marks it staged in
- * the same insert — there is no window where the row exists but is not yet
+ * the same insert, there is no window where the row exists but is not yet
  * flagged. `route` is fixed to 'public-mempool': the demo needs the victim
  * transaction visible in the public mempool for the front-run to react to it
  * at all, so this is the only truthful route label for it (this is not a
- * measurement of the public-mempool route's real leak/sandwich rate — see
+ * measurement of the public-mempool route's real leak/sandwich rate, see
  * README.md and the `staged` column comment in apps/api/src/db.ts for why
  * scoreRoute() excludes it regardless).
  */

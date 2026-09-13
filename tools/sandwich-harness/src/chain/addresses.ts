@@ -4,7 +4,7 @@ export const SEPOLIA_CHAIN_ID = 11155111
 export const UNISWAP_V3_FACTORY: `0x${string}` = '0x0227628f3F023bb0B980b67D528571c95c6DaC1c'
 
 /**
- * SwapRouter02 on Sepolia (IV3SwapRouter — no `deadline` field in
+ * SwapRouter02 on Sepolia (IV3SwapRouter, no `deadline` field in
  * ExactInputSingleParams, unlike the older SwapRouter). Verified:
  * `router.WETH9()` returns WETH9 below, `router.factory()` returns the
  * factory above.
@@ -78,7 +78,7 @@ export const WETH9_ABI = [
   },
 ] as const
 
-/** IV3SwapRouter (SwapRouter02) — exactInputSingle has no `deadline` field. */
+/** IV3SwapRouter (SwapRouter02): exactInputSingle has no `deadline` field. */
 export const SWAP_ROUTER_02_ABI = [
   {
     type: 'function',
@@ -161,5 +161,5 @@ export const UNISWAP_V3_POOL_ABI = [
   },
 ] as const
 
-/** keccak256("Swap(address,address,int256,int256,uint160,uint128,int24)") — must match substreams/src/lib.rs V3_SWAP_TOPIC0. */
+/** keccak256("Swap(address,address,int256,int256,uint160,uint128,int24)"): must match substreams/src/lib.rs V3_SWAP_TOPIC0. */
 export const V3_SWAP_TOPIC0 = '0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67' as const

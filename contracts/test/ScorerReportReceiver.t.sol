@@ -20,7 +20,7 @@ contract ScorerReportReceiverTest is Test {
 
     function setUp() public {
         // Two-phase wiring: the registry's scorer must be the Scorer, and the
-        // Scorer's creForwarder must be the adapter — not Chainlink's Forwarder.
+        // Scorer's creForwarder must be the adapter, not Chainlink's Forwarder.
         address predictedScorer = vm.computeCreateAddress(address(this), vm.getNonce(address(this)) + 1);
         registry = new RouteRegistry(predictedScorer, ETH_REGISTRY, PARENT, "gokuin");
         scorer = new Scorer(address(0xBEEF), registry);

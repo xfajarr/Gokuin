@@ -6,18 +6,18 @@ import {IResolver} from "./interfaces/IResolver.sol";
 
 /// @title RouteRegistry
 /// @notice `RouteRegistry` IS the ENSv2 subregistry for `gokuin.eth`. It owns the
-///         `public-mempool` / `flashbots-protect` / `mev-blocker` namespace directly — there is
+///         `public-mempool` / `flashbots-protect` / `mev-blocker` namespace directly, there is
 ///         no external "ENS registry" this contract calls into to create those subnames, because
 ///         in ENSv2's hierarchical model a registry answers for its own labels
 ///         (`getSubregistry`/`getResolver`), it does not ask another contract to record them.
 ///
 ///         This is a deliberate architectural change from a v1-shaped design, driven by the real
-///         ENSv2 interface (verified against `ensdomains/contracts-v2`, commit 48b3e2d — see
+///         ENSv2 interface (verified against `ensdomains/contracts-v2`, commit 48b3e2d, see
 ///         `interfaces/IRegistry.sol` and `interfaces/IResolver.sol` for exact source links):
 ///           - `gokuin.eth` is already registered on Sepolia in ENSv2's `ETHRegistry`
 ///             (`0xbdc85dd5b15d7ecb354cd7cb6f2c50b4f2c4f0e2`), owned by this project's deployer.
 ///           - The owner calls `ETHRegistry.setSubregistry(<gokuin labelhash>, RouteRegistry)`
-///             **once, out of band** (see `script/RegisterRoutes.s.sol`) — this is the one
+///             **once, out of band** (see `script/RegisterRoutes.s.sol`): this is the one
 ///             ENSv2 write this contract cannot do for itself, since only the name's owner (or
 ///             an address it granted `ROLE_SET_SUBREGISTRY`) may call that.
 ///           - From then on, resolving `mev-blocker.gokuin.eth` walks: root → `ETHRegistry`
@@ -28,10 +28,10 @@ import {IResolver} from "./interfaces/IResolver.sol";
 ///             `onlyScorer` check), not split across a registry ACL and a separate resolver ACL.
 ///
 /// @dev Scope, stated plainly rather than faked: `RouteRegistry` implements the real, minimal
-///      `IRegistry` (the interface every ENSv2 resolution client actually calls — confirmed via
+///      `IRegistry` (the interface every ENSv2 resolution client actually calls, confirmed via
 ///      `LibRegistry.findResolver` in the same repo) and the real EIP-634 `IResolver.text`. It
 ///      deliberately does NOT implement `PermissionedRegistry`'s ERC1155/`EnhancedAccessControl`
-///      surface (transferable ownership, expiry, role delegation, `IRegistryEvents`) — routes are
+///      surface (transferable ownership, expiry, role delegation, `IRegistryEvents`): routes are
 ///      three fixed labels created once by trusted deploy tooling, never transferred, never
 ///      expire, and never sub-delegate roles, so that machinery would add attack surface and
 ///      reasoning burden with no benefit to the one property this contract exists to prove.
@@ -40,7 +40,7 @@ contract RouteRegistry is IRegistry, IResolver {
     address public immutable scorer;
 
     /// @notice The ENSv2 registry `gokuin.eth` is registered in (e.g. ETHRegistry on Sepolia).
-    ///         Stored only for `getParent()` and for `RegisterRoutes`'s prerequisite check —
+    ///         Stored only for `getParent()` and for `RegisterRoutes`'s prerequisite check :
     ///         this contract never calls it to create subnames (see contract-level doc).
     address public immutable ethRegistry;
 
@@ -80,7 +80,7 @@ contract RouteRegistry is IRegistry, IResolver {
         _;
     }
 
-    /// @param scorer_ the only address ever permitted to call `setScore` — in practice the
+    /// @param scorer_ the only address ever permitted to call `setScore`: in practice the
     ///        deployed `Scorer` contract's address.
     /// @param ethRegistry_ the ENSv2 registry `gokuin.eth` lives in (metadata only; see above).
     /// @param parentNode_ `namehash("gokuin.eth")`, used to key text records (see above).
@@ -96,7 +96,7 @@ contract RouteRegistry is IRegistry, IResolver {
     ///         `getResolver(label)` and the sole holder of that label's text records.
     /// @dev Not scorer-gated: registering the label→routeId mapping is a one-time setup step,
     ///      distinct from writing scores, and the PRD does not ask for it to be restricted. It is
-    ///      idempotent per `routeId` — a route can only ever be registered once, which prevents a
+    ///      idempotent per `routeId`: a route can only ever be registered once, which prevents a
     ///      later call from re-pointing an existing route's node. No external call is made: in
     ///      ENSv2's hierarchical model, this contract IS the subregistry for these labels once
     ///      the operator points `ETHRegistry` at it (see `script/RegisterRoutes.s.sol`); it does
@@ -117,7 +117,7 @@ contract RouteRegistry is IRegistry, IResolver {
         emit RouteRegistered(routeId, label, node);
     }
 
-    /// @notice Write a score text record. Reverts for any caller but the Scorer — this
+    /// @notice Write a score text record. Reverts for any caller but the Scorer, this
     ///         is the "only we can write" claim, enforced instead of promised.
     /// @dev Keys written by `Scorer.submitScore`: `gokuin.leakBps`, `gokuin.sandwichBps`,
     ///      `gokuin.medianDelay`, `gokuin.probes`, `gokuin.lastCycle`, `gokuin.evidenceURI`.
@@ -131,14 +131,14 @@ contract RouteRegistry is IRegistry, IResolver {
         emit ScoreWritten(routeId, key, value);
     }
 
-    /// @notice ENS text record resolution — standard `IResolver.text`. Read-only, open
+    /// @notice ENS text record resolution, standard `IResolver.text`. Read-only, open
     ///         to anyone, exactly as ENS resolution requires.
     function text(bytes32 node, string calldata key) external view override returns (string memory) {
         return _text[node][key];
     }
 
     /// @inheritdoc IRegistry
-    /// @dev Routes are leaf names — none of them has a further subregistry of its own.
+    /// @dev Routes are leaf names, none of them has a further subregistry of its own.
     function getSubregistry(string calldata /* label */) external pure override returns (IRegistry) {
         return IRegistry(address(0));
     }

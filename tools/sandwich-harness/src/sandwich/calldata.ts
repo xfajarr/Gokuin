@@ -30,7 +30,7 @@ export type SwapDirection = 'weth-to-usdc' | 'usdc-to-weth'
  * detector-matching sandwich, not a profitable one, and a real
  * amountOutMinimum would risk a revert (and a broken block-ordering take)
  * over testnet-only "profit" that has no monetary meaning anyway. Documented
- * plainly rather than silently — see README.md "why amountOutMinimum is 0".
+ * plainly rather than silently, see README.md "why amountOutMinimum is 0".
  */
 export function encodeSwap(direction: SwapDirection, recipient: Hex, amountIn: bigint): Hex {
   const [tokenIn, tokenOut] = direction === 'weth-to-usdc' ? [WETH9, TEST_USDC] : [TEST_USDC, WETH9]

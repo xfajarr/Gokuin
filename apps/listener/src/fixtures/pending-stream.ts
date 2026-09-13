@@ -23,7 +23,7 @@ export const FIXTURE_STREAM: FixtureBatch[] = [
     fromUncle: false,
   },
   {
-    // a re-broadcast from an uncled block — stored, excluded from the leak flag.
+    // a re-broadcast from an uncled block, stored, excluded from the leak flag.
     hashes: ['0x1111111111111111111111111111111111111111111111111111111111111a'],
     seenBlock: 19_000_002,
     fromUncle: true,

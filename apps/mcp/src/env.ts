@@ -33,7 +33,7 @@ export const env = {
 
 /**
  * Per-route JSON-RPC endpoints that will accept a raw signed transaction.
- * These are separate from the Gokuin API — submission goes straight to the
+ * These are separate from the Gokuin API, submission goes straight to the
  * route's own transport, exactly as a probe would send it. Overridable per
  * deployment; the defaults are the routes' own public endpoints.
  */

@@ -26,7 +26,7 @@ afterEach(() => {
 })
 
 describe('createListener', () => {
-  test('throws without LISTENER_PK — cannot sign observations blind', () => {
+  test('throws without LISTENER_PK, cannot sign observations blind', () => {
     expect(() => createListener(makeEnv())).toThrow(/LISTENER_PK/)
   })
 

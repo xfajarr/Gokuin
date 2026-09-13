@@ -1,5 +1,5 @@
 // Server functions callable from route loaders and components. Safe to
-// statically import anywhere — TanStack Start strips the handler bodies
+// statically import anywhere. TanStack Start strips the handler bodies
 // (and api.server.ts along with them) out of the client bundle.
 import { createServerFn } from '@tanstack/react-start'
 import type { Need } from '@gokuin/core'
@@ -37,7 +37,7 @@ export const selectRoute = createServerFn({ method: 'POST' })
   .validator((input: { need: Need; maxLeakBps?: number; maxWaitBlocks?: number }) => input)
   .handler(({ data }) => backend.postSelect(data, SAMPLE_SELECTION))
 
-// No sample fallback — see the comment on postAdminCycleRun in api.server.ts.
+// No sample fallback, see the comment on postAdminCycleRun in api.server.ts.
 // A thrown error here reaches the console route as a rejected promise.
 export const runCycle = createServerFn({ method: 'POST' })
   .validator((input: CycleRunInput) => input)

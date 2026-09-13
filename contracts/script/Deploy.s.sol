@@ -9,15 +9,15 @@ import {ScorerReportReceiver} from "../src/ScorerReportReceiver.sol";
 
 /// @notice Deploys `ProbeLedger`, `RouteRegistry` and `Scorer` wired together on
 ///         Sepolia, then registers the three routes from
-///         `packages/core/src/types.ts::ROUTE_IDS` (must stay in that exact order —
+///         `packages/core/src/types.ts::ROUTE_IDS` (must stay in that exact order :
 ///         route ids are positional and never reordered).
 ///
 /// Required env vars:
 ///   PROBER_ADDRESS      address permitted to write ProbeLedger (the API's hot key).
 ///   CRE_FORWARDER       Chainlink's own CRE Forwarder on Sepolia. NOTE: this is NOT
-///                       what Scorer.creForwarder is set to — see the wiring below.
+///                       what Scorer.creForwarder is set to, see the wiring below.
 ///   ETH_REGISTRY        the real ENSv2 ETHRegistry address on Sepolia
-///                       (0xbdc85dd5b15d7ecb354cd7cb6f2c50b4f2c4f0e2 as of writing —
+///                       (0xbdc85dd5b15d7ecb354cd7cb6f2c50b4f2c4f0e2 as of writing :
 ///                       see https://docs.ens.domains/learn/deployments/). Stored on
 ///                       RouteRegistry only as metadata (IRegistry.getParent()) and for
 ///                       RegisterRoutes's prerequisite check; never called to create subnames.
@@ -36,7 +36,7 @@ import {ScorerReportReceiver} from "../src/ScorerReportReceiver.sol";
 ///   only ever calls onReport(bytes,bytes); Scorer takes eight typed arguments.
 ///   Point Scorer at the raw Forwarder and every confidential score is rejected.
 contract Deploy is Script {
-    /// @dev Must match `packages/core/src/types.ts::ROUTE_IDS` exactly — index is the
+    /// @dev Must match `packages/core/src/types.ts::ROUTE_IDS` exactly, index is the
     ///      on-chain routeId, and the order must never change once routes are live.
     string[3] internal ROUTE_LABELS = ["public-mempool", "flashbots-protect", "mev-blocker"];
 
@@ -79,7 +79,7 @@ contract Deploy is Script {
         RouteRegistry registry = new RouteRegistry(predictedScorer, ethRegistry, parentNode, parentLabel);
         console.log("RouteRegistry deployed at", address(registry));
 
-        // Scorer's only permitted caller is the adapter, which does not exist yet —
+        // Scorer's only permitted caller is the adapter, which does not exist yet :
         // predict it one nonce further on, the same trick used for Scorer itself.
         address predictedAdapter = vm.computeCreateAddress(deployer, vm.getNonce(deployer) + 1);
 

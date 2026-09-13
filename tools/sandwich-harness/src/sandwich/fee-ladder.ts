@@ -1,4 +1,4 @@
-// Gas priority laddering — the ordering mechanism this harness actually
+// Gas priority laddering, the ordering mechanism this harness actually
 // uses, and the thing README.md reports on for reliability. Sepolia has no
 // Flashbots-style bundle relay, so there is no way to guarantee atomic
 // same-block, fixed-order inclusion the way mainnet MEV-Boost bundles do.
@@ -19,9 +19,9 @@ export interface FeeParams {
 }
 
 export const PRIORITY_GWEI: Record<Leg, bigint> = {
-  frontrun: 6_000_000_000n, // 6 gwei tip — must land first
-  victim: 3_000_000_000n, // 3 gwei tip — the "unsuspecting" probe, still healthy priority
-  backrun: 1_500_000_000n, // 1.5 gwei tip — must land last, but still within the same block
+  frontrun: 6_000_000_000n, // 6 gwei tip, must land first
+  victim: 3_000_000_000n, // 3 gwei tip, the "unsuspecting" probe, still healthy priority
+  backrun: 1_500_000_000n, // 1.5 gwei tip, must land last, but still within the same block
 }
 
 /**

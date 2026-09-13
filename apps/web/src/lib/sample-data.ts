@@ -1,4 +1,4 @@
-// SAMPLE DATA — rendered only when the live API at API_URL is unreachable.
+// SAMPLE DATA, rendered only when the live API at API_URL is unreachable.
 // Every page that uses this marks it visibly with the SampleBadge component.
 // Numbers here are illustrative fixtures, not measurements. Do not treat them
 // as real cycle results.
@@ -61,10 +61,10 @@ function addrLike(seed: string): `0x${string}` {
   return `0x${body}` as `0x${string}`
 }
 
-/** Deterministic fixture rows per route — enough to fill a scoreboard drill-down.
+/** Deterministic fixture rows per route, enough to fill a scoreboard drill-down.
  * mev-blocker is the one route with no organic probes (see SAMPLE_ROUTES above):
  * its only row is the staged demo sandwich, marked `staged: true` and excluded
- * from every ratio by scoreRoute() — packages/core/test/staged-exclusion.test.ts
+ * from every ratio by scoreRoute(): packages/core/test/staged-exclusion.test.ts
  * pins exactly this "route of nothing but staged rows scores as no data" case. */
 export function sampleRouteRows(routeId: string): { rows: Row[]; cursor?: string } {
   const score = SAMPLE_ROUTES.find((r) => r.route === routeId) ?? SAMPLE_ROUTES[0]
@@ -205,7 +205,7 @@ export function sampleIntegrity(id: string): Integrity {
 export const SAMPLE_SELECTION: Selection = {
   route: 'flashbots-protect',
   reason:
-    'need=privacy, maxLeakBps=500 — flashbots-protect measured leakBps=300 over 100 probes last cycle, public-mempool measured 9400.',
+    'need=privacy, maxLeakBps=500, flashbots-protect measured leakBps=300 over 100 probes last cycle, public-mempool measured 9400.',
   evidence: [
     { txHash: hashLike('evidence-a', 1), what: 'flashbots-protect probe, not observed in public mempool' },
     { txHash: hashLike('evidence-b', 2), what: 'public-mempool probe, leaked at submission block, sandwiched' },

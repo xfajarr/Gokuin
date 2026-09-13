@@ -6,8 +6,8 @@ pragma solidity ^0.8.26;
 ///         registry; resolution walks the chain of registries label-by-label, from the root
 ///         down, calling exactly these two functions at each level
 ///         (`UniversalResolverV2`'s traversal in `LibRegistry.findResolver`):
-///           `exactRegistry.getResolver(label)` — remember it if non-zero.
-///           `exactRegistry.getSubregistry(label)` — descend into it for the next label.
+///           `exactRegistry.getResolver(label)`: remember it if non-zero.
+///           `exactRegistry.getSubregistry(label)`: descend into it for the next label.
 ///         `getParent` is metadata only (used by `LibRegistry.findCanonicalName` to reconstruct
 ///         a registry's canonical DNS name) and is not consulted during resolution.
 /// @dev Verified against the authoritative source, `ensdomains/contracts-v2`
@@ -17,7 +17,7 @@ pragma solidity ^0.8.26;
 ///      (`contracts/src/universalResolver/libraries/LibRegistry.sol`). This file omits
 ///      `IRegistryEvents` (the real `IRegistry` also inherits that) because `RouteRegistry`
 ///      does not implement the ERC1155/`PermissionedRegistry` surface those events describe
-///      (`LabelRegistered`, `TokenRegenerated`, etc.) — see `RouteRegistry`'s own doc comment
+///      (`LabelRegistered`, `TokenRegenerated`, etc.): see `RouteRegistry`'s own doc comment
 ///      for why that is a deliberate, documented scope choice and not a guess.
 interface IRegistry {
     /// @notice Fetches the registry for a label.

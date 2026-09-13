@@ -18,7 +18,7 @@ contract RouteRegistryTest is Test {
 
     // ── test_OnlyScorerWritesENS ────────────────────────────────────────────
     // Asserts: a non-scorer `setScore` call MUST revert. This is the ENS track's
-    // proof — enforced by the contract, not promised in a README.
+    // proof, enforced by the contract, not promised in a README.
     function test_OnlyScorerWritesENS() public {
         registry.registerRoute(1, "mev-blocker");
 
@@ -27,7 +27,7 @@ contract RouteRegistryTest is Test {
         registry.setScore(1, "gokuin.leakBps", "42");
 
         // The legitimate scorer, meanwhile, succeeds and the record is actually
-        // resolvable — proving this isn't just a revert with no working path behind it.
+        // resolvable, proving this isn't just a revert with no working path behind it.
         vm.prank(scorer);
         registry.setScore(1, "gokuin.leakBps", "42");
 
@@ -61,14 +61,14 @@ contract RouteRegistryTest is Test {
         assertEq(registry.routeOfNode(node), 0);
     }
 
-    // An unregistered label must resolve to nothing — RouteRegistry only answers for labels it
+    // An unregistered label must resolve to nothing. RouteRegistry only answers for labels it
     // actually registered, not arbitrary strings.
     function test_GetResolverIsZeroForUnregisteredLabel() public view {
         assertEq(registry.getResolver("not-a-route"), address(0));
     }
 
     // IRegistry.getParent() is metadata ENSv2 tooling (LibRegistry.findCanonicalName) uses to
-    // reconstruct a registry's canonical DNS name — must point back at gokuin.eth's registry.
+    // reconstruct a registry's canonical DNS name, must point back at gokuin.eth's registry.
     function test_GetParentPointsAtEthRegistryAndGokuinLabel() public view {
         (IRegistry parent, string memory label) = registry.getParent();
         assertEq(address(parent), ethRegistry);

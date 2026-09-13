@@ -2,7 +2,7 @@
 // (computeExtracted, isLeaked, scoreRoute's bps rounding) must produce the
 // exact same numbers whether called directly from @gokuin/core or read back
 // through the live Elysia app's HTTP responses (GET /v1/routes, POST
-// /v1/select), with the subgraph mocked at the fetch boundary — the API layer
+// /v1/select), with the subgraph mocked at the fetch boundary, the API layer
 // must not silently redefine or drift from packages/core.
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { computeExtracted, isLeaked, type Observation } from '@gokuin/core'
@@ -16,7 +16,7 @@ process.env.MAINNET_RPC = 'http://127.0.0.1:8545'
 process.env.SEPOLIA_RPC = 'http://127.0.0.1:8545'
 // Bun loads the repo-root .env into process.env before tests run, so anything
 // the operator has configured leaks in. That made this suite start failing the
-// moment contracts were deployed and PROBE_LEDGER_ADDRESS was filled in — a test
+// moment contracts were deployed and PROBE_LEDGER_ADDRESS was filled in, a test
 // breaking because someone deployed is testing the developer's machine, not the
 // code. Clear the deployment-dependent keys so the dry-run assertions below
 // describe a fixed environment.

@@ -1,4 +1,4 @@
-// The routing decision behind POST /v1/select — PRD §7.2: "the single most
+// The routing decision behind POST /v1/select. PRD §7.2: "the single most
 // important endpoint... An agent must be able to explain its choice." Ranks
 // routes purely off subgraph-sourced RouteScore (score/read.ts), never off
 // SQLite, and always returns real tx hashes as evidence.
@@ -55,8 +55,8 @@ function buildReason(need: Need, winner: RouteScore, runnerUp?: RouteScore): str
       break
   }
   const comparison = runnerUp
-    ? ` — the runner-up, ${fmtRoute(runnerUp.route)}, scored worse on ${metric}.`
-    : ' — it is the only route with a measured record for this cycle.'
+    ? `: the runner-up, ${fmtRoute(runnerUp.route)}, scored worse on ${metric}.`
+    : ': it is the only route with a measured record for this cycle.'
   return `${headline}, the best measured ${metric} of the routes probed.${comparison}`
 }
 
@@ -71,7 +71,7 @@ export function createSelector(scoreReader: ScoreReader) {
     async pick(query: SelectQuery): Promise<Selection> {
       const routes = await scoreReader.allRoutes()
       if (!routes.length) {
-        throw new ScoreReadUnavailable('subgraph has no scored routes yet — no cycles have settled')
+        throw new ScoreReadUnavailable('subgraph has no scored routes yet, no cycles have settled')
       }
 
       const eligible = routes.filter(

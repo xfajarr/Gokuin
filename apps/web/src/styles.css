@@ -1,4 +1,4 @@
-/* Gokuin web — editorial instrument palette, adapted from spec/landing-design-spec.md.
+/* Gokuin web, editorial instrument palette, adapted from spec/landing-design-spec.md.
  *
  * Deliberate departure from the landing spec: this file does NOT use the
  * `html { font-size: clamp(0.72px, 0.069444vw, 1.30px) }` fixed-canvas rem
@@ -6,13 +6,13 @@
  * data application with unpredictable content (hashes, long route names,
  * variable row counts) that has to lay out correctly from a 380px phone to a
  * wide monitor. Sizing here uses ordinary rem/em/clamp() against a normal
- * 16px root instead. Everything else — palette, hairlines, square corners,
- * ghost crop-mark buttons, the hatch divider, Figtree + JetBrains Mono — is
+ * 16px root instead. Everything else, palette, hairlines, square corners,
+ * ghost crop-mark buttons, the hatch divider, Figtree + JetBrains Mono, is
  * taken from the spec.
  */
 
 :root {
-  /* ---- palette (light — matches the landing spec) ---- */
+  /* ---- palette (light, matches the landing spec) ---- */
   --bg: #efede8;
   --panel: #f2f0eb;
   --panel-2: #e7e2d5;
@@ -26,7 +26,7 @@
   --chev: #57574f;
   --plus: #d6d0c3;
 
-  /* single accent — used only for the attested/staged/live signal, never decoration */
+  /* single accent, used only for the attested/staged/live signal, never decoration */
   --accent: #8a4a14;
   --good: #3f6b34;
   --bad: #a23b28;
@@ -403,7 +403,7 @@ main {
 }
 
 .legend dt::after {
-  content: ' — ';
+  content: ': ';
   color: var(--muted);
 }
 
@@ -600,7 +600,7 @@ tr.row-staged:hover td {
   margin-bottom: 1.25rem;
 }
 
-/* Same shape as .sample-banner but semantic bad — a real failure on the
+/* Same shape as .sample-banner but semantic bad, a real failure on the
    console page, never a stand-in for sample data (see console.tsx). */
 .error-banner {
   display: flex;
@@ -1013,7 +1013,7 @@ label {
     gap: 0.75rem;
   }
   /* Drop the breadcrumb to its own full-width line instead of competing with
-     the nav links and theme toggle for a cramped single row — it still has
+     the nav links and theme toggle for a cramped single row, it still has
      to say where you are on a deep page (/probe/$id etc.) that isn't one of
      the three top-level links. */
   .here {

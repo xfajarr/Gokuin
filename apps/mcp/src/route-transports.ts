@@ -1,5 +1,5 @@
 // Submits a raw, already-signed transaction through the JSON-RPC endpoint that
-// backs a given route. Gokuin never holds keys and never builds transactions —
+// backs a given route. Gokuin never holds keys and never builds transactions :
 // the caller signs, we send it down the route their `need` selected.
 
 import { createPublicClient, http, type Hash } from 'viem'

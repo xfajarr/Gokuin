@@ -1,5 +1,5 @@
 // Elysia app: plugin composition, .listen(). Exports `App` for Eden Treaty
-// (apps/web, apps/mcp import this type for end-to-end types, no codegen —
+// (apps/web, apps/mcp import this type for end-to-end types, no codegen :
 // PRD §7.5).
 import { Elysia } from 'elysia'
 import { loadEnv } from './env'
@@ -53,7 +53,7 @@ export const app = new Elysia()
     subgraphConfigured: Boolean(env.SUBGRAPH_URL),
   }))
 
-// Only bind a real port when this file is the entrypoint — importing it from
+// Only bind a real port when this file is the entrypoint, importing it from
 // tests must not start a listening server.
 if (import.meta.main) {
   app.listen(env.PORT, () => {

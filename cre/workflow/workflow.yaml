@@ -21,7 +21,7 @@ private-settings:
     config-path: ./config.staging.json
     secrets-path: ../secrets.yaml
 simulation-settings:
-  # Local `cre workflow simulate` target — points at the fixture subgraph
+  # Local `cre workflow simulate` target, points at the fixture subgraph
   # server in ../simulation/, not a live one (see project.yaml comment).
   user-workflow:
     workflow-name: gokuin-scorer-simulation

@@ -1,22 +1,22 @@
-// Gokuin scoring workflow — Chainlink CRE Confidential Workflow.
+// Gokuin scoring workflow. Chainlink CRE Confidential Workflow.
 //
 // What happens inside the enclave (handlerInTee, see initWorkflow below):
 //   1. Fetch the ONE secret this workflow ever touches: the aggregation weight
 //      vector (`SCORE_WEIGHTS`). This is the sensitive input. It never appears
-//      in a log line, a report field, or a return value — only ITS OUTPUT
+//      in a log line, a report field, or a return value, only ITS OUTPUT
 //      (the `composite` number it produces) crosses back out.
 //   2. Fetch the public rows (route aggregates) from the ProbeLedger subgraph.
-//      Nothing here is secret — anyone can run this same query and get the
+//      Nothing here is secret, anyone can run this same query and get the
 //      same rows. See `docs/credibility.md` / cre/README.md "rows public,
 //      weights private".
 //   3. Combine the two, per route, into `leakBps / sandwichBps / medianDelay /
-//      composite / probes / lastCycle` — mirrors packages/core/src/metrics.ts
+//      composite / probes / lastCycle`: mirrors packages/core/src/metrics.ts
 //      `scoreRoute()`, extended with the weighted `composite` term.
 //   4. Cross back to the DON (`usingTheDons()`) with a report encoding exactly
 //      `Scorer.submitScore`'s 8 parameters, one report per route.
 //   5. If a scorer/receiver address is configured, write it on chain. If not
 //      (e.g. this simulation run, before contracts are deployed), the report
-//      is still built and logged — nothing is broadcast, which is the correct,
+//      is still built and logged, nothing is broadcast, which is the correct,
 //      honest evidence for a not-yet-deployed target. See README "why the
 //      write step still runs".
 import {
@@ -36,14 +36,14 @@ import { z } from 'zod'
 
 // ─── Config ────────────────────────────────────────────────────────────────
 // Nothing here is secret. `weightsSecretId` is a NAME (a pointer to a Vault
-// secret), never a value — the value is only ever materialised inside the
+// secret), never a value, the value is only ever materialised inside the
 // enclave via `runtime.getSecrets`.
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 /** One probed route. `id` mirrors packages/core/src/types.ts ROUTE_IDS
  *  (the on-chain routeId ProbeLedger/Scorer use); `label` is the subgraph
  *  Route entity id (see subgraph/probe-ledger-subgraph/schema.graphql). Both
- *  public, positional and never reordered — same constraint the contracts
+ *  public, positional and never reordered, same constraint the contracts
  *  and the deploy script already carry. */
 export const RouteConfigSchema = z.object({
 	id: z.number().int().min(0).max(0xffffffff),
@@ -64,12 +64,12 @@ export const configSchema = z.object({
 	weightsSecretId: z.string().default('SCORE_WEIGHTS'),
 	routes: z.array(RouteConfigSchema).min(1),
 	// Public normalisation constant: a median delay at or above this many blocks
-	// scores as "worst possible" on the delay axis. Not secret — changing it
+	// scores as "worst possible" on the delay axis. Not secret, changing it
 	// changes the scale, not who wins, and it is visible in this file.
 	delayCapBlocks: z.number().int().positive().default(32),
 	chainSelectorName: z.string().default('ethereum-testnet-sepolia'),
 	// The deployed `Scorer`-reachable receiver (see README "the onReport gap").
-	// Zero address = compute and log everything, write nothing — the mode this
+	// Zero address = compute and log everything, write nothing, the mode this
 	// repo's own contracts are in today (no Sepolia deployment yet).
 	scorerAddress: z
 		.string()
@@ -83,7 +83,7 @@ export type Config = z.infer<typeof configSchema>
 // ─── Secret weight vector ──────────────────────────────────────────────────
 // The one sensitive input. Supplied as a single Vault secret whose VALUE is a
 // JSON object of three positive integers, e.g. `{"leakWeightBps":5000,...}`.
-// See cre/weights.example.json for the (obviously placeholder) shape — that
+// See cre/weights.example.json for the (obviously placeholder) shape, that
 // file is documentation only and is never read by this workflow.
 export const WeightsSchema = z.object({
 	leakWeightBps: z.number().int().positive(),
@@ -93,7 +93,7 @@ export const WeightsSchema = z.object({
 export type Weights = z.infer<typeof WeightsSchema>
 
 /** Parse the weight vector out of the raw secret value. Returns null on
- *  anything malformed — never throws with the raw value in the message, so a
+ *  anything malformed, never throws with the raw value in the message, so a
  *  parse failure can't leak a partial secret through an error string. */
 export const parseWeights = (raw: string | undefined): Weights | null => {
 	if (raw === undefined || raw === '') return null
@@ -158,7 +158,7 @@ export const parseRouteStats = (raw: SubgraphRoute): RouteStats => ({
 /** Fetch every configured route's stats in one HTTP round trip. Runs inside
  *  the enclave (it is called from `runScoring`, which only ever executes
  *  inside `handlerInTee`), but nothing about the query or its answer is
- *  secret — anyone can run the same query against the same public subgraph
+ *  secret, anyone can run the same query against the same public subgraph
  *  and get the same rows. See README "rows public, weights private". */
 export type FetchStatsFn = (
 	runtime: TeeRuntime<Config>,
@@ -189,7 +189,7 @@ export const fetchStatsFromSubgraph: FetchStatsFn = (runtime, http, config) => {
 	return config.routes.map((_, i) => parseRouteStats(parsed.data?.[`r${i}`] ?? null))
 }
 
-// ─── Composite scoring — the ONLY place the secret weight vector is used ───
+// ─── Composite scoring, the ONLY place the secret weight vector is used ───
 // Everything upstream (rows) and downstream (the ABI encoding, the write) is
 // plain public-data plumbing. This function is the confidential computation:
 // it is the only code in the whole workflow that ever holds `weights` and a
@@ -245,11 +245,11 @@ export const scoreRoute = (
 
 /** Evidence pointer: the exact subgraph query anyone can re-run to reproduce
  *  the rows this score was computed from (PRD §6.3 `evidenceURI`). Points at
- *  public data only — never at the weights. */
+ *  public data only, never at the weights. */
 export const evidenceUriFor = (subgraphUrl: string, route: RouteConfig, lastCycle: number): string =>
 	`${subgraphUrl}?routeLabel=${encodeURIComponent(route.label)}&lastCycle=${lastCycle}`
 
-// ─── Report encoding — must match Scorer.submitScore's 8 parameters exactly ─
+// ─── Report encoding, must match Scorer.submitScore's 8 parameters exactly ─
 // contracts/src/Scorer.sol:
 //   submitScore(uint32 routeId, uint16 leakBps, uint16 sandwichBps,
 //               uint16 medianDelay, uint16 composite, uint32 probes,
@@ -308,7 +308,7 @@ export const runScoring = (
 	const config = runtime.config
 
 	// ONE getSecrets call for the whole execution (CRE workflows may call
-	// getSecrets once per execution) — the secret weight vector, and nothing
+	// getSecrets once per execution): the secret weight vector, and nothing
 	// else. This is the sensitive input this Confidential Workflow exists to
 	// protect.
 	const secrets = runtime.getSecrets([{ id: config.weightsSecretId }]).result()
@@ -319,7 +319,7 @@ export const runScoring = (
 
 	// Public rows. Fetched from inside the enclave (this function only ever
 	// runs inside handlerInTee), but the query and the answer are both public
-	// — see README "rows public, weights private".
+	//: see README "rows public, weights private".
 	const http = new cre.capabilities.HTTPClient()
 	const stats = fetchStats(runtime, http, config)
 
@@ -331,8 +331,8 @@ export const runScoring = (
 
 	// Log lines may leave the enclave in the simulator, for debugging only
 	// ("During real execution, user logs for this trigger will not be
-	// visible, and will not leave the TEE" — printed by `cre workflow
-	// simulate` itself). Only the derived, public-safe numbers are logged —
+	// visible, and will not leave the TEE": printed by `cre workflow
+	// simulate` itself). Only the derived, public-safe numbers are logged :
 	// never `weights`.
 	for (const { score } of outputs) {
 		runtime.log(
@@ -368,7 +368,7 @@ export const runScoring = (
 			summaries.push(`route ${score.routeId}: composite=${score.composite} tx=${receipt.txHash}`)
 		} else {
 			// No scorer/receiver configured (this repo's contracts aren't deployed
-			// yet) — the report is still built, still logged, nothing is broadcast.
+			// yet): the report is still built, still logged, nothing is broadcast.
 			summaries.push(`route ${score.routeId}: composite=${score.composite} (report built, not broadcast)`)
 		}
 	}
@@ -382,7 +382,7 @@ export function initWorkflow(config: Config) {
 	const cronTrigger = new cre.capabilities.CronCapability()
 
 	return [
-		// `cre.handlerInTee` — not `cre.handler`. The third argument is the
+		// `cre.handlerInTee`: not `cre.handler`. The third argument is the
 		// TeeConstraint: AWS Nitro in us-west-2 is the only registered TEE today
 		// (same constraint the reference Confidential Workflow example uses).
 		cre.handlerInTee(cronTrigger.trigger({ schedule: config.schedule }), onCronTrigger, [

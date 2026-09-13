@@ -56,7 +56,7 @@ contract ProbeLedgerTest is Test {
 
     // ── test_OnlyProberCanRecord ────────────────────────────────────────────
     // Asserts: any sender other than the immutable `prober` reverts `NotProber`, for
-    // every write path — commit, record and reveal alike.
+    // every write path, commit, record and reveal alike.
     function test_OnlyProberCanRecord() public {
         vm.prank(prober);
         ledger.commitCycle(1, keccak256("sched-1"), 1);
@@ -158,7 +158,7 @@ contract ProbeLedgerTest is Test {
     // ── test_RowPacking ─────────────────────────────────────────────────────
     // Gas snapshot + storage-slot assertion. `Row`'s field widths (fixed by
     // `packages/core/src/types.ts::Row`, which this struct mirrors field-for-field)
-    // total 111 bytes — more than three 32-byte slots (96 bytes) can hold at any
+    // total 111 bytes, more than three 32-byte slots (96 bytes) can hold at any
     // packing, so the PRD's "three slots" note is unreachable at these widths. This
     // test asserts the layout is nonetheless as tight as those widths allow: exactly
     // four 32-byte slots, with the fifth slot after a single row entirely untouched.

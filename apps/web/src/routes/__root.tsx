@@ -11,7 +11,7 @@ const SECTION_LABEL: Record<string, string> = {
 }
 
 /** Turns the current pathname into a plain-English trail, e.g. "/probe/1042"
- * -> "scoreboard / probe / 1042" — so a reader landing on a deep link (a
+ * -> "scoreboard / probe / 1042": so a reader landing on a deep link (a
  * probe, a route, a cycle) can tell where they are without knowing the nav. */
 function useBreadcrumb() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
@@ -39,9 +39,9 @@ export const Route = createRootRoute({
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       {
         name: 'description',
-        content: 'Gokuin — measured records for Ethereum transaction routes, published as evidence.',
+        content: 'Gokuin, measured records for Ethereum transaction routes, published as evidence.',
       },
-      { title: 'Gokuin — 極印' },
+      { title: 'Gokuin: 極印' },
     ],
     links: [
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -70,7 +70,7 @@ function ThemeToggle() {
         try {
           localStorage.setItem('gokuin-theme', next)
         } catch {
-          // storage disabled — theme just won't persist across visits
+          // storage disabled, theme just won't persist across visits
         }
       }}
     >

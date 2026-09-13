@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Landing page — editorial developer-product page.
+   Landing page, editorial developer-product page.
    Reproduction of spec/landing-design-spec.md. Every number here maps to a
    line in that file; do not "improve" the rem scale or the token values.
    ========================================================================== */
@@ -755,7 +755,7 @@ h1 {
 }
 
 /* ==========================================================================
-   Entrance pre-states — only while JS has flagged the page as animatable.
+   Entrance pre-states, only while JS has flagged the page as animatable.
    Everything here is overridden by inline styles once the WAAPI timeline
    finishes; hatches, hairlines, the plus grid and logos are never touched.
    ========================================================================== */
@@ -817,7 +817,7 @@ h1 {
 }
 
 /* ==========================================================================
-   Breakpoints — the only ones the spec defines.
+   Breakpoints, the only ones the spec defines.
    ========================================================================== */
 
 @media (max-width: 1040px) {

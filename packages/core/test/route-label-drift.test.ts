@@ -18,7 +18,7 @@ const AS_MAPPING = new URL(
 
 function parseAsLabels(src: string): string[] {
   const m = src.match(/const ROUTE_LABELS:\s*string\[\]\s*=\s*\[([\s\S]*?)\]/)
-  if (!m) throw new Error('ROUTE_LABELS not found — did the AS mapping move or get renamed?')
+  if (!m) throw new Error('ROUTE_LABELS not found, did the AS mapping move or get renamed?')
   return [...m[1].matchAll(/"([^"]+)"/g)].map(x => x[1])
 }
 

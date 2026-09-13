@@ -1,5 +1,5 @@
 // The operator's budget is $10. That has to be a property of the code, not of
-// their attention — mainnet gas has moved 500x before, and nobody watches a
+// their attention, mainnet gas has moved 500x before, and nobody watches a
 // scheduled cycle at 3am.
 //
 // Two brakes, tested separately because they fail differently: a cumulative
@@ -53,7 +53,7 @@ describe('gas ceiling', () => {
     await expect(assertWithinBudget(client('50'), stmts('0', '0'), env, 1n)).rejects.toBeInstanceOf(GasTooExpensive)
   })
 
-  it('is checked before the spend cap — a spike is the more urgent stop', async () => {
+  it('is checked before the spend cap, a spike is the more urgent stop', async () => {
     // both would fail here; the gas error is the one that tells you to wait
     // rather than to give up
     await expect(assertWithinBudget(client('50'), stmts('0.004', '0'), env, eth('1'))).rejects.toBeInstanceOf(GasTooExpensive)
