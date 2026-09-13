@@ -8,7 +8,7 @@ cd "$(dirname "$0")/.."
 [ -f .env ] || { echo "no .env at repo root — copy .env.example and fill it in"; exit 1; }
 set -a; . ./.env; set +a
 
-for v in SEPOLIA_RPC DEPLOYER_PK PROBER_ADDRESS CRE_FORWARDER ENS_REGISTRY; do
+for v in SEPOLIA_RPC DEPLOYER_PK PROBER_ADDRESS CRE_FORWARDER ETH_REGISTRY; do
   [ -n "${!v:-}" ] || { echo "missing $v in .env — see .env.example"; exit 1; }
 done
 

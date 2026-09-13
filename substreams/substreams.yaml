@@ -8,21 +8,6 @@ package:
     Generic single-block sandwich-attack detector for Ethereum mainnet. Takes any
     address — it hardcodes none — so anyone can point it at their own wallet and
     ask whether they have been sandwiched.
-  doc: |
-    Generic sandwich-attack detector for Ethereum mainnet.
-
-    Detects front-run (A) / victim (V) / back-run (B) triples within a
-    single block, on a single Uniswap V2 or V3 pool, where:
-      - A is at transaction index i, V at j > i, B at k > j
-      - A, V, B all touch the same pool address
-      - A and B swap in OPPOSITE directions
-      - A and B have distinct transaction hashes
-      - A.from == B.from (the attacker)
-
-    This module does NOT hardcode any address. It emits every sandwich it
-    finds in a block; a consumer filters the output stream by `attacker`
-    or `victim` to ask "was I sandwiched?" for any wallet whatsoever.
-
 imports:
   # Only needed by `graph_out`, the small adapter module that turns our
   # domain-specific Sandwiches into graph-node EntityChanges. `map_sandwiches`

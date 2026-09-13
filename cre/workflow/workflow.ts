@@ -53,7 +53,7 @@ export type RouteConfig = z.infer<typeof RouteConfigSchema>
 
 export const configSchema = z.object({
 	schedule: z.string(),
-	subgraphUrl: z.string().url(),
+	subgraphUrl: z.string().min(1),
 	weightsSecretId: z.string().default('SCORE_WEIGHTS'),
 	routes: z.array(RouteConfigSchema).min(1),
 	// Public normalisation constant: a median delay at or above this many blocks

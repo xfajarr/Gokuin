@@ -41,7 +41,7 @@ cast wallet address --private-key $PROBER_PK    # -> PROBER_ADDRESS
 ```
 
 `CRE_FORWARDER` is Chainlink's own Forwarder on Sepolia, from the CRE docs.
-`ENS_REGISTRY` defaults to the long-standing ENS registry address in `.env.example`.
+`ETH_REGISTRY` defaults to the long-standing ENS registry address in `.env.example`.
 
 **Wiring, because getting it backwards fails silently:**
 
@@ -62,42 +62,34 @@ subnames until it owns the parent name, and folding that into the deploy meant o
 revert rolled back all four contract deployments — which is what happened the first
 time this ran.
 
-## 1b. Own the parent name, then register the routes
+## 1b. Point gokuin.eth at RouteRegistry
 
-`RouteRegistry.registerRoute` calls `setSubnodeRecord`, which the ENS registry only
-permits from the owner of the parent node. Right now nobody owns `gokuin.eth` on
-Sepolia:
-
-```bash
-cast call $ENS_REGISTRY "owner(bytes32)(address)" $PARENT_NODE --rpc-url $SEPOLIA_RPC
-# 0x0000000000000000000000000000000000000000  <- this is why registerRoute reverts
-```
-
-1. Register `gokuin.eth` on Sepolia — app.ens.domains works, switch the network to
-   Sepolia and pay with Sepolia ETH.
-2. Hand the node to the contract:
+`RouteRegistry` **is** the ENSv2 subregistry for `gokuin.eth`. ENSv2 is hierarchical —
+a name delegates its namespace to a registry contract, rather than the flat v1 table
+where you granted subnode rights. One call wires it, from the wallet that owns the name:
 
 ```bash
-cast send $ENS_REGISTRY "setOwner(bytes32,address)" \
-  $PARENT_NODE $ROUTE_REGISTRY_ADDRESS \
-  --rpc-url $SEPOLIA_RPC --private-key $DEPLOYER_PK
+source .env
+cast send $ETH_REGISTRY "setSubregistry(uint256,address)" \
+  $(cast keccak "gokuin") $ROUTE_REGISTRY_ADDRESS \
+  --private-key $DEPLOYER_PK --rpc-url $SEPOLIA_RPC
 ```
 
-3. `bun run register:routes`
+`ROUTE_REGISTRY_ADDRESS` comes from the deploy output in step 1 — put it in `.env`
+first. `cast keccak "gokuin"` is the labelhash; `setSubregistry` accepts a labelhash,
+token ID or EAC resource interchangeably, so the labelhash is fine here.
 
-The script checks parent ownership first and prints who actually owns it rather
-than letting you pay gas for a raw EVM revert.
+Do **not** use `setOwner` or `setSubnodeRecord`. Those are ENS v1 and do not exist in
+ENSv2 — an earlier version of this runbook said otherwise and the deploy reverted.
 
-**Worked when:** three subnames registered, and
-`flashbots-protect.gokuin.eth` resolves on Sepolia.
-
-Record them in `.env`: `PROBE_LEDGER_ADDRESS`, `ROUTE_REGISTRY_ADDRESS`, `SCORER_ADDRESS`.
-
-Then regenerate ABIs so the API cannot drift from what you just deployed:
+Confirm:
 
 ```bash
-cd .. && bun run abi && bun test apps/api
+cast call $ETH_REGISTRY "getSubregistry(string)(address)" "gokuin" --rpc-url $SEPOLIA_RPC
+# must return your RouteRegistry address, not 0x0
 ```
+
+**Worked when:** that call returns `$ROUTE_REGISTRY_ADDRESS`.
 
 ## 2. Register the routes
 
