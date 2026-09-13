@@ -30,6 +30,8 @@ contract DeployTest is Test {
     function test_ScriptRunsAndPredictionsHold() public {
         // Both `require`s inside the script assert the predicted addresses matched.
         Deploy.Deployed memory d = script.deploy(address(script));
+        assertTrue(address(d.ledger) != address(0));
+        assertTrue(address(d.adapter) != address(0));
     }
 
     function test_ScorerPointsAtTheAdapterNotChainlinksForwarder() public {
@@ -57,11 +59,11 @@ contract DeployTest is Test {
                 assertEq(d.ledger.prober(), PROBER);
     }
 
-    function test_RoutesRegisterInTheirOnChainIdOrder() public {
+    function test_DeployDoesNotRegisterRoutes() public {
+        // Registration needs an owner the contracts cannot grant themselves, and a
+        // revert there used to roll back all four deployments. It lives in
+        // RegisterRoutes now; the deploy must stay independent of ENS state.
         Deploy.Deployed memory d = script.deploy(address(script));
-                // routeId is positional and permanent — see packages/core/src/types.ts ROUTE_IDS.
-        assertTrue(d.registry.nodeOf(0) != bytes32(0), "public-mempool must be routeId 0");
-        assertTrue(d.registry.nodeOf(1) != bytes32(0), "flashbots-protect must be routeId 1");
-        assertTrue(d.registry.nodeOf(2) != bytes32(0), "mev-blocker must be routeId 2");
+        assertEq(d.registry.nodeOf(0), bytes32(0), "deploy must not touch ENS");
     }
 }

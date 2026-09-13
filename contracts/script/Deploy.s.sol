@@ -86,11 +86,13 @@ contract Deploy is Script {
         require(address(adapter) == predictedAdapter, "adapter address prediction drifted");
         require(scorer.creForwarder() == address(adapter), "Scorer must point at the adapter");
 
-        for (uint32 i = 0; i < ROUTE_LABELS.length; i++) {
-            bytes32 node = registry.registerRoute(i, ROUTE_LABELS[i]);
-            console.log("Registered route", ROUTE_LABELS[i]);
-            console.logBytes32(node);
-        }
+        console.log("");
+        console.log("Routes are NOT registered yet. RouteRegistry cannot create subnames");
+        console.log("until it owns the parent node. Next:");
+        console.log("  1. register gokuin.eth on Sepolia");
+        console.log("  2. cast send <ENS_REGISTRY> 'setOwner(bytes32,address)' <PARENT_NODE> <RouteRegistry>");
+        console.log("  3. bun run register:routes");
+        console.log("");
 
         return Deployed({ledger: ledger, registry: registry, scorer: scorer, adapter: adapter});
     }

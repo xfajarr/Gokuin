@@ -55,8 +55,41 @@ only ever calls `onReport(bytes,bytes)`; `Scorer` takes eight typed arguments. P
 reverting at deploy time to tell you. `contracts/test/Deploy.t.sol` asserts this
 wiring, so the script cannot ship mis-wired.
 
-**Worked when:** four addresses printed, and `forge test --match-contract DeployTest`
-passes against them.
+**Worked when:** four addresses printed. Copy them into `.env`.
+
+The deploy deliberately does **not** register routes. `RouteRegistry` cannot create
+subnames until it owns the parent name, and folding that into the deploy meant one
+revert rolled back all four contract deployments — which is what happened the first
+time this ran.
+
+## 1b. Own the parent name, then register the routes
+
+`RouteRegistry.registerRoute` calls `setSubnodeRecord`, which the ENS registry only
+permits from the owner of the parent node. Right now nobody owns `gokuin.eth` on
+Sepolia:
+
+```bash
+cast call $ENS_REGISTRY "owner(bytes32)(address)" $PARENT_NODE --rpc-url $SEPOLIA_RPC
+# 0x0000000000000000000000000000000000000000  <- this is why registerRoute reverts
+```
+
+1. Register `gokuin.eth` on Sepolia — app.ens.domains works, switch the network to
+   Sepolia and pay with Sepolia ETH.
+2. Hand the node to the contract:
+
+```bash
+cast send $ENS_REGISTRY "setOwner(bytes32,address)" \
+  $PARENT_NODE $ROUTE_REGISTRY_ADDRESS \
+  --rpc-url $SEPOLIA_RPC --private-key $DEPLOYER_PK
+```
+
+3. `bun run register:routes`
+
+The script checks parent ownership first and prints who actually owns it rather
+than letting you pay gas for a raw EVM revert.
+
+**Worked when:** three subnames registered, and
+`flashbots-protect.gokuin.eth` resolves on Sepolia.
 
 Record them in `.env`: `PROBE_LEDGER_ADDRESS`, `ROUTE_REGISTRY_ADDRESS`, `SCORER_ADDRESS`.
 
