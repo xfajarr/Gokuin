@@ -18,7 +18,7 @@
     "verify": "bun run verify:ts && bun run verify:contracts && bun run verify:build",
     "verify:ts": "bun test",
     "verify:contracts": "cd contracts && forge build && forge test",
-    "verify:build": "bun --filter @gokuin/web typecheck && bun --filter @gokuin/web build && bun --filter @gokuin/mcp typecheck && bun --filter @gokuin/api typecheck && bun --filter gokuin-cre-scorer typecheck",
+    "verify:build": "bun --filter @gokuin/web typecheck && bun --filter @gokuin/web build && bun --filter @gokuin/mcp typecheck && bun --filter @gokuin/api typecheck && bun --filter gokuin-cre-scorer typecheck && bun --filter @gokuin/landing typecheck && bun --filter @gokuin/landing build",
     "abi": "cd contracts && forge build && cd .. && bun run --filter @gokuin/abi gen",
     "docs": "bun run scripts/gen-metrics-doc.ts",
     "deploy:sepolia": "bash scripts/deploy-sepolia.sh",
