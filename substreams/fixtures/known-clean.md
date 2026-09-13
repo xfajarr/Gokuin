@@ -1,49 +1,45 @@
-# Fixture: known clean block
+# Fixture: negative control
 
-A block that provably contains **no** sandwich in the pool of interest --
-the negative control for `known-sandwich.md`.
+> **Corrected after running it.** This file previously described block 22450094 as
+> "clean" and the runbook said the module "must find nothing". That is wrong, and
+> following it would make a correct module look broken.
+>
+> Block 22450094 contains **two real sandwiches**, both by attacker
+> `0xc38e00ac5ed8859f18f4e9017fa2b3d3e1f65f40`, in pools
+> `0xce252c91e33c637054d8cdac7c42446a0ebd7ac3` and
+> `0x4b3250ea0ca819a2079187f1345de2d8febe1f1e`. A single front-run at index 0 and
+> back-run at index 3 bracket two different victims across two pools — legitimate,
+> and the module is right to report both.
+>
+> What is actually clean is the **fixture pool** `0x8d02988296949cd054623802c1115973a9afe307`,
+> which emits no swap in this block. That is the claim the negative control makes.
 
-## Identity
+## The assertion
 
-| Field | Value |
-|---|---|
-| Chain | Ethereum mainnet |
-| Block | **22450094** (the block immediately AFTER the known-sandwich fixture, same pool) |
-| Pool of interest | `0x8d02988296949cd054623802c1115973a9afe307` (Uniswap V2 WETH/RATO) |
+Run the module over block 22450094 and assert:
 
-## Why this is clean
+- **no detection carries `pool == 0x8d02988296949cd054623802c1115973a9afe307`**
 
-The pool emits **zero** logs at all in this block -- no `Swap`, no
-`Mint`/`Burn`/`Sync`, nothing:
+Not "no detections at all". The module is deliberately generic — it scans every
+pool in the block and hardcodes no address — so unrelated sandwiches elsewhere in
+the same block are expected output, not noise.
 
-```bash
-RPC=https://eth.drpc.org
-cast logs --rpc-url $RPC --from-block 22450094 --to-block 22450094 \
-  --address 0x8d02988296949cd054623802c1115973a9afe307 --json
-# -> []
+Verified live against `mainnet.eth.streamingfast.io`:
+
+```
+$ substreams run ./sandwich-detect-v0.1.0.spkg map_sandwiches \
+    -e mainnet.eth.streamingfast.io:443 -s 22450094 -t +1
+
+detections: 2
+  pool=0xce252c91e33c637054d8cdac7c42446a0ebd7ac3  idx 0/1/3  attacker=0xc38e00ac
+  pool=0x4b3250ea0ca819a2079187f1345de2d8febe1f1e  idx 0/2/3  attacker=0xc38e00ac
 ```
 
-Zero swaps on the pool trivially means zero sandwiches on the pool: the
-heuristic needs at least three swap legs on the same pool in the same
-block (A, V, B) to fire, and there are none. This is the strongest
-possible "no sandwich" argument -- it doesn't rely on judgment calls about
-what does or doesn't count, only on the absence of any candidate
-transactions whatsoever.
+Neither is the fixture pool. The negative control holds.
 
-(For completeness: block 22450092, the block immediately BEFORE the
-sandwich, is equally clean by the same test -- the pool was quiet on both
-sides of the attack block.)
+## Why a pool-scoped control is the right one
 
-## How to reproduce
-
-```bash
-make run-clean   # substreams run ... map_sandwiches -s 22450094 -t +1
-```
-
-**Expected `map_sandwiches` output for block 22450094:** an empty
-`Sandwiches.items` list (the module may still emit `Sandwich` entries for
-*other* pools that happen to be sandwiched in this same block by
-coincidence -- that's fine and expected, since the module is generic and
-scans every pool, not just the one in this fixture. What must NOT appear
-is any `Sandwich` whose `pool` field is
-`0x8d02988296949cd054623802c1115973a9afe307`).
+A block-scoped "must be empty" assertion only stays true while nobody sandwiches
+anything anywhere in that block — which is not a property of the module under test.
+Scoping it to the pool tests what the fixture is actually about: that the detector
+does not invent a triple where the pool was quiet.

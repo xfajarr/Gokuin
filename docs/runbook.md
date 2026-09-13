@@ -128,12 +128,16 @@ Needs a free Substreams token (streamingfast.io, pinax.network or thegraph.marke
 in `SUBSTREAMS_API_TOKEN`:
 
 ```bash
-export SUBSTREAMS_API_TOKEN=...
-substreams run ./sandwich-detect-v0.1.0.spkg map_sandwiches \
-  -e $SUBSTREAMS_ENDPOINT -s 22450093 -t +1   # must find the sandwich
-substreams run ./sandwich-detect-v0.1.0.spkg map_sandwiches \
-  -e $SUBSTREAMS_ENDPOINT -s 22450094 -t +1   # must find nothing
+export SUBSTREAMS_API_KEY=...      # a StreamingFast server_… key works directly
+make verify-fixtures
 ```
+
+That asserts both fixtures for you. The negative one is **pool-scoped**, not
+block-scoped: block 22450094 does contain two real sandwiches in other pools, and
+the module is right to report them — it is generic by design. What must be absent
+is any detection in the fixture pool `0x8d0298…e307`, which is quiet in that block.
+An earlier version of this runbook said "must find nothing", which would have made
+a correct module look broken.
 
 ## 4. Deploy both subgraphs
 

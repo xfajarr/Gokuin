@@ -39,3 +39,16 @@ protogen: ## (Optional) regenerate Rust bindings from proto/*.proto via the subs
 clean:
 	cargo clean
 	rm -f $(PKG)
+
+FIXTURE_POOL := 0x8d02988296949cd054623802c1115973a9afe307
+
+verify-fixtures: pack ## Assert both fixtures. Needs SUBSTREAMS_API_KEY.
+	@echo "→ 22450093 must detect the fixture-pool sandwich"
+	@substreams run $(PKG) map_sandwiches -e $(ENDPOINT) -s 22450093 -t +1 2>/dev/null \
+	  | grep -q '$(FIXTURE_POOL)' \
+	  && echo "  ✓ found" || { echo "  ✗ MISSING — detector regressed"; exit 1; }
+	@echo "→ 22450094 must NOT detect anything in the fixture pool"
+	@echo "   (other pools in that block DO contain sandwiches — see fixtures/known-clean.md)"
+	@substreams run $(PKG) map_sandwiches -e $(ENDPOINT) -s 22450094 -t +1 2>/dev/null \
+	  | grep -q '$(FIXTURE_POOL)' \
+	  && { echo "  ✗ FALSE POSITIVE in a quiet pool"; exit 1; } || echo "  ✓ clean"
