@@ -92,7 +92,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <header className="topnav">
             <div className="topnav-inner">
               <Link to="/" className="brand">
-                <span className="mark">極印</span> gokuin
+                <img src="/image/gokuin-icon-nav.png" alt="" className="brand-icon" />
+                gokuin
               </Link>
               <nav className="navlinks">
                 <Link to="/">scoreboard</Link>

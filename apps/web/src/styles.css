@@ -203,9 +203,11 @@ p {
   letter-spacing: -0.01em;
 }
 
-.brand .mark {
-  font-family: var(--font-mono);
-  color: var(--accent);
+.brand-icon {
+  width: 1.4em;
+  height: 1.4em;
+  display: block;
+  object-fit: contain;
 }
 
 .navlinks {
