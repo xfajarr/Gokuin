@@ -68,16 +68,21 @@ time this ran.
 a name delegates its namespace to a registry contract, rather than the flat v1 table
 where you granted subnode rights. One call wires it, from the wallet that owns the name:
 
+Use the command the deploy printed — it carries the **live token ID**, fetched from
+`ETHRegistry.getTokenId`. Do not substitute `cast keccak "gokuin"`: the ERC1155 token
+ID is not the labelhash. `LibLabel.withVersion` replaces its lower 32 bits with a
+per-name version counter, so the two are different numbers and only the live one is
+guaranteed to address the entry you own.
+
 ```bash
 source .env
+TOKEN_ID=$(cast call $ETH_REGISTRY "getTokenId(uint256)(uint256)" \
+  $(cast keccak "gokuin") --rpc-url $SEPOLIA_RPC)
+
 cast send $ETH_REGISTRY "setSubregistry(uint256,address)" \
-  $(cast keccak "gokuin") $ROUTE_REGISTRY_ADDRESS \
+  $TOKEN_ID $ROUTE_REGISTRY_ADDRESS \
   --private-key $DEPLOYER_PK --rpc-url $SEPOLIA_RPC
 ```
-
-`ROUTE_REGISTRY_ADDRESS` comes from the deploy output in step 1 — put it in `.env`
-first. `cast keccak "gokuin"` is the labelhash; `setSubregistry` accepts a labelhash,
-token ID or EAC resource interchangeably, so the labelhash is fine here.
 
 Do **not** use `setOwner` or `setSubnodeRecord`. Those are ENS v1 and do not exist in
 ENSv2 — an earlier version of this runbook said otherwise and the deploy reverted.
