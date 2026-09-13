@@ -29,7 +29,7 @@ that lands after dispatch proves nothing at all.
 | `packages/abi` | generated | typed ABIs from `forge build`. Never hand-written |
 | `contracts/` | Solidity, Sepolia | `ProbeLedger`, `RouteRegistry` (ENSv2), `Scorer` |
 | `substreams/` | Rust → WASM | `sandwich-detect`, generic over any address |
-| `subgraph/` | AssemblyScript | two subgraphs — see below |
+| `subgraph/` | AssemblyScript | two subgraphs: see below |
 | `apps/api` | Bun + ElysiaJS | cycle orchestration, observation ingest, scoring reads |
 | `apps/listener` | Bun | standalone mempool watcher, one process per region |
 | `apps/web` | TanStack Start | scoreboard, probe detail, method, console |
@@ -40,7 +40,7 @@ that lands after dispatch proves nothing at all.
 
 ### Probes on mainnet, contracts on Sepolia
 
-A sandwich on a testnet proves nothing — there are no searchers there to do the
+A sandwich on a testnet proves nothing, there are no searchers there to do the
 sandwiching, and a measurement of an empty market measures nothing. Probes
 therefore run on **mainnet**.
 
@@ -67,10 +67,10 @@ no product. That disagreement is made to fail a test rather than reach productio
 
 Two constants cannot be imported and so are duplicated. Both are guarded:
 
-- the **ABI** — generated from `forge build`, with `apps/api/test/abi-drift.test.ts`
+- the **ABI**: generated from `forge build`, with `apps/api/test/abi-drift.test.ts`
   encoding every ledger write and explicitly rejecting the old signature that
   already drifted here once
-- the **routeId → label map** — restated in AssemblyScript because AS cannot import
+- the **routeId → label map**: restated in AssemblyScript because AS cannot import
   TypeScript, with `packages/core/test/route-label-drift.test.ts` reading the AS
   source and asserting agreement
 
@@ -83,7 +83,7 @@ and makes the whole scoreboard wrong with no symptom.
 `apps/api/src/score/read.ts` queries the subgraph over GraphQL and throws
 `ScoreReadUnavailable` if it cannot. It does not fall back to the local database.
 
-SQLite holds operational state — probes, observations, funding — and nothing that
+SQLite holds operational state (probes, observations, funding) and nothing that
 appears on the scoreboard. Unset `SUBGRAPH_URL` and `/v1/routes` returns 503 with
 *"no Graph, no scores"*.
 
@@ -96,8 +96,8 @@ Forced by GIP-0053: a subgraph with a `substreams` dataSource may have only that
 single dataSource. Mainnet sandwich detection therefore cannot share a manifest
 with the Sepolia `ProbeLedger` contract datasource.
 
-- `subgraph/sandwich-subgraph` — substreams datasource, mainnet, `Sandwich` entities
-- `subgraph/probe-ledger-subgraph` — `ethereum/contract` datasource, Sepolia,
+- `subgraph/sandwich-subgraph`, substreams datasource, mainnet, `Sandwich` entities
+- `subgraph/probe-ledger-subgraph`, `ethereum/contract` datasource, Sepolia,
   `Route` and `Row` entities from `RowRecorded`, with full row data read back via
   `ProbeLedger`'s public `rows(uint256)` getter
 
@@ -116,5 +116,5 @@ This is deliberate. A stub exercises different code than production does, so it
 proves nothing; a dry run exercises the same code minus one call.
 
 The exception is `/console`. It claims to be running a live probe, so it never
-falls back to sample data — it shows the failure instead. Read-only pages may fall
+falls back to sample data, it shows the failure instead. Read-only pages may fall
 back, always behind a visible `SAMPLE DATA` banner.

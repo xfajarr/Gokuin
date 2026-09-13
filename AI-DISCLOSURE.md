@@ -4,7 +4,7 @@ Per ETHOnline 2026 rules, AI tooling used on this project is disclosed here.
 
 ## Tools
 
-- **Claude Code (Opus 5)** — problem research, architecture design, spec authoring, and code generation across contracts, backend, frontend and the Substreams module.
+- **Claude Code (Opus 5)**: problem research, architecture design, spec authoring, and code generation across contracts, backend, frontend and the Substreams module.
 
 ## Human contribution
 

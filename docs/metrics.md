@@ -5,7 +5,7 @@
 
 These are the definitions the contracts, the API, the MCP server and the web UI all
 compile against. They live in one file, `packages/core/src/metrics.ts`, and this
-document is generated from it — so a metric described here is a metric the code
+document is generated from it, so a metric described here is a metric the code
 implements, and a change to one is a change to both.
 
 A leak is claimed only on agreement from **2** independent signed listeners.
@@ -29,7 +29,7 @@ against third-party mempool archives.
 
 ### `isLeaked`
 
-leaked — the treatment tx hash was observed in the PUBLIC mempool by at least
+leaked, the treatment tx hash was observed in the PUBLIC mempool by at least
 MIN_LISTENER_AGREEMENT independent signed listeners, at a block height STRICTLY
 BELOW its inclusion block. Uncle re-broadcasts are excluded (logged separately).
 
@@ -39,7 +39,7 @@ export function isLeaked(obs: Observation[], includedBlock: number)
 
 ### `computeExtracted`
 
-extractedWei — simOut minus realOut, where simOut is an eth_call of the IDENTICAL
+extractedWei, simOut minus realOut, where simOut is an eth_call of the IDENTICAL
 calldata against state at (includedBlock - 1). Never negative.
 
 ```ts
@@ -48,7 +48,7 @@ export function computeExtracted(simOut: bigint, realOut: bigint): bigint
 
 ### `delayBlocks`
 
-delayBlocks — includedBlock minus the chain head at the moment of dispatch.
+delayBlocks, includedBlock minus the chain head at the moment of dispatch.
 
 ```ts
 export function delayBlocks(submittedBlock: number, includedBlock: number)
@@ -59,5 +59,5 @@ export function delayBlocks(submittedBlock: number, includedBlock: number)
 `packages/core/test/sandwich-fixture.test.ts` and `contracts/test/ForkDerive.t.sol`
 consume the same verified historical sandwich and must agree on `extractedWei`.
 If the contract and the API disagree about what a sandwich cost, the project has
-no product — so the disagreement is made to fail a test rather than surface in
+no product, so the disagreement is made to fail a test rather than surface in
 production.

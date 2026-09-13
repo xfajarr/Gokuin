@@ -8,7 +8,7 @@
 > `0xc38e00ac5ed8859f18f4e9017fa2b3d3e1f65f40`, in pools
 > `0xce252c91e33c637054d8cdac7c42446a0ebd7ac3` and
 > `0x4b3250ea0ca819a2079187f1345de2d8febe1f1e`. A single front-run at index 0 and
-> back-run at index 3 bracket two different victims across two pools — legitimate,
+> back-run at index 3 bracket two different victims across two pools, legitimate,
 > and the module is right to report both.
 >
 > What is actually clean is the **fixture pool** `0x8d02988296949cd054623802c1115973a9afe307`,
@@ -20,8 +20,8 @@ Run the module over block 22450094 and assert:
 
 - **no detection carries `pool == 0x8d02988296949cd054623802c1115973a9afe307`**
 
-Not "no detections at all". The module is deliberately generic — it scans every
-pool in the block and hardcodes no address — so unrelated sandwiches elsewhere in
+Not "no detections at all". The module is deliberately generic, it scans every
+pool in the block and hardcodes no address, so unrelated sandwiches elsewhere in
 the same block are expected output, not noise.
 
 Verified live against `mainnet.eth.streamingfast.io`:
@@ -40,6 +40,6 @@ Neither is the fixture pool. The negative control holds.
 ## Why a pool-scoped control is the right one
 
 A block-scoped "must be empty" assertion only stays true while nobody sandwiches
-anything anywhere in that block — which is not a property of the module under test.
+anything anywhere in that block, which is not a property of the module under test.
 Scoping it to the pool tests what the fixture is actually about: that the detector
 does not invent a triple where the pool was quiet.

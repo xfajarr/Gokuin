@@ -3,20 +3,20 @@ name: gokuin
 description: >-
   Independent, adversarially-measured scores for Ethereum transaction submission
   routes (public mempool, Flashbots Protect, MEV Blocker, and others as they are
-  added) — leak rate, sandwich rate, inclusion delay, value extracted — plus a
+  added) (leak rate, sandwich rate, inclusion delay, value extracted) plus a
   route picker that returns a route, a plain-language reason, and real mainnet
   transaction hashes as evidence. Use this before choosing where to send a
   transaction whose outcome matters: anything holding user funds, anything that
   should not be front-run, anything where "it landed eventually" is not good enough.
 ---
 
-# Gokuin — proof house for transaction routes
+# Gokuin: proof house for transaction routes
 
 ## What this is
 
 Every route a transaction can go through (public mempool, a "private" relay, a
 protected RPC) sells a promise: not front-run, not visible before inclusion,
-fast, cheap. Nobody neutral checks those promises — the routes measure
+fast, cheap. Nobody neutral checks those promises, the routes measure
 themselves, and a router that also sells routing cannot publish bad numbers
 about its own suppliers.
 
@@ -27,8 +27,8 @@ signed listeners in two regions, and derives four numbers per route from that:
 
 | Metric | What it means | Where it comes from |
 |---|---|---|
-| `leakBps` | How often the "private" route's transaction was seen in the public mempool before it was included, in basis points | the one **attested** metric — cross-checked by ≥2 independent signed listeners |
-| `sandwichBps` | How often the transaction was sandwiched (front-run then back-run, same block, same pool) | **public** — re-derivable by anyone from block data |
+| `leakBps` | How often the "private" route's transaction was seen in the public mempool before it was included, in basis points | the one **attested** metric: cross-checked by ≥2 independent signed listeners |
+| `sandwichBps` | How often the transaction was sandwiched (front-run then back-run, same block, same pool) | **public**: re-derivable by anyone from block data |
 | `medianDelayBlocks` | Median blocks between submission and inclusion | **public** |
 | `totalExtractedWei` | Total value extracted from probes on this route (`simOut − realOut` at inclusion), summed | **public** |
 
@@ -37,7 +37,7 @@ this server returns is read, at call time, from the Gokuin API's
 `GET /v1/routes` / `GET /v1/routes/:id`, which itself reads exclusively from a
 **Substreams-powered subgraph** (`sandwich-detect` Substreams module feeding a
 subgraph deployed on Subgraph Studio). There is no SQLite fallback and no
-cached snapshot in this path — if the subgraph is behind or unreachable, the
+cached snapshot in this path, if the subgraph is behind or unreachable, the
 API call fails and this server tells you so instead of inventing a number.
 
 ## When an agent should reach for this
@@ -53,17 +53,17 @@ Reach for `gokuin_submit` instead of a hardcoded RPC URL whenever:
   choice would cost real money.
 
 Do **not** reach for this to *build* a transaction, get a quote, or do price
-discovery — Gokuin only measures how a transaction is delivered after it is
+discovery, Gokuin only measures how a transaction is delivered after it is
 already signed. It is not a wallet, not a relay, and not a swap router.
 
 ## The non-negotiable contract
 
 **Every tool below always returns `reason` and `evidence` alongside its
-answer.** `evidence` is an array of `{ txHash, what }` — real mainnet
+answer.** `evidence` is an array of `{ txHash, what }`, real mainnet
 transaction hashes with a one-line note on what each one proves. An agent (or
 the human behind it) should always be able to point at a specific hash and
 say "that's why." If Gokuin's API is unreachable, every tool below fails
-loudly with a clear error instead of guessing — a wrong route costs real
+loudly with a clear error instead of guessing, a wrong route costs real
 money, so a silent fallback is strictly worse than a refusal.
 
 ## Tools
@@ -132,7 +132,7 @@ input.
 
 Use this to survey the field before deciding what to ask `gokuin_explain`
 about, or to build your own selection logic instead of trusting
-`gokuin_submit`'s pick. `evidence` is deliberately empty here — an aggregate
+`gokuin_submit`'s pick. `evidence` is deliberately empty here, an aggregate
 list carries no row-level hashes by itself; call `gokuin_explain` for those.
 
 ### `gokuin_explain`
@@ -151,7 +151,7 @@ One route's full measured record plus the evidence hashes behind it.
 {
   "route": "flashbots-protect",
   "record": { "route": "flashbots-protect", "probes": 900, "leaks": 3, "leakBps": 33, "sandwiches": 0, "sandwichBps": 0, "medianDelayBlocks": 2, "totalExtractedWei": "0", "lastCycle": 214 },
-  "reason": "flashbots-protect: 900 probes so far, 3 leaked (33 bps — the one attested metric...)...",
+  "reason": "flashbots-protect: 900 probes so far, 3 leaked (33 bps, the one attested metric...)...",
   "evidence": [
     { "txHash": "0x9f1c...", "what": "probe routed through flashbots-protect that Gokuin picked for a recent 'privacy' request" }
   ]
@@ -162,15 +162,15 @@ Evidence is drawn first from the route's own recent ledger rows
 (`GET /v1/routes/:id/rows`, each row a real mainnet tx with its own
 leaked/sandwiched/clean outcome), falling back to recent route-selection
 evidence if no rows are available yet. If neither source has anything,
-`evidence` comes back empty — the record itself is still live from the
+`evidence` comes back empty, the record itself is still live from the
 subgraph; Gokuin never fabricates a hash to fill the array.
 
 ## What this server will never do
 
-- Never picks a route when its API is unreachable — it errors instead.
+- Never picks a route when its API is unreachable: it errors instead.
 - Never returns a score without saying where it came from.
 - Never claims a hash as evidence unless it is a real, submitted mainnet
   transaction hash.
-- Never operates a route itself, and never takes payment from one — that
+- Never operates a route itself, and never takes payment from one: that
   conflict of interest is exactly what Gokuin exists to check for in everyone
   else.

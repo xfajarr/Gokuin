@@ -14,9 +14,9 @@ raw chain data (not taken on faith from the write-up) to confirm
 | Pool | `0x8d02988296949cd054623802c1115973a9afe307` (Uniswap V2 pair, factory `0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f`) |
 | token0 | WETH `0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2` |
 | token1 | RATO ("Rato The Rat") `0xf816507E690f5Aa4E29d164885EB5fa7a5627860`, 9 decimals |
-| Front-run (A) | tx index **10** — `0xa91b3f3ae036bcad07ee72df22a27ad5bfb5127b88a24301e3b7825868ae0286` |
-| Victim (V) | tx index **11** — `0x7c2d07b87c34605b08b15dccb9e01d403146b9c87d7c1b0ea3ce789a2f9b4252` |
-| Back-run (B) | tx index **12** — `0x989e2455430f20811de6682e95a7b87d2585305fb12627895a4df032f795cbe7` |
+| Front-run (A) | tx index **10**: `0xa91b3f3ae036bcad07ee72df22a27ad5bfb5127b88a24301e3b7825868ae0286` |
+| Victim (V) | tx index **11**: `0x7c2d07b87c34605b08b15dccb9e01d403146b9c87d7c1b0ea3ce789a2f9b4252` |
+| Back-run (B) | tx index **12**: `0x989e2455430f20811de6682e95a7b87d2585305fb12627895a4df032f795cbe7` |
 | Attacker (A.from == B.from) | `0xbabe01c4a05038010c3ced0281a732718a4d5701` |
 | Victim's `from` | `0x589437c4e91029c830217890107aebb545768dd3` |
 

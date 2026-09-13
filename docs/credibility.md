@@ -19,7 +19,7 @@ The short version is that mostly you should not have to.
 | `delayBlocks` | block numbers | yes |
 | `reverted` | receipt status | yes |
 | `rebate` | on-chain transfer | yes |
-| `leaked` | our mempool listeners | **no — see §2** |
+| `leaked` | our mempool listeners | **no, see §2** |
 
 Every row in `ProbeLedger` carries the **mainnet transaction hash** it indexes.
 The ledger stores no opinion; it is a pointer into evidence that already exists
@@ -29,7 +29,7 @@ The Substreams module that produces the sandwich verdict is open source and
 hardcodes no address. Run it yourself against the same blocks and you get the
 same rows.
 
-## 2. The leak flag is the one observation — and it is cross-checkable
+## 2. The leak flag is the one observation: and it is cross-checkable
 
 A leak is the claim that a transaction which was supposed to be private appeared
 in the public mempool. Nobody else was watching our listener's socket, so this one
@@ -65,14 +65,14 @@ numbers in our own favour.
 The subtlest way to lie with honest measurements is to choose *when* to measure.
 Probe a relay only during congestion and it looks bad without a single false row.
 
-Before any probe is dispatched, the schedule — routes, target slots, salt — is
+Before any probe is dispatched, the schedule (routes, target slots, salt) is
 hashed and the hash is posted on-chain, along with the committed probe count.
 The salt is withheld until after the cycle completes.
 
 This is enforced in code, not by convention: `CommitBeforeDispatchGuard` in the
 API refuses to dispatch until the commit result is in hand, and the funding
 preflight fails a cycle *before* the commit lands if the distributor cannot cover
-it — a committed cycle that cannot execute would manufacture exactly the gap the
+it, a committed cycle that cannot execute would manufacture exactly the gap the
 integrity check is meant to treat as dishonesty.
 
 The same structure closes omission. `ProbeLedger.integrity(cycleId)` returns
@@ -85,7 +85,7 @@ explanation available.
 The composite score is computed inside a Chainlink CRE Confidential Workflow with
 a secret weight vector. This is deliberate and it is a mechanism, not a flourish:
 if the weights are public, a route can optimise for the ranking instead of for its
-users — knowing that leak is weighted three times sandwich tells you exactly which
+users, knowing that leak is weighted three times sandwich tells you exactly which
 probes to treat well.
 
 The tension this creates is obvious, and the resolution is the important part:
@@ -95,7 +95,7 @@ The tension this creates is obvious, and the resolution is the important part:
 Anyone can pull every row and compute their own score with their own weights. Our
 score is a convenience, not the truth. The truth is the rows.
 
-This also answers a criticism raised on the ERC-8004 thread — that a single
+This also answers a criticism raised on the ERC-8004 thread, that a single
 aggregate score facilitates monopolistic behaviour, and that *"trust is not a
 universal value of Bob, but a vector from Alice to Bob."* Public rows plus your own
 weights is exactly that vector.
@@ -105,7 +105,7 @@ weights is exactly that vector.
 A scoreboard that exempts its own operator is not neutral, it is just a
 better-positioned participant.
 
-`Dispute` (designed, not shipped for the hackathon — see below) lets anyone bond
+`Dispute` (designed, not shipped for the hackathon, see below) lets anyone bond
 and challenge a row by producing a different derivation from the same transaction
 hash. If the challenger is right, the row is corrected and Gokuin's bond is
 slashed. Gokuin's count of disputed and overturned rows is public in the same
@@ -141,7 +141,7 @@ third party takes real money from a real person; that is not a configuration
 option here, it is a guard with its own test.
 
 **Staged rows never reach a score.** Every probe carries a `staged` flag, and
-`scoreRoute()` excludes staged rows from every ratio and total — sandwiches, leaks,
+`scoreRoute()` excludes staged rows from every ratio and total, sandwiches, leaks,
 extracted value, all of it. The returned score reports `stagedExcluded` so the
 exclusion is visible rather than silent, and the scoreboard surfaces that count.
 `packages/core/test/staged-exclusion.test.ts` pins this, including the case that

@@ -13,7 +13,7 @@ Work top to bottom. Each step names how you know it worked.
 | Secret | For | Rough cost |
 |---|---|---|
 | Sepolia key with ~0.5 ETH | deploying three contracts | free from a faucet |
-| Mainnet key with ~0.05 ETH | `DISTRIBUTOR_PK` — funds probe wallets | real money, small |
+| Mainnet key with ~0.05 ETH | `DISTRIBUTOR_PK`, funds probe wallets | real money, small |
 | Mainnet archive RPC | fork test, `eth_call` at historical blocks | `https://eth.drpc.org` works free |
 | Mainnet websocket RPC | the listener | any provider with `eth_subscribe` |
 | Subgraph Studio deploy key | publishing two subgraphs | free |
@@ -34,7 +34,7 @@ root where this project keeps its single `.env`. The script loads the root one a
 refuses with a named variable if anything required is blank, rather than letting
 forge fail halfway through a broadcast.
 
-Fill these in `.env` first — `PROBER_ADDRESS` is derived, not invented:
+Fill these in `.env` first, `PROBER_ADDRESS` is derived, not invented:
 
 ```bash
 cast wallet address --private-key $PROBER_PK    # -> PROBER_ADDRESS
@@ -59,16 +59,16 @@ wiring, so the script cannot ship mis-wired.
 
 The deploy deliberately does **not** register routes. `RouteRegistry` cannot create
 subnames until it owns the parent name, and folding that into the deploy meant one
-revert rolled back all four contract deployments — which is what happened the first
+revert rolled back all four contract deployments, which is what happened the first
 time this ran.
 
 ## 1b. Point gokuin.eth at RouteRegistry
 
-`RouteRegistry` **is** the ENSv2 subregistry for `gokuin.eth`. ENSv2 is hierarchical —
+`RouteRegistry` **is** the ENSv2 subregistry for `gokuin.eth`. ENSv2 is hierarchical , 
 a name delegates its namespace to a registry contract, rather than the flat v1 table
 where you granted subnode rights. One call wires it, from the wallet that owns the name:
 
-Use the command the deploy printed — it carries the **live token ID**, fetched from
+Use the command the deploy printed, it carries the **live token ID**, fetched from
 `ETHRegistry.getTokenId`. Do not substitute `cast keccak "gokuin"`: the ERC1155 token
 ID is not the labelhash. `LibLabel.withVersion` replaces its lower 32 bits with a
 per-name version counter, so the two are different numbers and only the live one is
@@ -85,7 +85,7 @@ cast send $ETH_REGISTRY "setSubregistry(uint256,address)" \
 ```
 
 Do **not** use `setOwner` or `setSubnodeRecord`. Those are ENS v1 and do not exist in
-ENSv2 — an earlier version of this runbook said otherwise and the deploy reverted.
+ENSv2, an earlier version of this runbook said otherwise and the deploy reverted.
 
 Confirm:
 
@@ -99,7 +99,7 @@ cast call $ETH_REGISTRY "getSubregistry(string)(address)" "gokuin" --rpc-url $SE
 ## 2. Register the routes
 
 Three ENSv2 subnames under `gokuin.eth` on Sepolia. `routeId` order is fixed
-forever by `ROUTE_IDS` in `packages/core/src/types.ts` — never reorder it, the
+forever by `ROUTE_IDS` in `packages/core/src/types.ts`, never reorder it, the
 subgraph mapping and the ledger both depend on the index.
 
 ```
@@ -113,7 +113,7 @@ from any address other than `Scorer` reverts.
 
 ## 3. Publish the Substreams package
 
-Install the CLI first — `make pack` checks for it and tells you how:
+Install the CLI first, `make pack` checks for it and tells you how:
 
 ```bash
 brew install streamingfast/tap/substreams
@@ -121,7 +121,7 @@ cd substreams && make build && make pack
 ```
 
 **Worked when:** the module flags the fixture sandwich and leaves the clean block
-alone. Do not skip this — the fixtures exist so you find out here rather than on
+alone. Do not skip this, the fixtures exist so you find out here rather than on
 camera.
 
 Needs a free Substreams token (streamingfast.io, pinax.network or thegraph.market)
@@ -140,7 +140,7 @@ substreams registry publish sandwich-detect-v0.1.0.spkg
 ```
 
 Published: <https://substreams.dev/packages/sandwich-detect/v0.1.0>. Verify it is
-consumable by reference rather than only from disk — that is the property that
+consumable by reference rather than only from disk, that is the property that
 matters, because it means a judge never has to clone this repo:
 
 ```bash
@@ -150,14 +150,14 @@ substreams run sandwich-detect@v0.1.0 map_sandwiches \
 
 That asserts both fixtures for you. The negative one is **pool-scoped**, not
 block-scoped: block 22450094 does contain two real sandwiches in other pools, and
-the module is right to report them — it is generic by design. What must be absent
+the module is right to report them, it is generic by design. What must be absent
 is any detection in the fixture pool `0x8d0298…e307`, which is quiet in that block.
 An earlier version of this runbook said "must find nothing", which would have made
 a correct module look broken.
 
 ## 4. Deploy both subgraphs
 
-Two, not one — GIP-0053 forbids a substreams dataSource sharing a manifest with a
+Two, not one, GIP-0053 forbids a substreams dataSource sharing a manifest with a
 contract dataSource.
 
 ```bash
@@ -173,7 +173,7 @@ Set `SUBGRAPH_URL` to the probe-ledger endpoint.
 **Worked when:** `GET /v1/routes` stops returning 503. Until it does, the API is
 correctly refusing to invent scores.
 
-## 5. First cycle — testnet-shaped, mainnet-real
+## 5. First cycle: testnet-shaped, mainnet-real
 
 Fund the distributor, start the API and both listeners:
 
@@ -183,7 +183,7 @@ LISTENER_REGION=eu-central bun --filter @gokuin/listener start
 LISTENER_REGION=us-east    bun --filter @gokuin/listener start   # different host
 ```
 
-Start small — one twin pair, minimum size — and confirm the whole chain before
+Start small (one twin pair, minimum size) and confirm the whole chain before
 spending on a real cycle:
 
 ```bash
@@ -207,17 +207,17 @@ A sandwich cannot be summoned. What makes it likely:
 | Route | one leg naked to the public mempool | the control has to be visible |
 
 Run several pairs before the take you record. If the live one comes back clean,
-say so on camera and show the row — a ledger that stays honest when nothing
+say so on camera and show the row, a ledger that stays honest when nothing
 happens is more convincing than one that always finds a villain.
 
 ### The staged sandwich, for the detection-path shot specifically
 
 A sandwich cannot be summoned against a real route, but the shot in §16 that
 shows the detector working ("Explorer: three transactions in one block") does
-not need one to be organic — see `docs/credibility.md`'s "The sandwich in the
+not need one to be organic, see `docs/credibility.md`'s "The sandwich in the
 demo video is one we caused". `tools/sandwich-harness/` is exactly that: a
 standalone, Sepolia-only tool that stages a real sandwich against Gokuin's own
-probe address (never a third party — enforced in code, see its README) and
+probe address (never a third party, enforced in code, see its README) and
 marks the resulting row `staged`, which `scoreRoute()` already excludes from
 every figure. Run it with:
 
@@ -231,7 +231,7 @@ bun src/cli.ts run --attempts=5
 three real Sepolia transaction hashes and block from the run this repo has
 already verified, the exact Uniswap Sepolia addresses used (all verified with
 `cast call`), and an honest account of trying Flashbots bundle submission on
-Sepolia (real, but unreliable there today — gas-priority laddering is what
+Sepolia (real, but unreliable there today, gas-priority laddering is what
 this actually uses, measured across repeated live attempts).
 
 ## 6. CRE
@@ -246,7 +246,7 @@ cre workflow simulate ./workflow --target=simulation-settings --non-interactive 
 just prints usage.
 
 Put the real weight vector in the Vault secret named in `cre/secrets.yaml`. Never
-commit it — `cre/weights.example.json` holds placeholders and exists to show the
+commit it, `cre/weights.example.json` holds placeholders and exists to show the
 shape.
 
 **Worked when:** the six `gokuin.*` text records update on Sepolia and the weight
@@ -262,7 +262,7 @@ vector appears in no log.
    too low for current fees. Preflight should catch the first before the commit
    lands; if it did not, that is a bug worth reporting.
 3. **Integrity says `intact: false`.** Some probe produced no ledger row. Usually
-   the subgraph is behind and the sandwich verdict was unavailable — the API is
+   the subgraph is behind and the sandwich verdict was unavailable, the API is
    refusing to record a verdict it did not measure, which is correct behaviour.
    Wait for the subgraph to catch up and re-settle.
 4. **Scores stay empty.** `SUBGRAPH_URL` unset or pointing at the sandwich
@@ -275,4 +275,4 @@ vector appears in no log.
 Whatever is still unfinished at recording time, name it. `docs/credibility.md`
 already carries a "designed, not shipped" section and the README separates what
 runs from what only builds. Judges verify repos after the fact, and the project's
-entire argument is that unchecked claims are worthless — including ours.
+entire argument is that unchecked claims are worthless, including ours.

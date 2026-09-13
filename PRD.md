@@ -1,7 +1,7 @@
-# Gokuin — Product Requirements & Build Spec
+# Gokuin: Product Requirements & Build Spec
 
-**極印** — the mark struck into metal to certify what it actually is.
-**極印を押される** — to be permanently branded.
+**極印**: the mark struck into metal to certify what it actually is.
+**極印を押される**: to be permanently branded.
 
 > **Best execution for transaction promises.**
 > Every route you can send a transaction through sells a promise: private, unsandwiched, fast, rebated. Nobody neutral checks. Gokuin probes each route with real transactions, records what actually happened, and stamps a mark that cannot be removed.
@@ -21,13 +21,13 @@
 
 | Fact | Source |
 |---|---|
-| ~10% of Ethereum transactions route through private mempools daily — double the 2022 share | mempool research |
+| ~10% of Ethereum transactions route through private mempools daily, double the 2022 share | mempool research |
 | **4.3% of "private" transactions were observed in the public mempool anyway** | two nodes, two continents, nine days |
 | ~5% of blocks are uncled, re-broadcasting their transactions publicly | same |
 | Flashbots Protect and MEV Blocker both advertise "80% of sandwich attacks" prevented | each measuring itself |
-| *"Little transparency to the reliability and performance of Relays"* — despite >85% node-operator use | Flashbots Collective |
+| *"Little transparency to the reliability and performance of Relays"*, despite >85% node-operator use | Flashbots Collective |
 
-Routers exist — RPC Fast Beam, Ironforge — optimising for landing rate. None measures leakage, because **a commercial router cannot publish leak figures about the relays it partners with.** That conflict is permanent. It is the reason this must be built by a party that does not sell routing.
+Routers exist (RPC Fast Beam, Ironforge) optimising for landing rate. None measures leakage, because **a commercial router cannot publish leak figures about the relays it partners with.** That conflict is permanent. It is the reason this must be built by a party that does not sell routing.
 
 ### The analogy that explains it in one line
 
@@ -53,20 +53,20 @@ Gokuin is that stamp.
 
 ## 3. Scope
 
-### In — phase 1
+### In: phase 1
 
 | Promise measured | Method | Trust in Gokuin required |
 |---|---|---|
-| "not publicly visible before inclusion" | own listeners, 2 regions, signed observations | **yes — the only one** |
+| "not publicly visible before inclusion" | own listeners, 2 regions, signed observations | **yes, the only one** |
 | "you will not be sandwiched" | one-block heuristic over public block data | none |
 | "included quickly" | block delta submit → inclusion | none |
 | value lost | receipt output vs `eth_call` at inclusion block − 1 | none |
 
-### Out — state in README
+### Out: state in README
 
 - **Never sells routing.** One dollar from a relay ends the project.
 - Not price discovery (1inch/CoW territory).
-- Not a wallet, not a relay — operating a route makes us a party that needs auditing.
+- Not a wallet, not a relay: operating a route makes us a party that needs auditing.
 - Not RPC read correctness.
 - No prediction. Only what already happened, pointing at hashes.
 
@@ -119,7 +119,7 @@ gokuin/
 │   ├── src/{ProbeLedger,RouteRegistry,Scorer}.sol
 │   ├── test/
 │   └── script/Deploy.s.sol
-├── substreams/               Rust — sandwich-detect
+├── substreams/               Rust: sandwich-detect
 ├── subgraph/                 Substreams-powered subgraph
 ├── packages/
 │   ├── core/                 shared types, metric math, zod/typebox schemas
@@ -131,9 +131,9 @@ gokuin/
     └── mcp/                  MCP server
 ```
 
-**Why a monorepo:** `packages/core` holds the metric definitions used by the API, the MCP server and the frontend. One definition of `extractedWei`, imported everywhere — the number on screen is the number in the ledger.
+**Why a monorepo:** `packages/core` holds the metric definitions used by the API, the MCP server and the frontend. One definition of `extractedWei`, imported everywhere, the number on screen is the number in the ledger.
 
-### Network split — decide before writing a line
+### Network split: decide before writing a line
 
 Probes run on **mainnet** (a testnet sandwich proves nothing). ENSv2 is **Sepolia-only** in beta. So contracts live on Sepolia and every row carries the **mainnet** hash it indexes.
 
@@ -146,8 +146,8 @@ Recorded here rather than left as a surprise for whoever reads the code next.
 | Spec said | Shipped | Why |
 |---|---|---|
 | `revealCycle(cycleId, salt)` | `revealCycle(cycleId, routeIds, slots, salt)` | The commitment is over all four. Without them the contract cannot verify a revealed salt and `BadSalt` is unenforceable |
-| `Row` packs into three slots | Four slots | The field widths sum to 111 bytes. 96 is unreachable at any packing — arithmetic, not a packing failure. Field order preserved |
-| `Scorer.submitScore(6 args)` | 8 args, adding `probes` and `lastCycle` | Otherwise two of the six `gokuin.*` keys had no writer, and the alternative — a second authorised path for the API — would have broken the single-writer property the ENS demo asserts |
+| `Row` packs into three slots | Four slots | The field widths sum to 111 bytes. 96 is unreachable at any packing: arithmetic, not a packing failure. Field order preserved |
+| `Scorer.submitScore(6 args)` | 8 args, adding `probes` and `lastCycle` | Otherwise two of the six `gokuin.*` keys had no writer, and the alternative (a second authorised path for the API) would have broken the single-writer property the ENS demo asserts |
 | One subgraph | Two | GIP-0053: a subgraph with a substreams dataSource may have only that dataSource, so mainnet detection cannot share a manifest with the Sepolia contract |
 | CRE writes to `Scorer` directly | `ScorerReportReceiver` adapter | CRE's Forwarder only calls `onReport(bytes,bytes)`; no capability invokes a typed function. Without the adapter the workflow computes a score it can never write |
 | `Sandwich.extractedWei` | `Sandwich.attackerRoundTripWei` | Two fields with one name meant different things in different tokens. A reader querying both would have concluded the project contradicts itself |
@@ -259,7 +259,7 @@ type Row @entity {
 
 ---
 
-## 6. Smart contracts — Foundry
+## 6. Smart contracts: Foundry
 
 Network: **Sepolia**. Solidity `^0.8.26`.
 
@@ -321,7 +321,7 @@ contract ProbeLedger {
     /// @notice Reveal the salt. Anyone can now recompute the schedule and compare counts.
     function revealCycle(uint16 cycleId, bytes32 salt) external onlyProber;
 
-    /// @notice committed vs published — a gap is visible to everyone, forever.
+    /// @notice committed vs published: a gap is visible to everyone, forever.
     function integrity(uint16 cycleId) external view returns (uint16 committed, uint16 published, bool intact);
 
     function rowsByRoute(uint32 routeId) external view returns (uint256[] memory);
@@ -331,11 +331,11 @@ contract ProbeLedger {
 
 **Design constraints**
 - No `update`, no `delete`, no owner, no upgrade proxy. Immutability is the product.
-- `prober` is immutable — set at deploy, cannot rotate. If the key is lost, deploy a new ledger and say so.
+- `prober` is immutable, set at deploy, cannot rotate. If the key is lost, deploy a new ledger and say so.
 - Storage is packed: `Row` fits three slots.
 - `scheduleHash = keccak256(abi.encode(cycleId, routeIds, slots, salt))`.
 
-### 6.2 `RouteRegistry.sol` — ENSv2
+### 6.2 `RouteRegistry.sol`, ENSv2
 
 ```solidity
 /// @notice One ENSv2 subname per route: <label>.gokuin.eth
@@ -355,7 +355,7 @@ contract RouteRegistry {
     /// @notice Create <label>.gokuin.eth and point it at the permissioned resolver.
     function registerRoute(uint32 routeId, string calldata label) external;
 
-    /// @notice Write a score text record. Reverts for any caller but the Scorer —
+    /// @notice Write a score text record. Reverts for any caller but the Scorer :
     ///         this is the "only we can write" claim, enforced instead of promised.
     function setScore(uint32 routeId, string calldata key, string calldata value) external;
 }
@@ -367,7 +367,7 @@ Text record keys written: `gokuin.leakBps`, `gokuin.sandwichBps`, `gokuin.median
 
 ```solidity
 /// @notice Receives the weighted score from the CRE Confidential Workflow.
-///         Weights never appear on-chain — only their output does.
+///         Weights never appear on-chain: only their output does.
 contract Scorer {
     address public immutable creForwarder;
     RouteRegistry public immutable registry;
@@ -387,7 +387,7 @@ contract Scorer {
 }
 ```
 
-### 6.4 Not built — documented in `docs/credibility.md`
+### 6.4 Not built: documented in `docs/credibility.md`
 
 ```solidity
 contract Dispute {
@@ -407,7 +407,7 @@ Say plainly in the video: designed, not shipped.
 | `test_OnlyProberCanRecord` | any other sender reverts `NotProber` |
 | `test_IntegrityDetectsGap` | commit 10, publish 8 → `intact == false` |
 | `test_RevealValidatesSalt` | wrong salt reverts `BadSalt` |
-| `test_OnlyScorerWritesENS` | non-scorer `setScore` reverts — **this is the ENS track's proof** |
+| `test_OnlyScorerWritesENS` | non-scorer `setScore` reverts, **this is the ENS track's proof** |
 | `testFork_DeriveKnownSandwich` | mainnet fork at a known sandwich block; `simOut − realOut` equals the value computed off-chain |
 | `test_RowPacking` | gas snapshot; `Row` stays within three slots |
 
@@ -415,7 +415,7 @@ Say plainly in the video: designed, not shipped.
 
 ---
 
-## 7. Backend — ElysiaJS (Bun)
+## 7. Backend: ElysiaJS (Bun)
 
 ### 7.1 Module map
 
@@ -478,7 +478,7 @@ new Elysia({ prefix: '/v1' })
 ```
 
 ```ts
-// apps/api/src/routes/listener.ts — the only write path from outside
+// apps/api/src/routes/listener.ts: the only write path from outside
 .post('/observations', async ({ body, set }) => {
   const ok = await verifyObservation(body)   // recover signer, check allowlist
   if (!ok) { set.status = 401; return { error: 'unrecognised listener' } }
@@ -492,14 +492,14 @@ new Elysia({ prefix: '/v1' })
 })
 ```
 
-**`/v1/select` is the product.** It returns `reason` and `evidence` alongside `route` — an agent must be able to explain its choice to its user, with hashes.
+**`/v1/select` is the product.** It returns `reason` and `evidence` alongside `route`, an agent must be able to explain its choice to its user, with hashes.
 
 ### 7.3 Cycle orchestration
 
 ```
 POST /admin/cycles/run
   1. schedule.build()      routes × slots, salt
-  2. ledger.commitCycle()  Sepolia tx — BEFORE dispatch
+  2. ledger.commitCycle()  Sepolia tx: BEFORE dispatch
   3. dispatch.twins()      rotate EOA, build identical swaps, submit to each route
   4. wait for inclusion    or timeout → status 'dropped'
   5. observe               listeners have been POSTing all along
@@ -509,9 +509,9 @@ POST /admin/cycles/run
   9. reveal.publish()      salt on-chain; assert published == committed
 ```
 
-Runs as a Bun cron (`Bun.cron` or a simple `setInterval` supervisor). Step 2 before step 3 is a hard ordering constraint — the commit is worthless if it lands after dispatch.
+Runs as a Bun cron (`Bun.cron` or a simple `setInterval` supervisor). Step 2 before step 3 is a hard ordering constraint, the commit is worthless if it lands after dispatch.
 
-### 7.4 Listener — `apps/listener`
+### 7.4 Listener: `apps/listener`
 
 Standalone Bun process, deployed to two regions. Not part of the API.
 
@@ -529,7 +529,7 @@ client.watchPendingTransactions({
 })
 ```
 
-Only hashes in the current cycle's watchlist are forwarded — the API hands each listener the watchlist at cycle start. Uncle re-broadcasts are flagged, stored, and excluded from the leak flag.
+Only hashes in the current cycle's watchlist are forwarded, the API hands each listener the watchlist at cycle start. Uncle re-broadcasts are flagged, stored, and excluded from the leak flag.
 
 ### 7.5 Eden Treaty
 
@@ -542,7 +542,7 @@ const api = treaty<App>(env.API_URL)  // apps/web, apps/mcp
 
 ---
 
-## 8. Substreams — `sandwich-detect`
+## 8. Substreams: `sandwich-detect`
 
 Rust module streaming every mainnet block.
 
@@ -556,20 +556,20 @@ Rust module streaming every mainnet block.
 
 Output feeds a **Substreams-powered subgraph** deployed to Subgraph Studio.
 
-**Deliberately generic:** takes any address, not just Gokuin probes. This is what satisfies The Graph's *"tooling must be reusable infrastructure, not a one-off app"* — anyone can point it at their own wallet and ask whether they have been sandwiched.
+**Deliberately generic:** takes any address, not just Gokuin probes. This is what satisfies The Graph's *"tooling must be reusable infrastructure, not a one-off app"*, anyone can point it at their own wallet and ask whether they have been sandwiched.
 
 Validation gate before trusting it live: run against a **known historical sandwich** and a **known clean block**, both pinned in the repo as fixtures.
 
 ---
 
-## 9. Frontend — TanStack Start
+## 9. Frontend: TanStack Start
 
 ### 9.1 Route tree
 
 ```
 apps/web/src/routes/
 ├── __root.tsx              shell, theme, nav
-├── index.tsx               scoreboard — the money page
+├── index.tsx               scoreboard: the money page
 ├── route.$id.tsx           one route's record + evidence table
 ├── probe.$id.tsx           single probe: twin comparison, block view, derivation
 ├── cycle.$id.tsx           commit / reveal / integrity
@@ -579,20 +579,20 @@ apps/web/src/routes/
 
 ### 9.2 Page specs
 
-**`/` — Scoreboard**
+**`/`, Scoreboard**
 - Table: route · probes · leaks · sandwich % · median inclusion · ETH lost
 - Each cell links to the rows that produced it. No number without a path to its hashes.
 - Header states the cycle integrity: *"committed 100 · published 100 · intact"*
 - Loader: `createServerFn` → `api.v1.routes.get()`
 
-**`/probe/$id` — the demo page**
+**`/probe/$id`, the demo page**
 - Twin side-by-side, identical params visibly identical
 - Block view: three transactions in order, victim striped
-- Derivation table with a `public` / `attested` column per metric — **five of six say `public`**
+- Derivation table with a `public` / `attested` column per metric, **five of six say `public`**
 - Ledger row as emitted, with the Sepolia tx link
 
 **`/method`**
-- Metric definitions from `packages/core` — rendered from the same constants the API uses
+- Metric definitions from `packages/core`, rendered from the same constants the API uses
 - The six credibility mechanisms
 - Explicit: what is live, what is simulated, what is designed but unbuilt
 
@@ -615,7 +615,7 @@ export const Route = createFileRoute('/')({
 })
 ```
 
-Server functions keep the API key server-side and give the page a filled first paint — the scoreboard must be readable before any JS runs, because it is the first frame of the demo.
+Server functions keep the API key server-side and give the page a filled first paint, the scoreboard must be readable before any JS runs, because it is the first frame of the demo.
 
 ### 9.4 Design
 
@@ -623,7 +623,7 @@ Reuse the console prototype's tokens: warm charcoal ground, IBM Plex Mono for da
 
 ---
 
-## 10. MCP server — `apps/mcp`
+## 10. MCP server: `apps/mcp`
 
 ```ts
 server.tool('gokuin_submit', {
@@ -644,7 +644,7 @@ server.tool('gokuin_routes',  ...)   // list with scores
 server.tool('gokuin_explain', ...)   // one route's record + evidence hashes
 ```
 
-Ships with `apps/mcp/SKILL.md` — required by The Graph's AI track.
+Ships with `apps/mcp/SKILL.md`, required by The Graph's AI track.
 
 **The return value always carries `reason` and `evidence`.** An agent that cannot say why it chose a route is no better than a hardcoded URL.
 
@@ -666,33 +666,33 @@ Lives in `packages/core/metrics.ts`, imported by API, MCP and web. One definitio
 ## 12. Credibility
 
 - **Five of six metrics need no trust in Gokuin.** Sandwich, extracted value, delay, revert and rebate all derive from public block data via an open-source module.
-- **The leak flag is the one observation** — mitigated four ways: multiple signed listeners; TEE-attested observation; third-party mempool archives (Blocknative sells historical Ethereum mempool data, marketed explicitly for analysing private transactions) as independent cross-check; anyone may run a listener.
+- **The leak flag is the one observation**: mitigated four ways: multiple signed listeners; TEE-attested observation; third-party mempool archives (Blocknative sells historical Ethereum mempool data, marketed explicitly for analysing private transactions) as independent cross-check; anyone may run a listener.
 - **Commit-reveal kills cherry-picking and omission together.** A gap between committed and published is on-chain forever.
 - **Rows public, weights private.** The score is a convenience; the rows are the truth. This is also the answer to the ERC-8004 thread's *"trust is not a universal value of Bob, but a vector from Alice to Bob."*
 - **Gokuin sits in its own ledger**, disputed and overturned rows public.
 - **Gokuin never sells routing.**
 
-### 30-second Q&A answer — memorise
+### 30-second Q&A answer: memorise
 
-> "We don't ask to be trusted. Five of six metrics anyone can re-derive from public data. The sixth — leakage — cross-checks against a third-party mempool archive that has nothing to do with us. The schedule is committed before it runs, so we can't pick our moments and can't hide results. Weights are private, rows are public: don't like our weights, score it yourself. And we're in the same ledger — bond against us, and if you're right, we get slashed."
+> "We don't ask to be trusted. Five of six metrics anyone can re-derive from public data. The sixth (leakage) cross-checks against a third-party mempool archive that has nothing to do with us. The schedule is committed before it runs, so we can't pick our moments and can't hide results. Weights are private, rows are public: don't like our weights, score it yourself. And we're in the same ledger, bond against us, and if you're right, we get slashed."
 
 ---
 
 ## 13. Sponsor mapping
 
-### The Graph — 1 slot, 2 tracks, $10,000
+### The Graph: 1 slot, 2 tracks, $10,000
 
 | Requirement | Answer |
 |---|---|
-| Compose 2+ Graph products or a standardized schema | Substreams module feeding a Substreams-powered Subgraph — two products, composed |
+| Compose 2+ Graph products or a standardized schema | Substreams module feeding a Substreams-powered Subgraph: two products, composed |
 | Live provider data; mocks disqualify | Subgraph Studio, queried live in the demo |
 | Reusable infrastructure, not a one-off app | `sandwich-detect` takes any address, not just our probes |
 | Graph load-bearing for the AI track | API and MCP read scores only from the Subgraph. No Graph, no scores |
 | Open source + README or SKILL.md | `apps/mcp/SKILL.md` |
 
-Their Lisbon thesis — *"freshness as a correctness property, not a nice-to-have"* — is this project's entire subject. Quote it back in the writeup.
+Their Lisbon thesis (*"freshness as a correctness property, not a nice-to-have"*) is this project's entire subject. Quote it back in the writeup.
 
-### ENS — 1 slot, $4,500
+### ENS: 1 slot, $4,500
 
 | Requirement | Answer |
 |---|---|
@@ -702,11 +702,11 @@ Their Lisbon thesis — *"freshness as a correctness property, not a nice-to-hav
 
 Pattern that has won three times: ENShell, npmguard, Immunity.
 
-### Chainlink — 1 slot, $2,000
+### Chainlink: 1 slot, $2,000
 
 | Requirement | Answer |
 |---|---|
-| CRE Confidential Workflows for a meaningful part | Scoring weights in the enclave. Public weights let routes optimise for the ranking instead of for users — mechanism, not decoration |
+| CRE Confidential Workflows for a meaningful part | Scoring weights in the enclave. Public weights let routes optimise for the ranking instead of for users: mechanism, not decoration |
 | Register `handlerInTee` / `cre.HandlerInTee` | Scoring handler |
 | One sensitive input inside the enclave | Weight vector + listener signing keys |
 | Evidence: CLI simulation or live deployment | Simulation logs in repo and on camera |
@@ -722,12 +722,12 @@ Ordered by **risk**, not dependency. The thing that can kill the project goes fi
 
 ### P0 · Repo
 `bun create`, workspace, Foundry init, directory tree, `README.md`, `AI-DISCLOSURE.md`.
-**Done when:** repo public, ≥3 real commits. Commit continuously from here — a single last-day dump is assumed unqualified.
+**Done when:** repo public, ≥3 real commits. Commit continuously from here, a single last-day dump is assumed unqualified.
 
-### P1 · Listener *(riskiest — do it first)*
+### P1 · Listener *(riskiest: do it first)*
 `apps/listener` watching pending transactions in one region, signing observations, POSTing to a stub endpoint.
 **Done when:** hand it any hash, get back a first-seen timestamp. Then duplicate to region two.
-**If this fails, pivot here** — before anything is sunk into contracts.
+**If this fails, pivot here**: before anything is sunk into contracts.
 
 ### P2 · Twin dispatch
 `apps/api` cycle module: rotate EOA, build one swap, submit to two routes in the same block window. Bait: thin pool, 8% slippage, small size.
@@ -762,10 +762,10 @@ Move weights into the enclave. Capture CLI simulation logs.
 
 ### Cut order
 
-1. **Cut 1st** — P8 CRE. Lose $2,000, keep the project. Weights stay in the API, move to the enclave later.
-2. **Cut 2nd** — third route. Two routes still demonstrate the mechanism.
-3. **Cut 3rd** — `/cycle/$id` and `gokuin_explain`. `/` and `gokuin_submit` carry the story.
-4. **Never cut** — listener, twin dispatch, sandwich detection, on-chain row, video.
+1. **Cut 1st**: P8 CRE. Lose $2,000, keep the project. Weights stay in the API, move to the enclave later.
+2. **Cut 2nd**: third route. Two routes still demonstrate the mechanism.
+3. **Cut 3rd**: `/cycle/$id` and `gokuin_explain`. `/` and `gokuin_submit` carry the story.
+4. **Never cut**: listener, twin dispatch, sandwich detection, on-chain row, video.
 
 ---
 
@@ -783,20 +783,20 @@ One rule: **the fork test and the TypeScript metric test consume the same fixtur
 
 ---
 
-## 16. Demo video — 4 minutes
+## 16. Demo video: 4 minutes
 
 | Time | Shot | Say |
 |---|---|---|
 | 0:00–0:15 | Two claims side by side: both relays advertising 80% sandwich prevention | *"Both measured that themselves. Nobody else has ever checked."* |
 | 0:15–0:30 | Gokuin: the mark struck into metal to certify what it actually is | *"In Britain, every firearm is test-fired by an independent proof house before it can be sold. The maker isn't allowed to test its own. Ethereum's transaction routes have no such thing."* |
 | 0:30–0:50 | Commit hash on Sepolia. Twin transactions built, dispatched | *"Same swap, twice. One naked into the public mempool, one through the protected route."* |
-| 0:50–1:40 | **The shot.** Explorer: three transactions in one block — front-run, ours, back-run. Then `simOut` vs `realOut` | *"That's what it cost. Not a simulation — that money is gone."* |
+| 0:50–1:40 | **The shot.** Explorer: three transactions in one block, front-run, ours, back-run. Then `simOut` vs `realOut` | *"That's what it cost. Not a simulation, that money is gone."* |
 | 1:40–2:05 | Twin comes back clean. Both write to the ledger, including the boring one | *"The null result gets recorded too. Publishing only the dramatic cycles would mean writing our own story."* |
 | 2:05–2:45 | Subgraph query live; ENS name resolving to scores; `forge test` showing a non-scorer write revert | *"Only the scorer can write. That's enforced by the contract, not promised by us."* |
-| 2:45–3:20 | Claude Code calls `gokuin_submit(need: "privacy")` — route, reason, evidence | *"The agent never picks a route again. And it can tell you why it chose this one."* |
+| 2:45–3:20 | Claude Code calls `gokuin_submit(need: "privacy")`, route, reason, evidence | *"The agent never picks a route again. And it can tell you why it chose this one."* |
 | 3:20–4:00 | Why no incumbent can do this. Roadmap: bundlers, preconfirmers. Stop | *"Routers already exist. None can publish leak rates about their own partners. That's why this has to be neutral."* |
 
-**The shoot risk:** a sandwich cannot be summoned. Three insurances — aggressive bait; several successful pairs recorded in advance; and if the live one comes back clean, say so and record it. A ledger that stays honest when nothing happens is more convincing than one that always finds a villain.
+**The shoot risk:** a sandwich cannot be summoned. Three insurances, aggressive bait; several successful pairs recorded in advance; and if the live one comes back clean, say so and record it. A ledger that stays honest when nothing happens is more convincing than one that always finds a villain.
 
 ---
 
@@ -811,7 +811,7 @@ Items marked **[!]** are disqualifiers.
 - [ ] **[!]** Exactly three partners: The Graph, ENS, Chainlink.
 - [ ] **[!]** Graph data live from a Graph provider. Any mock in the required path fails.
 - [ ] **[!]** ENSv2 on Sepolia, central, no hard-coded names.
-- [ ] **[!]** Chainlink CRE only — Functions and Automation are deprecating.
+- [ ] **[!]** Chainlink CRE only: Functions and Automation are deprecating.
 - [ ] Per-partner writeup answering each qualification bullet in §13, in order.
 - [ ] README points at contract addresses and specific line numbers.
 - [ ] README states what is live, what is simulated, what is designed but unbuilt.
@@ -828,7 +828,7 @@ Items marked **[!]** are disqualifiers.
 | Listener can't reliably see the public mempool | Built first, P1. Fail there and pivot before anything is sunk |
 | No sandwich during the shoot | Aggressive bait, pre-recorded pairs, honesty if the live one is clean |
 | "Beam already routes transactions" | Never pitch routing. Pitch measurement. Their conflict of interest is permanent and it is the answer |
-| "Relay dashboards already exist" | True — beaconcha.in, MEV Watch, Metrika. All measure the *operator's* side: bids, latency, missed slots. None measures the *sender's* outcome, none tests whether private was private |
+| "Relay dashboards already exist" | True: beaconcha.in, MEV Watch, Metrika. All measure the *operator's* side: bids, latency, missed slots. None measures the *sender's* outcome, none tests whether private was private |
 | "Who declares ground truth?" | Nobody. Five of six metrics derive from public block data; the sixth cross-checks a third-party archive |
 | Probes fingerprinted | Rotated single-use EOAs funded through a distributor. Have this answer ready before it's asked |
 | Probes cost real money | Small sizes, budgeted. The loss **is** the evidence |
@@ -839,6 +839,6 @@ Items marked **[!]** are disqualifiers.
 
 ## 19. After the hackathon
 
-Phase 2 is the rest of the promise surface, ordered by market size rather than novelty: **bundlers** first — ERC-4337 rates account factories, paymasters and aggregators while explicitly leaving the bundler's own reputation design out of scope, and the market already has six named providers with published share. Then **solver fill quality**, then **preconfirmations**, where fault attribution is a stated open problem and reputation is the intended punishment mechanism.
+Phase 2 is the rest of the promise surface, ordered by market size rather than novelty: **bundlers** first, ERC-4337 rates account factories, paymasters and aggregators while explicitly leaving the bundler's own reputation design out of scope, and the market already has six named providers with published share. Then **solver fill quality**, then **preconfirmations**, where fault attribution is a stated open problem and reputation is the intended punishment mechanism.
 
-The attestation target stays ERC-8004's Validation Registry — a standard authored by MetaMask, the Ethereum Foundation, Google and Coinbase, whose own forum thread has no answer for who produces the attestations, and whose live data is 52% empty shells across 34,556 registrations. Being its first honest data producer beats owning a registry nobody adopts.
+The attestation target stays ERC-8004's Validation Registry, a standard authored by MetaMask, the Ethereum Foundation, Google and Coinbase, whose own forum thread has no answer for who produces the attestations, and whose live data is 52% empty shells across 34,556 registrations. Being its first honest data producer beats owning a registry nobody adopts.

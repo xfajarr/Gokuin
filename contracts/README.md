@@ -1,4 +1,4 @@
-# Gokuin — contracts
+# Gokuin: contracts
 
 Foundry project for the three Sepolia contracts described in `PRD.md` §6:
 `ProbeLedger`, `RouteRegistry` (ENSv2) and `Scorer`.
@@ -39,7 +39,7 @@ forge test -vv
 
 The mainnet-fork test (`testFork_DeriveKnownSandwich` in `test/ForkDerive.t.sol`) needs
 `MAINNET_RPC` (an archive-capable mainnet RPC URL) **and** a pinned known-sandwich
-fixture shared with `packages/core`'s metric test — neither is wired up yet, so it
+fixture shared with `packages/core`'s metric test, neither is wired up yet, so it
 always self-skips with a logged reason rather than failing the suite. See the TODO in
 that file for the exact wiring once both exist:
 
@@ -69,7 +69,7 @@ Deploy order matters: `RouteRegistry`'s immutable `scorer` must equal the `Score
 contract's own address, so the script predicts that address (deployer's next nonce)
 before deploying `RouteRegistry`, then deploys `Scorer` and asserts the prediction held.
 
-Deploying `RouteRegistry` does **not** make it usable yet — see the ENSv2 section below.
+Deploying `RouteRegistry` does **not** make it usable yet, see the ENSv2 section below.
 Once deployed, run:
 
 ```bash
@@ -82,18 +82,18 @@ printing the exact `cast send` to run, if it isn't met yet.
 
 ## ENSv2 architecture
 
-`gokuin.eth` is a real, already-registered ENSv2 name on Sepolia — registered in
+`gokuin.eth` is a real, already-registered ENSv2 name on Sepolia, registered in
 ENSv2's `ETHRegistry` (`0xbdc85dd5b15d7ecb354cd7cb6f2c50b4f2c4f0e2`; see
 https://docs.ens.domains/learn/deployments/), owned by this project's deployer wallet.
 Verified on-chain (`cast call` against Sepolia, Sept 2026):
 `ETHRegistry.getResolver("gokuin")` returns a resolver, `ETHRegistry.getSubregistry("gokuin")`
 returns `0x0` (no subregistry set yet), and `ETHRegistry.roles(labelhash("gokuin"), owner)`
-already includes `ROLE_SET_SUBREGISTRY` — the role `ETHRegistrar` grants every registrant.
+already includes `ROLE_SET_SUBREGISTRY`, the role `ETHRegistrar` grants every registrant.
 
 ENSv2 is genuinely hierarchical, not a flat namehash→owner table like v1: every name can
 define its own registry, and `IRegistry.getSubregistry(label)` / `getResolver(label)` at
 each level is how resolution walks down (confirmed against `LibRegistry.findResolver` in
-`ensdomains/contracts-v2`). `RouteRegistry` **is** that subregistry for `gokuin.eth` — it
+`ensdomains/contracts-v2`). `RouteRegistry` **is** that subregistry for `gokuin.eth`, it
 answers `getResolver`/`getSubregistry` for its own three labels directly; it does not call
 out to any external "ENS registry" contract to create them (there is nothing v1-shaped
 left in this codebase; see `src/RouteRegistry.sol`'s doc comment).
@@ -111,15 +111,15 @@ cast send 0xbdc85dd5b15d7ecb354cd7cb6f2c50b4f2c4f0e2 \
 ```
 
 (`setSubregistry`'s first argument accepts a labelhash, token ID, or EAC resource
-interchangeably — `PermissionedRegistry._entry()` normalizes all three — so the plain
+interchangeably, `PermissionedRegistry._entry()` normalizes all three, so the plain
 labelhash from `cast keccak "gokuin"` works; you do not need the ERC1155 token ID, which
-is *not* the plain labelhash — see below.)
+is *not* the plain labelhash, see below.)
 
 `src/interfaces/IRegistry.sol` and `src/interfaces/IResolver.sol` are the real ENSv2
 interfaces, verified against the authoritative source (`ensdomains/contracts-v2`, commit
 `48b3e2d`, plus a Sepolia `cast call`/bytecode check confirming the deployed `ETHRegistry`
-matches) — not guessed, not v1-shaped. Each file links its exact source. The part that
-matters for the ENS track — **only the Scorer may write score text records** — does not
+matches), not guessed, not v1-shaped. Each file links its exact source. The part that
+matters for the ENS track (**only the Scorer may write score text records**) does not
 depend on the external registry's shape at all: `RouteRegistry` is its own resolver for
 every label it registers, so `setScore`'s `onlyScorer` check is the entire access-control
 surface, proven by `test_OnlyScorerWritesENS` and
@@ -129,10 +129,10 @@ surface, proven by `test_OnlyScorerWritesENS` and
 ERC1155-tokenized: `LibLabel.id(label) = uint256(keccak256(bytes(label)))` is the
 labelhash, but the actual token ID replaces that value's lower 32 bits with a per-name
 `tokenVersionId` counter (`LibLabel.withVersion`), so `balanceOf(owner, keccak256(label))`
-is generally **not** the registered token's balance — this is exactly why an earlier probe
+is generally **not** the registered token's balance, this is exactly why an earlier probe
 of `balanceOf(owner, keccak256("gokuin"))` returned 0 despite `gokuin.eth` being live and
 owned. The real token ID is `ETHRegistry.getTokenId(labelhash)` (or `findTokenId(label)`).
-`RouteRegistry` itself does **not** implement this ERC1155/versioning machinery — it holds
+`RouteRegistry` itself does **not** implement this ERC1155/versioning machinery, it holds
 three fixed, non-transferable labels created once by trusted deploy tooling, so that
 complexity (transfer, expiry, role delegation, `IRegistryEvents`) is deliberately left
 out; see the scope note in `RouteRegistry`'s doc comment.
@@ -147,13 +147,13 @@ out; see the scope note in `RouteRegistry`'s doc comment.
 
 ## ABI notes for the backend (`apps/api`)
 
-- `ProbeLedger.record(uint16 cycleId, Row calldata row) returns (uint256 rowId)` — the
+- `ProbeLedger.record(uint16 cycleId, Row calldata row) returns (uint256 rowId)`, the
   `Row` tuple field order is `(bytes32 mainnetTxHash, uint64 submittedBlock, uint64
   includedBlock, uint64 leakedAtBlock, uint128 extractedWei, uint128 simOut, uint128
   realOut, uint32 routeId, uint16 cycleId, bool sandwiched)`, matching
   `packages/core/src/types.ts::Row` exactly, field-for-field, in the same order.
 - `ProbeLedger.revealCycle(uint16 cycleId, uint32[] calldata routeIds, uint64[] calldata slots, bytes32 salt)`
-  — **wider than the PRD's two-argument sketch.** The schedule hash cannot be verified
+ , **wider than the PRD's two-argument sketch.** The schedule hash cannot be verified
   on-chain from the hash alone; `routeIds` and `slots` (both public once probes are
   dispatched) must be passed again at reveal time, in the exact order
   `packages/core/src/schedule.ts::hashSchedule()` used, so the contract can recompute
@@ -169,15 +169,15 @@ out; see the scope note in `RouteRegistry`'s doc comment.
   (`leakBps`, `sandwichBps`, `medianDelay`, `probes`, `lastCycle`, `evidenceURI`).
   `probes` and `lastCycle` are ordinary parameters, not looked up on-chain: the CRE
   workflow already knows both, since it derived the score from the same rows. There is
-  still exactly one authorised writer into `RouteRegistry` — `Scorer` itself — and no
+  still exactly one authorised writer into `RouteRegistry`, `Scorer` itself, and no
   second path in; `composite` is emitted in `Scored` but is not one of the six text keys.
 
 ## What is live vs. designed-but-unbuilt
 
 - Live: `ProbeLedger`, `RouteRegistry`, `Scorer`, `ScorerReportReceiver`, full unit test
   suite. `RouteRegistry` is written against the real, verified ENSv2 interface (see
-  above) but is not yet installed as `gokuin.eth`'s ENSv2 subregistry on Sepolia — that
+  above) but is not yet installed as `gokuin.eth`'s ENSv2 subregistry on Sepolia, that
   is the one out-of-band `cast send` above, which `RegisterRoutes` checks for and refuses
   to proceed without.
-- Designed but not built: `Dispute` (see `PRD.md` §6.4 and `docs/credibility.md`) — bond
+- Designed but not built: `Dispute` (see `PRD.md` §6.4 and `docs/credibility.md`), bond
   against a row, get Gokuin's own bond slashed if the challenge is correct.
