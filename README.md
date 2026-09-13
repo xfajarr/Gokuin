@@ -19,6 +19,20 @@ Nothing below is claimed unless it runs. The distinction matters more here than
 in most projects, because this one exists to say other people's claims are not
 checked.
 
+**Reproduce the detector without cloning this repo**
+
+The Substreams module is published to the registry, so the core claim can be
+checked by anyone with a free Substreams key and no access to our code:
+
+```bash
+substreams run sandwich-detect@v0.1.0 map_sandwiches \
+  -e mainnet.eth.streamingfast.io:443 -s 22450093 -t +1
+```
+
+That returns the fixture sandwich — victim, pool, front-run, back-run, attacker,
+indices 10/11/12 — from a package we do not control the delivery of.
+<https://substreams.dev/packages/sandwich-detect/v0.1.0>
+
 **Verified against real mainnet data**
 
 - `contracts/test/ForkDerive.t.sol` forks mainnet at block 22450092, replays the
@@ -36,7 +50,7 @@ checked.
 | | State |
 |---|---|
 | `contracts/` | 23 tests pass. **No Sepolia deployment yet** |
-| `substreams/` | compiles to a real WASM artifact. **Not published to Substreams registry** |
+| `substreams/` | **published: `sandwich-detect@v0.1.0`**, runnable by reference |
 | `subgraph/` | `graph build` succeeds. **Not deployed to Subgraph Studio**; contract address is a placeholder pending deployment |
 | `cre/` | `cre workflow build` produces a real 2.6MB WASM. `cre workflow simulate` is blocked by Chainlink account auth — see `cre/simulation/05-simulate-auth-gate.log` for the real transcript. **No simulation was fabricated** |
 | `apps/api` | runs; chain writes are dry-run without keys |

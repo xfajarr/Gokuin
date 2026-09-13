@@ -132,6 +132,22 @@ export SUBSTREAMS_API_KEY=...      # a StreamingFast server_… key works direct
 make verify-fixtures
 ```
 
+Publishing is a separate step, and it is what turns the module from a local file
+into a Graph product anyone can point at:
+
+```bash
+substreams registry publish sandwich-detect-v0.1.0.spkg
+```
+
+Published: <https://substreams.dev/packages/sandwich-detect/v0.1.0>. Verify it is
+consumable by reference rather than only from disk — that is the property that
+matters, because it means a judge never has to clone this repo:
+
+```bash
+substreams run sandwich-detect@v0.1.0 map_sandwiches \
+  -e mainnet.eth.streamingfast.io:443 -s 22450093 -t +1
+```
+
 That asserts both fixtures for you. The negative one is **pool-scoped**, not
 block-scoped: block 22450094 does contain two real sandwiches in other pools, and
 the module is right to report them — it is generic by design. What must be absent
