@@ -112,6 +112,12 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
+  /* Term definition popovers are absolutely positioned and centered under
+     short trigger words that can sit near either edge at narrow widths;
+     this keeps a stray popover from ever producing page-level horizontal
+     scroll. Wide content (tables, code) scrolls inside its own
+     .table-scroll / .copy-code container instead, unaffected by this. */
+  overflow-x: hidden;
 }
 
 body {
@@ -525,6 +531,169 @@ tr.row-staged:hover td {
 .hash-link:hover {
   color: var(--accent);
   border-bottom-color: var(--accent);
+}
+
+.hash-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ---------- copy affordances ---------- */
+
+.copy-icon-btn {
+  height: auto;
+  padding: 0.08rem 0.4rem;
+  font-size: 0.66rem;
+  color: var(--muted);
+  background: transparent;
+  border: var(--hairline) solid var(--hair);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.copy-icon-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.copy-line {
+  margin: 0.6rem 0;
+}
+
+.copy-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+.copy-row {
+  display: flex;
+  align-items: stretch;
+  background: var(--rule);
+  gap: var(--hairline);
+  border: var(--hairline) solid var(--rule);
+  overflow: hidden;
+}
+
+.copy-code {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  background: var(--panel);
+  color: var(--ink);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.78rem;
+  white-space: pre;
+}
+
+.copy-btn {
+  flex: 0 0 auto;
+  height: auto;
+  background: var(--panel);
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0 1rem;
+  color: var(--body);
+}
+
+.copy-btn:hover {
+  color: var(--accent);
+}
+
+.verify-block {
+  border: var(--hairline) solid var(--rule);
+  background: var(--panel-2);
+  padding: 1rem 1.1rem 0.4rem;
+  margin: 0.75rem 0 1.5rem;
+}
+
+/* ---------- inline term definitions ---------- */
+
+.term {
+  position: relative;
+  display: inline-block;
+}
+
+.term-trigger {
+  display: inline-flex;
+  align-items: baseline;
+  height: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--muted);
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+.term-trigger:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+.term-mark {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.62em;
+  line-height: 1;
+  color: var(--accent);
+  border: 1px solid currentColor;
+  padding: 0.05em 0.32em;
+  margin-left: 0.3em;
+  vertical-align: text-top;
+}
+
+.term-pop {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 0.4rem);
+  transform: translateX(-50%);
+  width: min(20rem, calc(100vw - 2.5rem));
+  max-width: calc(100vw - 2.5rem);
+  z-index: 20;
+  background: var(--panel);
+  border: var(--hairline) solid var(--rule);
+  box-shadow: 3px 3px 0 0 var(--rule);
+  padding: 0.65rem 0.8rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--body);
+  white-space: normal;
+}
+
+.term:hover .term-pop,
+.term.is-open .term-pop {
+  display: block;
+}
+
+/* ---------- plain-language lead ---------- */
+
+.plain-answer {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: 58ch;
+  margin: 0 0 0.9rem;
+}
+
+.plain-answer strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.page-purpose {
+  font-size: 0.95rem;
+  color: var(--body);
+  max-width: 58ch;
+  margin: 0 0 0.6rem;
 }
 
 /* ---------- badges ---------- */

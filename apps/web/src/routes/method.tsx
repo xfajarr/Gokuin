@@ -9,6 +9,7 @@ import {
   isLeaked,
 } from '@gokuin/core'
 import { ProvenanceBadge } from '../components/Badge'
+import { Term } from '../components/Term'
 
 export const Route = createFileRoute('/method')({
   component: Method,
@@ -80,10 +81,16 @@ function Method() {
       <div className="page-head">
         <div className="eyebrow">How Gokuin can be checked</div>
         <h1>Method</h1>
+        <p className="page-purpose">
+          This page shows exactly how every number on this site is calculated, in the project's own code, so nothing
+          here has to be taken on faith.
+        </p>
         <p>
           These definitions are rendered from <code>PROVENANCE</code> and the measurement functions exported by{' '}
           <code>@gokuin/core</code>: the same module the API and the MCP server import. One definition, three
-          consumers; this page cannot quietly drift from what actually runs.
+          consumers; this page cannot quietly drift from what actually runs. <Term id="provenance">Provenance</Term>{' '}
+          is which of those two kinds a number is: something anyone can re-derive, or something that rests on our own
+          observation (<Term id="attested">attested</Term>).
         </p>
       </div>
 

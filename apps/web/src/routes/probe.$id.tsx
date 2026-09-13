@@ -1,11 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { PROVENANCE, delayBlocks } from '@gokuin/core'
 import { getProbe } from '../lib/api'
-import { truncateAddress, weiToEth } from '../lib/format'
+import { etherscanTx, truncateAddress, weiToEth } from '../lib/format'
 import { ROUTE_LABELS } from '../lib/types'
-import type { BlockTx, ProbeDetail } from '../lib/types'
+import type { BlockTx, Derivation, ProbeDetail } from '../lib/types'
 import { TxHashLink } from '../components/Hash'
 import { ProvenanceBadge, VerdictBadge } from '../components/Badge'
+import { Term } from '../components/Term'
+import { CopyLine } from '../components/Copy'
 
 export const Route = createFileRoute('/probe/$id')({
   loader: ({ params }) => getProbe({ data: params.id }),
@@ -99,6 +101,35 @@ function buildSandwichChecklist(block: ProbeDetail['block']): CheckItem[] {
   ]
 }
 
+/** The plain-language answer this page exists to give, read before any hash,
+ * index or derivation. A person who has never heard of MEV should be able to
+ * read this one paragraph and know what happened to this transaction. */
+function PlainVerdict({ derivation }: { derivation: Derivation }) {
+  return (
+    <p className="plain-answer">
+      {derivation.sandwiched ? (
+        <>
+          This transaction was <Term id="sandwich">sandwiched</Term>. Someone bought right before it and sold right
+          after, and it cost <strong>{weiToEth(derivation.extractedWei)} ETH</strong>.
+        </>
+      ) : (
+        <>
+          This transaction was <strong>not sandwiched</strong>: nobody was found buying right before it and selling
+          right after in the same block.
+        </>
+      )}{' '}
+      {derivation.leaked ? (
+        <>
+          It also <Term id="leak">leaked</Term>: it showed up in the public list of pending transactions before it
+          was confirmed.
+        </>
+      ) : (
+        <>It was not seen in the public list of pending transactions before it was confirmed.</>
+      )}
+    </p>
+  )
+}
+
 function CheckIcon({ status }: { status: CheckStatus }) {
   if (status === 'pass') return <span className="check-mark">✓</span>
   if (status === 'fail') return <span className="check-mark">✗</span>
@@ -132,9 +163,11 @@ function ProbeDemo() {
         <h1>
           {ROUTE_LABELS[probe.route]} vs. {ROUTE_LABELS[twin.route]}
         </h1>
+        <PlainVerdict derivation={derivation} />
         <p>
-          Two identical swaps, dispatched in the same cycle through different routes. Same pool, same amount, same
-          slippage, same block target, the only variable is the route.
+          Two identical swaps, dispatched in the same cycle through different routes. Same pool, same amount, same{' '}
+          <Term id="slippage">slippage</Term>, same block target, the only variable is the route. What follows is the
+          evidence behind the sentence above: hashes, indices and the exact commands to check it yourself.
         </p>
       </div>
 
@@ -165,7 +198,7 @@ function ProbeDemo() {
               </dd>
               <dt>slippage</dt>
               <dd className={identical(probe.slippageBps, twin.slippageBps) ? 'identical' : ''}>
-                {p.slippageBps} bps
+                {p.slippageBps} <Term id="bps">bps</Term> ({(p.slippageBps / 100).toFixed(2)}%)
               </dd>
               <dt>from</dt>
               <dd>{truncateAddress(p.fromAddress)}</dd>
@@ -186,6 +219,11 @@ function ProbeDemo() {
       <h2 className="section-title">Block view: {block ? `block ${block.number}` : 'no sandwich observed'}</h2>
       {block ? (
         <>
+          <p className="small muted" style={{ marginTop: 0 }}>
+            These three transactions landed in one block, in this order. A <Term id="frontrun">front-run</Term> buys
+            just before the victim trades; a <Term id="backrun">back-run</Term> sells just after, both from the same
+            address, this is the bracket that turns a normal trade into a sandwich.
+          </p>
           <div className="table-scroll">
             <table>
               <thead>
@@ -258,11 +296,14 @@ function ProbeDemo() {
 
       <h2 className="section-title">Derivation</h2>
       <p className="small muted" style={{ marginTop: 0 }}>
+        Six numbers, each with a <Term id="provenance">provenance</Term>:{' '}
         <strong style={{ color: 'var(--ink)', fontWeight: 400 }}>public</strong> means anyone can re-derive this
-        figure from block data alone.{' '}
-        <strong style={{ color: 'var(--accent)', fontWeight: 400 }}>attested</strong> means it rests on our own
-        listeners' observation, cross-checkable against third-party mempool archives, never independently provable
-        the way the others are.
+        figure from block data alone, no trust required.{' '}
+        <strong style={{ color: 'var(--accent)', fontWeight: 400 }}>
+          <Term id="attested">attested</Term>
+        </strong>{' '}
+        means it rests on our own listeners' observation, cross-checkable against third-party mempool archives, never
+        independently provable the way the others are.
       </p>
       <div className="table-scroll">
         <table>
@@ -290,6 +331,35 @@ function ProbeDemo() {
         Provenance comes straight from <code>PROVENANCE</code> in <code>@gokuin/core</code>: this table cannot
         drift from what the API and MCP server declare.
       </p>
+
+      <h2 className="section-title">Verify this yourself</h2>
+      <p className="small muted" style={{ marginTop: 0 }}>
+        Every line below uses this probe's real transaction hash and block number, nothing here needs our word. Copy
+        one, run it, and compare what you get to the numbers above.
+      </p>
+      {probe.txHash ? (
+        <div className="verify-block">
+          <CopyLine label="Open the transaction in a public block explorer" value={etherscanTx(probe.txHash)} />
+          {probe.includedBlock && (
+            <CopyLine
+              label="Ask the same open-source sandwich detector that produced this page's verdict"
+              value={`substreams run sandwich-detect@v0.1.0 map_sandwiches -s ${probe.includedBlock} -t +1`}
+            />
+          )}
+          <CopyLine
+            label="Replay the transaction against mainnet yourself (requires Foundry and an RPC URL)"
+            value={`cast run ${probe.txHash} --rpc-url $MAINNET_RPC`}
+          />
+          <CopyLine
+            label="Read its final on-chain status directly from the receipt"
+            value={`cast receipt ${probe.txHash} --rpc-url $MAINNET_RPC`}
+          />
+        </div>
+      ) : (
+        <p className="muted">
+          This probe has no included transaction yet, so there is nothing on public mainnet data to verify against.
+        </p>
+      )}
 
       <h2 className="section-title">Ledger &amp; listeners</h2>
       <dl className="kv" style={{ marginBottom: '1rem' }}>

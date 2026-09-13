@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { getIntegrity } from '../lib/api'
-import { formatTimestamp } from '../lib/format'
+import { etherscanTx, formatTimestamp } from '../lib/format'
 import { TxHashLink } from '../components/Hash'
 import { IntegrityBadge } from '../components/Badge'
+import { Term } from '../components/Term'
+import { CopyLine } from '../components/Copy'
 
 export const Route = createFileRoute('/cycle/$id')({
   loader: ({ params }) => getIntegrity({ data: params.id }),
@@ -19,9 +21,15 @@ function CycleDetail() {
       <div className="page-head">
         <div className="eyebrow">Commit / reveal</div>
         <h1>Cycle #{id}</h1>
+        <p className="page-purpose">
+          A cycle is one batch of probes run together. This page proves nobody, including us, quietly changed which
+          routes were tested after seeing how they would do: we publish a fingerprint of the plan before running it,
+          then publish the plan itself afterward, and you can check the two match.
+        </p>
         <p>
-          The schedule for this cycle was hashed and committed on Sepolia before any probe dispatched. Reveal
-          publishes the salt; the published count must equal the committed count or the gap is visible forever.
+          The schedule for this cycle was hashed and <Term id="commitReveal">committed</Term> on Sepolia before any
+          probe dispatched. Reveal publishes the salt; the published count must equal the committed count or the gap
+          is visible forever.
         </p>
       </div>
 
@@ -41,7 +49,9 @@ function CycleDetail() {
           <dd>the salt, published once the cycle settles</dd>
         </div>
         <div>
-          <dt>Intact</dt>
+          <dt>
+            <Term id="integrity">Intact</Term>
+          </dt>
           <dd>committed count equals published count, no probe was quietly dropped or added after the fact</dd>
         </div>
       </dl>
@@ -91,6 +101,35 @@ function CycleDetail() {
         <dt>reveal tx (Sepolia)</dt>
         <dd>{data.revealedTx ? <TxHashLink hash={data.revealedTx} network="sepolia" /> : 'pending'}</dd>
       </dl>
+
+      <h2 className="section-title">Verify this yourself</h2>
+      <p className="small muted" style={{ marginTop: 0 }}>
+        These links and commands use this cycle's real Sepolia transactions, nothing here needs our word.
+      </p>
+      {data.committedTx || data.revealedTx ? (
+        <div className="verify-block">
+          {data.committedTx && (
+            <>
+              <CopyLine
+                label="Open the commit transaction in a public block explorer"
+                value={etherscanTx(data.committedTx, 'sepolia')}
+              />
+              <CopyLine
+                label="Read the commit transaction's receipt directly"
+                value={`cast receipt ${data.committedTx} --rpc-url $SEPOLIA_RPC`}
+              />
+            </>
+          )}
+          {data.revealedTx && (
+            <CopyLine
+              label="Open the reveal transaction in a public block explorer"
+              value={etherscanTx(data.revealedTx, 'sepolia')}
+            />
+          )}
+        </div>
+      ) : (
+        <p className="muted">Neither the commit nor the reveal transaction has landed yet, nothing to verify.</p>
+      )}
 
       <h2 className="section-title">Why this is checkable</h2>
       <p>

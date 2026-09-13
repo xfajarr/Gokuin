@@ -7,148 +7,117 @@ const EASE_EXPO = 'cubic-bezier(.16,1,.3,1)'
 const EASE_SOFT = 'cubic-bezier(.22,.61,.24,1)'
 
 const NAV_ITEMS: Array<{ label: string; chevron: boolean }> = [
-  { label: 'Products', chevron: true },
-  { label: 'Solutions', chevron: true },
-  { label: 'Resources', chevron: true },
-  { label: 'Enterprise', chevron: false },
-  { label: 'Clients', chevron: false },
-  { label: 'Pricing', chevron: false },
+  { label: 'Method', chevron: true },
+  { label: 'Evidence', chevron: true },
+  { label: 'Routes', chevron: true },
+  { label: 'Credibility', chevron: false },
+  { label: 'Docs', chevron: false },
 ]
 
 const TREE_ROWS: Array<{
   level: 'l1' | 'l2' | 'file'
   label: string
   chevron?: 'right' | 'down'
+  active?: boolean
 }> = [
-  { level: 'l1', label: '.github', chevron: 'right' },
-  { level: 'l1', label: '.vercel', chevron: 'right' },
-  { level: 'l1', label: '.node_modules', chevron: 'right' },
-  { level: 'l1', label: '.src', chevron: 'down' },
-  { level: 'l2', label: '.snippets', chevron: 'down' },
-  { level: 'file', label: 'button.jsx' },
-  { level: 'file', label: 'card.jsx' },
-  { level: 'file', label: 'card.jsx' },
-  { level: 'l1', label: '.public', chevron: 'down' },
+  { level: 'l1', label: 'apps', chevron: 'right' },
+  { level: 'l1', label: 'node_modules', chevron: 'right' },
+  { level: 'l1', label: 'docs', chevron: 'right' },
+  { level: 'l1', label: 'substreams', chevron: 'down' },
+  { level: 'l2', label: 'sandwich-detect', chevron: 'down' },
+  { level: 'file', label: 'sandwich-detect.spkg' },
+  { level: 'file', label: 'block-11693970.json', active: true },
+  { level: 'l1', label: 'contracts', chevron: 'down' },
+  { level: 'file', label: 'ProbeLedger.sol' },
 ]
 
-// Line numbers skip 4 on purpose, matches the reference mock exactly.
+// Line numbers skip 4 on purpose, matches the reference mock's own quirk.
 const LINE_NUMBERS = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
 
-const LOGOS: Array<{ key: string; name: string; src: string }> = [
-  {
-    key: 'europa',
-    name: 'Europa',
-    src: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_121624_294abb76-9c42-4ec7-b0da-150a59ef6a08.png',
-  },
-  {
-    key: 'eclipseful',
-    name: 'Eclipseful',
-    src: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_122106_32ed25ea-5ac4-4f87-9337-c99a4635cc13.png',
-  },
-  {
-    key: 'ikigai',
-    name: 'Ikigai Labs',
-    src: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_122106_2df1b7c0-4987-4ba7-8fae-37b6e357232f.png',
-  },
-  {
-    key: 'eightball',
-    name: 'Eightball',
-    src: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_121624_affc2cfe-bb6a-430c-93b3-691ccbfbe746.png',
-  },
+// What Gokuin is actually built on, not customer logos, so these are set as
+// plain wordmarks rather than borrowed images.
+const BUILT_ON: Array<{ key: string; label: string }> = [
+  { key: 'thegraph', label: 'The Graph' },
+  { key: 'ens', label: 'ENS' },
+  { key: 'chainlink', label: 'Chainlink CRE' },
+  { key: 'foundry', label: 'Foundry' },
 ]
 
-// The exact code listing from the spec, each entry rendered as one `.cl`
-// line. `null` is a blank line. Hex digits inside quoted colour strings are
-// wrapped in `.hx`; the rest of the string (quotes + `#`) stays `.st`.
+// This is the detector's own output, not invented copy: block 11693970 on
+// Sepolia, a sandwich staged against our own probe. `.kw` marks JSON keys,
+// `.st` marks string values, `.hx` marks the hex digits inside a 0x string
+// (the quotes and the `0x` itself stay `.st`, same split the spec used for
+// hex colours).
+const hexString = (hex: string) => (
+  <span className="st">
+    {'"0x'}
+    <span className="hx">{hex}</span>
+    {'"'}
+  </span>
+)
+
 const CODE_LINES: Array<React.ReactNode> = [
-  '// CSS Syntax Highlighter UI (Design Mock)',
+  '// map_sandwiches output, Sepolia block 11693970',
   null,
+  '{',
   <>
-    <span className="kw">import</span>
-    {' React from '}
-    <span className="st">"react"</span>
-    {';'}
+    {'  '}
+    <span className="kw">"@module"</span>
+    {': '}
+    <span className="st">"map_sandwiches"</span>
+    {','}
+  </>,
+  <>
+    {'  '}
+    <span className="kw">"@block"</span>
+    {': 11693970,'}
   </>,
   null,
-  'export default function SyntaxUI() {',
-  '  const colors = {',
+  '  "items": [',
+  '    {',
   <>
-    {'    arrow: '}
-    <span className="st">
-      {'"#'}
-      <span className="hx">d9b3ff</span>
-      {'"'}
-    </span>
+    {'      '}
+    <span className="kw">"victimTxHash"</span>
+    {': '}
+    {hexString('f6833083c21d1a6335e6e63b95364e72afa4f8e9bfb1cb34c3c0d71d895c1d4f')}
     {','}
   </>,
   <>
-    {'    values: '}
-    <span className="st">
-      {'"#'}
-      <span className="hx">8cd9ff</span>
-      {'"'}
-    </span>
+    {'      '}
+    <span className="kw">"pool"</span>
+    {': '}
+    {hexString('3289680dD4d6C10bb19b899729cda5eEF58AEfF1')}
     {','}
   </>,
   <>
-    {'    integer: '}
-    <span className="st">
-      {'"#'}
-      <span className="hx">ffb399</span>
-      {'"'}
-    </span>
+    {'      '}
+    <span className="kw">"attacker"</span>
+    {': '}
+    {hexString('73261B963E7aaF044283fD6BbC826315e9451631')}
     {','}
   </>,
   <>
-    {'    text: '}
-    <span className="st">
-      {'"#'}
-      <span className="hx">ff9966</span>
-      {'"'}
-    </span>
-    {','}
+    {'      '}
+    <span className="kw">"frontrunIndex"</span>
+    {': 1,'}
   </>,
   <>
-    {'    digit: '}
-    <span className="st">
-      {'"#'}
-      <span className="hx">99cc99</span>
-      {'"'}
-    </span>
-    {','}
+    {'      '}
+    <span className="kw">"victimIndex"</span>
+    {': 2,'}
   </>,
   <>
-    {'    title: '}
-    <span className="st">
-      {'"#'}
-      <span className="hx">80b380</span>
-      {'"'}
-    </span>
-    {','}
+    {'      '}
+    <span className="kw">"backrunIndex"</span>
+    {': 7'}
   </>,
-  '  };',
+  '    }',
+  '  ]',
+  '}',
   null,
-  '  return (',
-  <>
-    {'    <div style={{ fontFamily: '}
-    <span className="st">"monospace"</span>
-    {', padding: 20 }}>'}
-  </>,
-  '      <h3>CSS Highlighter</h3>',
-  null,
-  <>
-    {'      {Object.entries(colors).map(([key, color]) '}
-    <span className="lig">{'=>'}</span>
-    {' ('}
-  </>,
-  <>
-    {'        <div key={key} style={{ display: '}
-    <span className="st">"flex"</span>
-    {', alignItems: '}
-    <span className="st">"center"</span>
-    {', marginBottom: 8 }}>'}
-  </>,
-  '          <span style={{ width: 100 }}>{key}</span>',
+  '// frontrun +0.000600 WETH for -16.72 USDC',
+  '// victim   +0.000200 WETH for -5.57 USDC (worse price)',
+  '// backrun  -0.000593 WETH for +16.55 USDC',
 ]
 
 function BrandMark() {
@@ -484,7 +453,7 @@ function Home() {
                   headlineRefs.current[0] = el
                 }}
               >
-                For Developers Who Swear
+                Every Route Promises Privacy
               </span>
             </span>
             <span className="ln dim">
@@ -494,13 +463,14 @@ function Home() {
                   headlineRefs.current[1] = el
                 }}
               >
-                It Wasn't Their Fault
+                Nobody Has Ever Checked
               </span>
             </span>
           </h1>
 
           <p className="sub" ref={subRef}>
-            Your AI-powered code space that catches the obvious, the subtle, and the "how did that even happen?"
+            Flashbots Protect and MEV Blocker both advertise that they stop around 80% of sandwich attacks. Both of
+            those numbers were measured by the company that published them.
           </p>
 
           <div className="cta-row">
@@ -511,16 +481,16 @@ function Home() {
                 ctaRefs.current[0] = el
               }}
             >
-              Get Started
+              Read the Evidence
             </a>
             <a
-              href="#"
+              href="https://github.com/xfajarr/Gokuin"
               className="btn btn-ghost btn-hero"
               ref={(el) => {
                 ctaRefs.current[1] = el
               }}
             >
-              Book a Call
+              View on GitHub
             </a>
           </div>
         </div>
@@ -553,15 +523,15 @@ function Home() {
             <div className="ed-head">
               <div className="ed-head-left">
                 <span className="ed-eyebrow" ref={eyebrowRef}>
-                  File Manager
+                  Substreams Output
                 </span>
                 <span className="ed-project" ref={projectRef}>
-                  NEW-REACT-WEB-APP
+                  SANDWICH-DETECT@V0.1.0
                 </span>
               </div>
               <div className="ed-head-right">
                 <span className="ed-tab" ref={tabRef}>
-                  card.jsx
+                  block-11693970.json
                 </span>
               </div>
             </div>
@@ -571,14 +541,14 @@ function Home() {
                 {TREE_ROWS.map((row, i) => (
                   <div
                     key={`${row.label}-${i}`}
-                    className={`tree-row tree-row--${row.level}`}
+                    className={`tree-row tree-row--${row.level}${row.active ? ' tree-row--active' : ''}`}
                     ref={(el) => {
                       treeRowRefs.current[i] = el
                     }}
                   >
                     {row.chevron ? <TreeChevron direction={row.chevron} /> : null}
                     {row.level === 'file' ? <FileIcon /> : <FolderIcon />}
-                    <span>{row.label}</span>
+                    <span className="tree-label">{row.label}</span>
                   </div>
                 ))}
               </div>
@@ -614,9 +584,9 @@ function Home() {
       <div className="hatch" />
 
       <div className="strip">
-        {LOGOS.map((logo) => (
-          <div className="strip-cell" data-logo={logo.key} key={logo.key}>
-            <img src={logo.src} alt={logo.name} loading="lazy" />
+        {BUILT_ON.map((tech) => (
+          <div className="strip-cell" data-tech={tech.key} key={tech.key}>
+            <span className="strip-word">{tech.label}</span>
           </div>
         ))}
       </div>

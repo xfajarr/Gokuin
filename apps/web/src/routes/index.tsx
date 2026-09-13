@@ -1,17 +1,28 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ROUTE_IDS } from '@gokuin/core'
-import { getRoutes } from '../lib/api'
+import { getIntegrity, getRoutes } from '../lib/api'
 import { bpsToPct, weiToEth } from '../lib/format'
 import { ROUTE_LABELS } from '../lib/types'
 import { IntegrityBadge, NoDataBadge } from '../components/Badge'
+import { Term } from '../components/Term'
 
 export const Route = createFileRoute('/')({
-  loader: () => getRoutes(),
+  loader: async () => {
+    const routesResult = await getRoutes()
+    const lastCycle = routesResult.data.reduce((max, r) => Math.max(max, r.lastCycle), 0)
+    // Real committed/published counts for the most recent cycle, never a
+    // stand-in figure: with no cycle run yet there is nothing to fetch, and
+    // the strip below reads as "no data" rather than a fabricated 100/100.
+    const integrity = lastCycle > 0 ? await getIntegrity({ data: String(lastCycle) }) : null
+    return { routesResult, integrity }
+  },
   component: Scoreboard,
 })
 
 function Scoreboard() {
-  const { data: routes, sample } = Route.useLoaderData()
+  const { routesResult, integrity } = Route.useLoaderData()
+  const { data: routes, sample: routesSample } = routesResult
+  const sample = routesSample || Boolean(integrity?.sample)
   const lastCycle = routes.reduce((max, r) => Math.max(max, r.lastCycle), 0)
   const totalProbes = routes.reduce((a, r) => a + r.probes, 0)
   const totalLeaked = routes.reduce((a, r) => a + r.leaks, 0)
@@ -23,6 +34,11 @@ function Scoreboard() {
       <div className="page-head">
         <div className="eyebrow">Gokuin, measured, not asserted</div>
         <h1>Route scoreboard</h1>
+        <p className="plain-answer">
+          These are three different ways to send a transaction on Ethereum. Gokuin sent real, identical transactions
+          through each one and watched what happened: how often each way <Term id="leak">leaked</Term>, how often a{' '}
+          <Term id="sandwich">sandwich</Term> attack found it, and how much that cost.
+        </p>
         <p>
           One row per Ethereum transaction route. Every cell links to the evidence rows that produced it, the
           mainnet transaction hash, not our word. Five of six measurements below are things anyone can re-derive
@@ -40,35 +56,53 @@ function Scoreboard() {
       <dl className="legend">
         <div>
           <dt>Probes</dt>
-          <dd>twin transactions sent through this route this cycle, staged rows excluded</dd>
+          <dd>
+            test transactions sent through this route this cycle. <Term id="staged">Staged</Term> rows excluded
+          </dd>
         </div>
         <div>
           <dt>Leaks</dt>
-          <dd>seen in the public mempool before inclusion, attested, see /method</dd>
+          <dd>
+            how many <Term id="leak">leaked</Term>, seen in public before they were confirmed, an{' '}
+            <Term id="attested">attested</Term> figure, see /method
+          </dd>
         </div>
         <div>
           <dt>Sandwich %</dt>
-          <dd>front-run + back-run around ours, same block, public, re-derivable</dd>
+          <dd>
+            how many were <Term id="sandwich">sandwiched</Term>, checkable by anyone from public block data
+          </dd>
         </div>
         <div>
           <dt>ETH lost</dt>
-          <dd>simulated output minus real output, public, re-derivable</dd>
+          <dd>what a sandwich actually cost, simulated output minus real output, public, re-derivable</dd>
         </div>
       </dl>
 
       <div className="integrity" title="Cycle integrity: committed schedules that were published without a gap">
-        <span>cycle {lastCycle || ':'} integrity:</span>
-        <span className="num">committed 100</span>
-        <span className="integrity-sep">·</span>
-        <span className="num">published 100</span>
-        <span className="integrity-sep">·</span>
-        <IntegrityBadge intact={totalProbes > 0} />
-        <span className="muted small">
-         : see{' '}
-          <Link to="/cycle/$id" params={{ id: String(lastCycle || 1) }}>
-            cycle {lastCycle || 1}
-          </Link>
+        <span>
+          cycle {lastCycle || ':'} <Term id="integrity">integrity</Term>:
         </span>
+        {integrity ? (
+          <>
+            <span className="num">committed {integrity.data.committed}</span>
+            <span className="integrity-sep">·</span>
+            <span className="num">published {integrity.data.published}</span>
+            <span className="integrity-sep">·</span>
+            <IntegrityBadge intact={integrity.data.intact} />
+            <span className="muted small">
+              : see{' '}
+              <Link to="/cycle/$id" params={{ id: String(lastCycle) }}>
+                cycle {lastCycle}
+              </Link>
+            </span>
+          </>
+        ) : (
+          <>
+            <NoDataBadge />
+            <span className="muted small">no cycle has run yet</span>
+          </>
+        )}
       </div>
 
       <div className="grid-cards">
@@ -142,7 +176,7 @@ function Scoreboard() {
                       </td>
                       <td className="num">
                         <Link className="cell-link" to="/route/$id" params={{ id: r.route }} hash="sandwiches">
-                          {bpsToPct(r.sandwichBps)}
+                          {bpsToPct(r.sandwichBps)} ({r.sandwiches} of {r.probes})
                         </Link>
                       </td>
                       <td className="num">

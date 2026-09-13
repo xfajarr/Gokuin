@@ -34,6 +34,16 @@
   --rise: 22px;
   --ed-detail: 1;
 
+  /* Gokuin's headline ("Every Route Promises Privacy") runs ~7% wider per
+     character than the reference copy the spec's mobile h1 clamp was tuned
+     against, which broke the "exactly two lines" requirement across almost
+     the whole <=1040px range. This scales both mobile h1 clamps down
+     uniformly (floor, preferred, and ceiling alike, so the 470px seam
+     between them still lines up) rather than hand-picking new numbers. The
+     >=1040px base size (48rem) needed no change: it already scales
+     proportionally with the viewport there and had comfortable margin. */
+  --h1-fit: 0.9;
+
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.22, 0.61, 0.24, 1);
 }
@@ -524,6 +534,7 @@ h1 {
   letter-spacing: calc(0.19 * var(--e));
   color: #454545;
   white-space: nowrap;
+  width: 100%;
 }
 
 .tree-row--l1 {
@@ -536,6 +547,15 @@ h1 {
 
 .tree-row--file {
   padding-left: calc(90 * var(--e));
+}
+
+.tree-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: calc(8 * var(--e));
 }
 
 .tree-row svg {
@@ -555,6 +575,18 @@ h1 {
 
 .tree-file {
   color: #9a9a9a;
+}
+
+/* The file currently open in the tab, highlighted like an active row in a
+   real file tree. */
+.tree-row--active {
+  background: rgba(38, 38, 31, 0.06);
+  color: #1a1a17;
+  font-weight: 500;
+}
+
+.tree-row--active .tree-file {
+  color: #57574f;
 }
 
 .ed-linenums {
@@ -641,26 +673,17 @@ h1 {
   border-left: none;
 }
 
-.strip-cell img {
+/* Plain wordmarks standing in for logos, same max-height discipline as an
+   image would have kept so the row still reads as a logo strip. */
+.strip-word {
   display: block;
   max-height: 56rem;
-  object-fit: contain;
-}
-
-.strip-cell[data-logo='europa'] img {
-  width: 147rem;
-}
-
-.strip-cell[data-logo='eclipseful'] img {
-  width: 169rem;
-}
-
-.strip-cell[data-logo='ikigai'] img {
-  width: 202rem;
-}
-
-.strip-cell[data-logo='eightball'] img {
-  width: 151rem;
+  font-family: 'Figtree', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 20rem;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: nowrap;
 }
 
 /* ==========================================================================
@@ -849,7 +872,7 @@ h1 {
   }
 
   h1 {
-    font-size: clamp(34px, calc(22px + 2.5vw), 48px);
+    font-size: calc(clamp(34px, calc(22px + 2.5vw), 48px) * var(--h1-fit));
   }
 
   .sub {
@@ -903,24 +926,9 @@ h1 {
     border-top: var(--hairline) solid var(--rule);
   }
 
-  .strip-cell img {
+  .strip-word {
     max-height: 36px;
-  }
-
-  .strip-cell[data-logo='europa'] img {
-    width: 126px;
-  }
-
-  .strip-cell[data-logo='eclipseful'] img {
-    width: 145px;
-  }
-
-  .strip-cell[data-logo='ikigai'] img {
-    width: 173px;
-  }
-
-  .strip-cell[data-logo='eightball'] img {
-    width: 129px;
+    font-size: 16px;
   }
 }
 
@@ -940,7 +948,7 @@ h1 {
   }
 
   h1 {
-    font-size: clamp(20px, calc(8.33vw - 5.16px), 34px);
+    font-size: calc(clamp(20px, calc(8.33vw - 5.16px), 34px) * var(--h1-fit));
   }
 
   .sub {
@@ -961,24 +969,9 @@ h1 {
     align-self: stretch;
   }
 
-  .strip-cell img {
+  .strip-word {
     max-height: 27px;
-  }
-
-  .strip-cell[data-logo='europa'] img {
-    width: 88px;
-  }
-
-  .strip-cell[data-logo='eclipseful'] img {
-    width: 101px;
-  }
-
-  .strip-cell[data-logo='ikigai'] img {
-    width: 120px;
-  }
-
-  .strip-cell[data-logo='eightball'] img {
-    width: 90px;
+    font-size: 13px;
   }
 }
 

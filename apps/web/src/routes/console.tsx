@@ -8,6 +8,7 @@ import type { CycleRunInput, CycleRunResult, Derivation, Fetched, Integrity, Pro
 import { ROUTE_LABELS } from '../lib/types'
 import { TxHashLink } from '../components/Hash'
 import { IntegrityBadge, ProvenanceBadge, VerdictBadge } from '../components/Badge'
+import { Term } from '../components/Term'
 
 export const Route = createFileRoute('/console')({
   component: Console,
@@ -65,6 +66,22 @@ function sameVal(a: unknown, b: unknown) {
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/** Wei is not a unit anyone reads at a glance: shown next to the raw input
+ * so the operator can see the ETH amount they are about to send. Tolerates
+ * a half-typed value instead of throwing on it. */
+function safeWeiToEth(wei: string): string {
+  if (!/^\d+$/.test(wei)) return 'not a number yet'
+  return `= ${weiToEth(wei)} ETH`
+}
+
+/** Same idea for the slippage tolerance: bps alone is not readable, so show
+ * the plain percentage it maps to next to it. */
+function safeBpsToPct(bps: string): string {
+  const n = Number(bps)
+  if (!Number.isFinite(n)) return 'not a number yet'
+  return `= ${(n / 100).toFixed(2)}% max slippage`
 }
 
 function initialStages(): Record<StageKey, { status: StageStatus; note: string }> {
@@ -300,10 +317,14 @@ function Console() {
       <div className="page-head">
         <div className="eyebrow">Live probe runner, screen-recording surface</div>
         <h1>Console</h1>
+        <p className="page-purpose">
+          This page runs one real, small measurement live: it commits to a plan, sends two identical transactions
+          through different routes, watches what happens to each, and shows every step on this screen as it happens.
+        </p>
         <p>
           Runs one real cycle against <code>POST /admin/cycles/run</code>, then polls the same read endpoints{' '}
           <code>/probe/$id</code> and <code>/cycle/$id</code> use to fill in the six stages as the cycle progresses:
-          commit → dispatch → observe → block → derive → record.
+          <Term id="commitReveal">commit</Term> → dispatch → observe → block → derive → record.
         </p>
       </div>
 
@@ -323,10 +344,12 @@ function Console() {
         <label>
           amount in (wei)
           <input inputMode="numeric" value={amountInWei} onChange={(e) => setAmountInWei(e.target.value)} />
+          <span className="small muted">{safeWeiToEth(amountInWei)}</span>
         </label>
         <label>
-          slippage (bps)
+          slippage (<Term id="bps">bps</Term>)
           <input inputMode="numeric" value={slippageBps} onChange={(e) => setSlippageBps(e.target.value)} />
+          <span className="small muted">{safeBpsToPct(slippageBps)}</span>
         </label>
         <button type="button" className="primary" onClick={run} disabled={running}>
           {running ? `running… (poll ${attempts}/${MAX_POLLS})` : 'run cycle'}

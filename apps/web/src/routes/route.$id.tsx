@@ -5,6 +5,7 @@ import { bpsToPct, weiToEth } from '../lib/format'
 import { ROUTE_LABELS } from '../lib/types'
 import { TxHashLink } from '../components/Hash'
 import { NoDataBadge, StagedBadge, VerdictBadge } from '../components/Badge'
+import { Term } from '../components/Term'
 
 export const Route = createFileRoute('/route/$id')({
   loader: async ({ params }) => {
@@ -29,10 +30,20 @@ function RouteDetail() {
       <div className="page-head">
         <div className="eyebrow">Route record</div>
         <h1>{ROUTE_LABELS[score.route] ?? score.route}</h1>
+        <p className="plain-answer">
+          {hasData ? (
+            <>
+              Out of {score.probes} real transactions sent through this route, {score.leaks} <Term id="leak">
+                leaked
+              </Term>{' '}
+              and {score.sandwiches} were <Term id="sandwich">sandwiched</Term>, costing a combined{' '}
+              <strong>{weiToEth(score.totalExtractedWei)} ETH</strong>.
+            </>
+          ) : (
+            'Nothing has been measured on this route yet: it has not been probed this cycle, or every row on record was one we staged ourselves.'
+          )}
+        </p>
         <p>
-          {hasData
-            ? `${score.probes} non-staged probes measured through cycle ${score.lastCycle}.`
-            : 'No non-staged probes have been measured on this route yet.'}{' '}
           Every row below is one twin probe&rsquo;s evidence, the mainnet tx hash links to the public explorer, no
           number here is asserted without it.
         </p>
@@ -50,8 +61,8 @@ function RouteDetail() {
           {score.stagedExcluded > 0
             ? `${score.stagedExcluded} row(s) were excluded because we caused them ourselves (see below): they cannot count as evidence about this route.`
             : 'It has not been probed yet this cycle.'}{' '}
-          This reads as no data, not as a clean 0%: a route scored on nothing but staged rows must never look like a
-          passing record.
+          This reads as no data, not as a clean 0%: a route scored on nothing but <Term id="staged">staged</Term>{' '}
+          rows must never look like a passing record.
         </div>
       )}
 
@@ -62,14 +73,14 @@ function RouteDetail() {
             <div className="stat-value num">
               {score.leaks} / {score.probes}
             </div>
-            <div className="muted small">{bpsToPct(score.leakBps)}</div>
+            <div className="muted small">{bpsToPct(score.leakBps)} of probes ({score.leakBps} bps)</div>
           </div>
           <div className="stat" id="sandwiches">
             <div className="stat-label">Sandwiched</div>
             <div className="stat-value num">
               {score.sandwiches} / {score.probes}
             </div>
-            <div className="muted small">{bpsToPct(score.sandwichBps)}</div>
+            <div className="muted small">{bpsToPct(score.sandwichBps)} of probes ({score.sandwichBps} bps)</div>
           </div>
           <div className="stat">
             <div className="stat-label">Median inclusion</div>
@@ -84,8 +95,8 @@ function RouteDetail() {
 
       {score.stagedExcluded > 0 && hasData && (
         <p className="small muted">
-          {score.stagedExcluded} additional row(s) on this route were staged by us and are excluded from every figure
-          above, see the marked row(s) below.
+          {score.stagedExcluded} additional row(s) on this route were <Term id="staged">staged</Term> by us and are
+          excluded from every figure above, see the marked row(s) below.
         </p>
       )}
 

@@ -17,11 +17,11 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1, viewport-fit=cover',
       },
       { name: 'theme-color', content: '#efede8' },
-      { title: "For Developers Who Swear It Wasn't Their Fault" },
+      { title: 'Gokuin: every route promises privacy, nobody has ever checked' },
       {
         name: 'description',
         content:
-          'Your AI-powered code space that catches the obvious, the subtle, and the "how did that even happen?"',
+          'Flashbots Protect and MEV Blocker both advertise that they stop around 80% of sandwich attacks. Both of those numbers were measured by the company that published them.',
       },
     ],
     links: [
