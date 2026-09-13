@@ -54,7 +54,18 @@ export function median(xs: number[]) {
   return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2)
 }
 
+/**
+ * Scores a route from its rows, excluding any we staged.
+ *
+ * A staged row is one where we executed the sandwich ourselves against our own
+ * probe. That demonstrates the detector works; it says nothing about whether the
+ * route failed its promise. Letting it into sandwichBps would mean publishing a
+ * manufactured figure about a named company — the precise thing this project
+ * exists to object to.
+ */
 export function scoreRoute(route: RouteId, rows: Row[]): RouteScore {
+  const staged = rows.filter(r => r.staged)
+  rows = rows.filter(r => !r.staged)
   const probes = rows.length
   const leaks = rows.filter(r => r.leakedAtBlock > 0).length
   const sandwiches = rows.filter(r => r.sandwiched).length
@@ -69,6 +80,7 @@ export function scoreRoute(route: RouteId, rows: Row[]): RouteScore {
     medianDelayBlocks: median(rows.map(r => delayBlocks(r.submittedBlock, r.includedBlock))),
     totalExtractedWei: rows.reduce((a, r) => a + r.extractedWei, 0n).toString(),
     lastCycle: rows.reduce((a, r) => Math.max(a, r.cycleId), 0),
+    stagedExcluded: staged.length,
   }
 }
 

@@ -124,6 +124,34 @@ document becomes worthless and the project should be ignored.
 
 ---
 
+## The sandwich in the demo video is one we caused
+
+A sandwich cannot be scheduled. Waiting for an organic one during a four-minute
+recording is not a plan, so the demo executes one against **our own probe** to show
+the detection path working end to end.
+
+Said plainly because it matters: **that sandwich is not evidence about any route.**
+It is evidence that the detector works.
+
+Two things keep it from contaminating anything:
+
+**It can only target us.** The harness resolves its victim from our own probe
+records and refuses to build a bundle against any other address. Sandwiching a
+third party takes real money from a real person; that is not a configuration
+option here, it is a guard with its own test.
+
+**Staged rows never reach a score.** Every probe carries a `staged` flag, and
+`scoreRoute()` excludes staged rows from every ratio and total — sandwiches, leaks,
+extracted value, all of it. The returned score reports `stagedExcluded` so the
+exclusion is visible rather than silent, and the scoreboard surfaces that count.
+`packages/core/test/staged-exclusion.test.ts` pins this, including the case that
+matters most: a route with nothing but staged rows reports zero probes, not a clean
+record.
+
+If a staged row reached `sandwichBps`, Gokuin would be publishing a manufactured
+figure about a named company. That is the precise thing this project exists to
+object to, so it is made structurally impossible rather than left to discipline.
+
 ## Designed, not shipped
 
 Honest accounting of what is specified but not built for the hackathon submission:

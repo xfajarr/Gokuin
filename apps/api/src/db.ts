@@ -28,7 +28,10 @@ CREATE TABLE IF NOT EXISTS probe (
   submitted_block INTEGER,
   submitted_at    INTEGER,
   included_block  INTEGER,
-  status          TEXT NOT NULL       -- pending|included|dropped|reverted
+  status          TEXT NOT NULL,
+  -- 1 when we executed the sandwich ourselves against our own probe, to show the
+  -- detection path on camera. Excluded from every route figure by scoreRoute().
+  staged          INTEGER NOT NULL DEFAULT 0       -- pending|included|dropped|reverted
 );
 
 CREATE TABLE IF NOT EXISTS observation (

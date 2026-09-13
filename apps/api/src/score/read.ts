@@ -30,12 +30,14 @@ function toRouteScore(r: {
   totalExtractedWei: string
   medianDelayBlocks: string | number
   lastCycle?: string | number
+  stagedExcluded?: string | number
 }): RouteScore {
   const probes = Number(r.probes)
   const leaks = Number(r.leaks)
   const sandwiches = Number(r.sandwiches)
   return {
     route: r.id as RouteId,
+    stagedExcluded: Number(r.stagedExcluded ?? 0),
     probes,
     leaks,
     leakBps: bps(leaks, probes),

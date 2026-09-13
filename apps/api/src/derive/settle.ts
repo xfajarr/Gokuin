@@ -26,6 +26,8 @@ interface ProbeRow {
   submitted_block: number | null
   included_block: number | null
   status: string
+  /** 0 or 1 — sqlite has no boolean. See db.ts for what staged means. */
+  staged: number
 }
 
 interface ObservationRow {
@@ -74,6 +76,9 @@ export async function settleProbe(deps: SettleDeps, probeId: number): Promise<Ro
     routeId: ROUTE_IDS[probe.route],
     cycleId: probe.cycle_id,
     sandwiched: verdict.sandwiched,
+    // Carried from the probe, not inferred here. A row we staged is evidence about
+    // the detector; scoreRoute() keeps it out of every route figure.
+    staged: probe.staged === 1,
   }
 
   const ledgerResult = await deps.ledger.record(probe.cycle_id, row)

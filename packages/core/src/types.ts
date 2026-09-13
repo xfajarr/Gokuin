@@ -55,6 +55,16 @@ export interface Row {
   routeId: number
   cycleId: number
   sandwiched: boolean
+  /**
+   * True when we caused this outcome ourselves — a sandwich executed against our
+   * own probe to demonstrate the detection path, because a real one cannot be
+   * scheduled for a recording.
+   *
+   * A staged row is evidence about the DETECTOR, never about the ROUTE, and
+   * scoreRoute() excludes it from every ratio and total. Counting it would put
+   * manufactured data into a number we ask other people to trust.
+   */
+  staged: boolean
 }
 
 export interface RouteScore {
@@ -67,6 +77,9 @@ export interface RouteScore {
   medianDelayBlocks: number
   totalExtractedWei: string
   lastCycle: number
+  /** How many rows were withheld from the figures above because we staged them.
+   *  Surfaced rather than silent: a reader should see that an exclusion happened. */
+  stagedExcluded: number
 }
 
 export interface Selection {

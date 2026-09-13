@@ -1,0 +1,19 @@
+specVersion: 0.0.5
+description: >
+  Generic Uniswap V2/V3 sandwich-attack detector for Ethereum mainnet. Not scoped to any
+  address -- query `sandwiches(where: { victim: "0x..." })` or `sandwiches(where: {
+  attacker: "0x..." })` for any wallet whatsoever.
+repository: https://github.com/gokuin/gokuin
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: substreams
+    name: sandwich_detect
+    network: mainnet
+    source:
+      package:
+        moduleName: graph_out
+        file: sandwich_detect/sandwich-detect-v0.1.0.spkg
+    mapping:
+      kind: substreams/graph-entities
+      apiVersion: 0.0.5
