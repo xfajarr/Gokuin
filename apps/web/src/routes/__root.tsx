@@ -1,6 +1,25 @@
-import { HeadContent, Link, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Link, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router'
 
 import appCss from '../styles.css?url'
+
+const SECTION_LABEL: Record<string, string> = {
+  route: 'route',
+  probe: 'probe',
+  cycle: 'cycle',
+  method: 'method',
+  console: 'console',
+}
+
+/** Turns the current pathname into a plain-English trail, e.g. "/probe/1042"
+ * -> "scoreboard / probe / 1042" — so a reader landing on a deep link (a
+ * probe, a route, a cycle) can tell where they are without knowing the nav. */
+function useBreadcrumb() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const segments = pathname.split('/').filter(Boolean)
+  if (segments.length === 0) return 'scoreboard'
+  const trail = segments.map((seg, i) => (i === 0 ? (SECTION_LABEL[seg] ?? seg) : seg))
+  return ['scoreboard', ...trail].join(' / ')
+}
 
 const THEME_INIT = `
 (function () {
@@ -29,7 +48,7 @@ export const Route = createRootRoute({
       { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
       {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap',
+        href: 'https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap',
       },
       { rel: 'stylesheet', href: appCss },
     ],
@@ -61,6 +80,7 @@ function ThemeToggle() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const breadcrumb = useBreadcrumb()
   return (
     <html lang="en">
       <head>
@@ -79,9 +99,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 <Link to="/method">method</Link>
                 <Link to="/console">console</Link>
               </nav>
+              <span className="here mono" suppressHydrationWarning>
+                {breadcrumb}
+              </span>
               <ThemeToggle />
             </div>
           </header>
+          <div className="hatch" aria-hidden="true" />
           {children}
           <footer className="footer">
             Rows are the truth, the score is a convenience. Every number on this site links to the hashes that

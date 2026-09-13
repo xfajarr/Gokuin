@@ -23,7 +23,17 @@ export interface BlockTx {
   hash: `0x${string}`
   position: number
   role: BlockRole
+  /** The transaction's `from` — the EOA that signed it. This is what identifies
+   * the attacker, deliberately NOT a Swap event's `sender` field: in Uniswap,
+   * `sender` is populated by the router contract and is identical for the
+   * attacker's transactions and the victim's, since both went through the same
+   * router. See the trap note on /probe/$id. */
   from: `0x${string}`
+  /** Trade direction inferred from the pool's token ordering, when the API
+   * reports it. Optional and honestly absent rather than guessed: older rows
+   * or a leaner API response may not carry it, and the sandwich checklist
+   * says so explicitly instead of assuming a direction it cannot verify. */
+  direction?: 'buy' | 'sell'
 }
 
 /** One value per metric named in PROVENANCE, keyed the same way, so the

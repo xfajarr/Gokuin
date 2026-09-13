@@ -18,6 +18,7 @@ export const SAMPLE_ROUTES: RouteScore[] = [
     medianDelayBlocks: 1,
     totalExtractedWei: '185320000000000000',
     lastCycle: 7,
+    stagedExcluded: 0,
   },
   {
     route: 'flashbots-protect',
@@ -29,17 +30,24 @@ export const SAMPLE_ROUTES: RouteScore[] = [
     medianDelayBlocks: 2,
     totalExtractedWei: '2140000000000000',
     lastCycle: 7,
+    stagedExcluded: 0,
   },
+  // mev-blocker deliberately has NO organic probes in this fixture, mirroring
+  // README's "mev-blocker has none on Sepolia": probes=0 must read as "no
+  // data", never as a clean 0% record. The one row that exists is the staged
+  // sandwich used to demonstrate the detector (see docs/credibility.md) and
+  // scoreRoute() excludes it, so it surfaces only as stagedExcluded.
   {
     route: 'mev-blocker',
-    probes: 100,
-    leaks: 6,
-    leakBps: 600,
-    sandwiches: 2,
-    sandwichBps: 200,
-    medianDelayBlocks: 2,
-    totalExtractedWei: '4370000000000000',
+    probes: 0,
+    leaks: 0,
+    leakBps: 0,
+    sandwiches: 0,
+    sandwichBps: 0,
+    medianDelayBlocks: 0,
+    totalExtractedWei: '0',
     lastCycle: 7,
+    stagedExcluded: 1,
   },
 ]
 
@@ -53,13 +61,38 @@ function addrLike(seed: string): `0x${string}` {
   return `0x${body}` as `0x${string}`
 }
 
-/** Deterministic fixture rows per route — enough to fill a scoreboard drill-down. */
+/** Deterministic fixture rows per route — enough to fill a scoreboard drill-down.
+ * mev-blocker is the one route with no organic probes (see SAMPLE_ROUTES above):
+ * its only row is the staged demo sandwich, marked `staged: true` and excluded
+ * from every ratio by scoreRoute() — packages/core/test/staged-exclusion.test.ts
+ * pins exactly this "route of nothing but staged rows scores as no data" case. */
 export function sampleRouteRows(routeId: string): { rows: Row[]; cursor?: string } {
   const score = SAMPLE_ROUTES.find((r) => r.route === routeId) ?? SAMPLE_ROUTES[0]
   const routeIndex = ROUTES.indexOf(score.route)
+
+  if (score.route === 'mev-blocker') {
+    return {
+      rows: [
+        {
+          mainnetTxHash: hashLike('mev-blocker-staged', 0),
+          submittedBlock: 21_400_500,
+          includedBlock: 21_400_501,
+          leakedAtBlock: 0,
+          extractedWei: 12_913_434_669_342_331n,
+          simOut: 1_000_000_000_000_000_000n,
+          realOut: 987_086_565_330_657_669n,
+          routeId: routeIndex,
+          cycleId: 7,
+          sandwiched: true,
+          staged: true,
+        },
+      ],
+    }
+  }
+
   const rows: Row[] = Array.from({ length: 8 }, (_, i) => {
-    const leaked = i < (score.route === 'public-mempool' ? 7 : score.route === 'mev-blocker' ? 1 : 0)
-    const sandwiched = i < (score.route === 'public-mempool' ? 5 : score.route === 'mev-blocker' ? 1 : 0)
+    const leaked = i < (score.route === 'public-mempool' ? 7 : 0)
+    const sandwiched = i < (score.route === 'public-mempool' ? 5 : 0)
     const submittedBlock = 21_400_000 + i * 12
     const delay = score.route === 'public-mempool' ? 1 : 2
     return {
@@ -73,6 +106,7 @@ export function sampleRouteRows(routeId: string): { rows: Row[]; cursor?: string
       routeId: routeIndex,
       cycleId: 7,
       sandwiched,
+      staged: false,
     }
   })
   return { rows }
@@ -145,9 +179,9 @@ export function sampleProbe(id: string): ProbeDetail {
       number: 21_400_812,
       pool: POOL,
       transactions: [
-        { hash: derivation.frontrunHash!, position: 0, role: 'frontrun', from: addrLike('attacker') },
-        { hash: probe.txHash!, position: 1, role: 'victim', from: probe.fromAddress },
-        { hash: derivation.backrunHash!, position: 2, role: 'backrun', from: addrLike('attacker') },
+        { hash: derivation.frontrunHash!, position: 0, role: 'frontrun', from: addrLike('attacker'), direction: 'buy' },
+        { hash: probe.txHash!, position: 1, role: 'victim', from: probe.fromAddress, direction: 'buy' },
+        { hash: derivation.backrunHash!, position: 2, role: 'backrun', from: addrLike('attacker'), direction: 'sell' },
       ],
     },
     derivation,

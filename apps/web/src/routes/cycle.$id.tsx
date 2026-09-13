@@ -31,6 +31,21 @@ function CycleDetail() {
         </div>
       )}
 
+      <dl className="legend">
+        <div>
+          <dt>Commit</dt>
+          <dd>the schedule's hash, posted on Sepolia before any probe was dispatched</dd>
+        </div>
+        <div>
+          <dt>Reveal</dt>
+          <dd>the salt, published once the cycle settles</dd>
+        </div>
+        <div>
+          <dt>Intact</dt>
+          <dd>committed count equals published count — no probe was quietly dropped or added after the fact</dd>
+        </div>
+      </dl>
+
       <div className="integrity">
         <span>committed</span>
         <span className="num">{data.committed}</span>
