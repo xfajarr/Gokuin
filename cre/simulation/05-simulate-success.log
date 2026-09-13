@@ -1,0 +1,44 @@
+$ bun run simulation/fixture-subgraph-server.ts &
+[fixture-subgraph] serving canned Route data on http://localhost:8555/subgraph
+
+$ export SCORE_WEIGHTS_STAGING='{"leakWeightBps":3334,"sandwichWeightBps":3333,"delayWeightBps":3333}'
+$ cre workflow simulate ./workflow --target=simulation-settings --non-interactive --trigger-index 0
+
+Initializing...
+Loading settings...
+! Using default private key for chain write simulation. To use your own key, set CRE_ETH_PRIVATE_KEY in your .env file or system environment.
+Checking RPC connectivity...
+Compiling workflow...
+✓ Workflow compiled
+✓ Simulation limits enabled
+  HTTP: req=120kb resp=250kb timeout=10s | ConfHTTP: req=125kb resp=500kb timeout=1m30s | Consensus obs=25kb | ChainWrite evm_report=50kb evm_gas=10000000 solana_report=265b solana_cu=300000 | WASM binary=100mb compressed=20mb
+  Binary hash: 32ef0e2f0a1c4d1708e9812d41804ffbe3c592c4f021bbb0743464734c573875
+  Config hash: 71dc3fcaabd549673faa6d07f32f3bc2a9adc263d30608a0eda1ac25e2c0e2b0
+2026-09-13T11:39:02Z [SIMULATION] Simulator Initialized
+
+2026-09-13T11:39:02Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
+╭────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Trigger requested TEE Execution your trigger will run in one of the following Tees:                │
+│     - AWS Nitro in us-west-2                                                                       │
+│ The simulator is not a real TEE, and is meant to debug.                                            │
+│ Do not use it for sensitive information.                                                           │
+│ During real execution, user logs for this trigger will not be visible, and will not leave the TEE. │
+│ They are presented in the simulator for debugging only.                                            │
+│                                                                                                    │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+2026-09-13T11:39:02Z [USER LOG] enclave: route=0 leakBps=4500 sandwichBps=2250 medianDelay=1 composite=7645 probes=40 lastCycle=12
+2026-09-13T11:39:02Z [USER LOG] enclave: route=1 leakBps=250 sandwichBps=0 medianDelay=3 composite=9604 probes=40 lastCycle=12
+2026-09-13T11:39:02Z [USER LOG] enclave: route=2 leakBps=500 sandwichBps=250 medianDelay=2 composite=9542 probes=40 lastCycle=12
+
+✓ Workflow Simulation Result:
+"simulation: route 0: composite=7645 (report built, not broadcast) | route 1: composite=9604 (report built, not broadcast) | route 2: composite=9542 (report built, not broadcast)"
+
+2026-09-13T11:39:02Z [SIMULATION] Execution finished signal received
+2026-09-13T11:39:02Z [SIMULATION] Skipping WorkflowEngineV2
+
+╭──────────────────────────────────────────────────────╮
+│ Simulation complete! Ready to deploy your workflow?  │
+│                                                      │
+│ Run cre account access to request deployment access. │
+╰──────────────────────────────────────────────────────╯

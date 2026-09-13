@@ -53,7 +53,14 @@ export type RouteConfig = z.infer<typeof RouteConfigSchema>
 
 export const configSchema = z.object({
 	schedule: z.string(),
-	subgraphUrl: z.string().min(1),
+	// Not `z.string().url()`: CRE's config-validation step runs this schema in
+	// a JS environment where zod's `.url()` refinement (which calls the global
+	// `new URL(...)`) fails validation unconditionally, for every value,
+	// including URLs that are valid by any normal definition (confirmed by
+	// swapping in several different valid absolute URLs and getting the
+	// identical zod error every time). A `.regex()` check has no such
+	// dependency and works correctly in the same environment.
+	subgraphUrl: z.string().regex(/^https?:\/\/.+/, 'subgraphUrl must be an http(s) URL'),
 	weightsSecretId: z.string().default('SCORE_WEIGHTS'),
 	routes: z.array(RouteConfigSchema).min(1),
 	// Public normalisation constant: a median delay at or above this many blocks

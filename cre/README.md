@@ -135,7 +135,7 @@ deployment yet (`.env.example`'s `SCORER_ADDRESS` is blank).
 | Thing | Where | Notes |
 |---|---|---|
 | `SCORE_WEIGHTS` secret value | `cre secrets create --target=staging-settings` (or an `.env`/env var named per `cre/secrets.yaml` for simulation) | JSON `{"leakWeightBps":N,"sandwichWeightBps":N,"delayWeightBps":N}`, all positive. Never commit this. `cre/weights.example.json` shows only the shape, with obviously-placeholder equal weights. |
-| `CRE_API_KEY` | from https://app.chain.link (Account Settings) | Required for `cre workflow simulate` / `deploy`. Confidential Workflows is in private beta and needs enrollment through the Chainlink account team (docs.chain.link/cre/concepts/confidential-workflows) — request this before expecting `simulate` to run. |
+| `CRE_API_KEY` / `cre login` | from https://app.chain.link (Account Settings) | Required for `cre workflow simulate` / `deploy` — plain account authentication. A logged-in account was sufficient to run the full simulation below; no separate Confidential-Workflows-beta enrollment step was needed in practice. |
 | `workflow-owner-address` in `project.yaml` | replace the placeholder (Anvil account #0) | The real operator/deployer address. |
 | `subgraphUrl` in `workflow/config.staging.json` / `config.production.json` | once `subgraph/probe-ledger-subgraph` is deployed (`graph deploy --studio gokuin-probe-ledger`, see `subgraph/README.md`) | Currently a `REPLACE_ME` placeholder — the subgraph isn't live yet. |
 | `scorerAddress` in the same config files | once `Scorer.sol` + the `onReport` adapter above are deployed to Sepolia | Zero address = compute-and-log-only, the current default. |
@@ -152,15 +152,20 @@ bunx tsc --noEmit               # strict typecheck
 cd ..
 bun run simulation/fixture-subgraph-server.ts &   # stand-in for the not-yet-deployed subgraph
 
-SCORE_WEIGHTS_STAGING='{"leakWeightBps":5000,"sandwichWeightBps":3000,"delayWeightBps":2000}' \
+SCORE_WEIGHTS_STAGING='{"leakWeightBps":3334,"sandwichWeightBps":3333,"delayWeightBps":3333}' \
   cre workflow simulate ./workflow --target=simulation-settings --non-interactive --trigger-index 0
 ```
 
-The last command needs `CRE_API_KEY` set (see table above) — it is what
-actually exercises `handlerInTee` inside the CRE simulator's TEE emulation.
-Without it, `cre workflow build ./workflow` still compiles the real workflow
-to WASM against the real CRE toolchain (no account needed) — see
-`cre/simulation/README.md` for exactly what ran, what didn't, and why.
+The last command needs `cre login` / `CRE_API_KEY` set (see table above). This
+has been run for real — `cre/simulation/05-simulate-success.log` is the
+complete, non-fabricated transcript: `handlerInTee` executes inside the CRE
+simulator's TEE emulation, `runtime.getSecrets` resolves `SCORE_WEIGHTS`, the
+fixture subgraph is queried over real HTTP, and all three routes' composite
+scores are logged and returned. `cre/simulation/README.md` also documents a
+real config-schema bug this surfaced and its fix (`z.string().url()` fails
+CRE's config validation unconditionally in this environment; a `.regex()`
+check does not — see that file's "What was broken, and the actual root
+cause").
 
 ## Layout
 

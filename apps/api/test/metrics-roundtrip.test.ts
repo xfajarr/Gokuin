@@ -14,6 +14,17 @@ process.env.SUBGRAPH_URL = 'http://fixture.invalid/graphql'
 process.env.API_ADMIN_TOKEN = 'test-admin-token'
 process.env.MAINNET_RPC = 'http://127.0.0.1:8545'
 process.env.SEPOLIA_RPC = 'http://127.0.0.1:8545'
+// Bun loads the repo-root .env into process.env before tests run, so anything
+// the operator has configured leaks in. That made this suite start failing the
+// moment contracts were deployed and PROBE_LEDGER_ADDRESS was filled in — a test
+// breaking because someone deployed is testing the developer's machine, not the
+// code. Clear the deployment-dependent keys so the dry-run assertions below
+// describe a fixed environment.
+delete process.env.PROBER_PK
+delete process.env.PROBE_LEDGER_ADDRESS
+delete process.env.SCORER_ADDRESS
+delete process.env.ROUTE_REGISTRY_ADDRESS
+delete process.env.DISTRIBUTOR_PK
 
 const FIXTURE_ROUTES = [
   { id: 'flashbots-protect', probes: '10', leaks: '1', sandwiches: '0', totalExtractedWei: '500', medianDelayBlocks: '2', lastCycle: '3' },
@@ -117,7 +128,7 @@ describe('metrics round-tripping through the live API', () => {
     const res = await app.handle(new Request('http://localhost/health'))
     const json = (await res.json()) as { ok: boolean; ledgerDryRun: boolean; subgraphConfigured: boolean }
     expect(json.ok).toBe(true)
-    expect(json.ledgerDryRun).toBe(true) // no PROBER_PK/PROBE_LEDGER_ADDRESS set in this test env
+    expect(json.ledgerDryRun).toBe(true) // cleared above, so this holds whether or not the operator has deployed
     expect(json.subgraphConfigured).toBe(true)
   })
 })

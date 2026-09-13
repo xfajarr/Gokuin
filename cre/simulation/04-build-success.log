@@ -1,11 +1,11 @@
 $ cre workflow build ./workflow --non-interactive -o ./gokuin-scorer.wasm
   Compiling workflow...
 ✓ Workflow compiled successfully
-  Binary hash: 816d5eb64dadd19a66bd60accd589e7113c2737969f974ec14a93440151311ff
+  Binary hash: 32ef0e2f0a1c4d1708e9812d41804ffbe3c592c4f021bbb0743464734c573875
 ✓ Build output written to ./gokuin-scorer.wasm
 
 $ file ./gokuin-scorer.wasm
 ./gokuin-scorer.wasm: WebAssembly (wasm) binary module version 0x1 (MVP)
 
 $ ls -la ./gokuin-scorer.wasm
--rw-r--r--@ 1 xfajarr  staff  2629309 Sep 13 05:44 ./gokuin-scorer.wasm
+-rw-r--r--@ 1 xfajarr  staff  2629437 Sep 13 11:39 ./gokuin-scorer.wasm
