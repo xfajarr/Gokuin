@@ -66,6 +66,12 @@ to. That conflict of interest is permanent, which is why this has to be built by
 party that does not sell routing. Gokuin operates no route, sells no routing, and takes
 no money from any relay.
 
+The interface is written for someone who has never heard of a sandwich attack, because
+a claim that anyone can check the numbers is not true if only an expert can read them.
+Every page opens with the plain answer and puts the evidence underneath, jargon is
+defined in place at first use, and each probe carries a block with the real explorer
+link and the exact commands to re-derive its numbers, all copyable.
+
 The demo sandwich is one we caused ourselves, on Sepolia, against our own probe,
 because a sandwich cannot be scheduled for a recording. Rows we staged are marked and
 excluded from every route's score. It is evidence the detector works, never evidence

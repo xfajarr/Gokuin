@@ -179,12 +179,31 @@ Three transactions in one Sepolia block, checkable by anyone:
 | `contracts/` | 30 tests pass, deployed to Sepolia |
 | `substreams/` | published; Sepolia build packed, not yet published |
 | `subgraph/` | deployed, indexing, no errors |
-| `apps/api` · `apps/listener` · `apps/web` · `apps/mcp` | run; 100 TypeScript tests pass |
+| `apps/api` · `apps/listener` · `apps/web` · `apps/mcp` · `apps/landing` | run; 100 TypeScript tests pass |
 | `cre/` | real simulation; live deployment not run |
 
 **Not done.** No mainnet probe has run. Funding, dispatch, observation and settlement are implemented and tested, but need a funded key. `Dispute`, the bond-and-challenge contract that makes Gokuin accountable in its own ledger, is designed and specified but not deployed. TEE-attested listeners and automated third-party archive cross-checks are likewise specified, not wired.
 
 ---
+
+## Reading the evidence without knowing MEV
+
+The claim is that anyone can check the numbers, so the app is written for someone
+who has never heard of a sandwich attack. Every page opens with the plain answer
+and puts the evidence underneath: a probe page begins with a sentence like "this
+transaction was sandwiched, someone bought right before it and sold right after,
+and it cost 0.0028 ETH", and the hashes and derivation follow as proof rather than
+as the headline.
+
+Jargon is defined in place at first use rather than in a glossary nobody opens,
+and each definition is a real button so it works by keyboard and by touch, not
+only on hover. Basis points always carry the plain fraction beside them, and wei
+is shown as ETH.
+
+Each probe page also carries a **Verify this yourself** block with the real block
+explorer link, the exact `substreams run` command for that block, and the `cast`
+calls, all copyable. Five of the six metrics are re-derivable, and that should be
+something a reader can act on rather than read about.
 
 ## How Gokuin can be checked
 
@@ -232,6 +251,7 @@ Add `MAINNET_RPC` to also run the fork test that pins the arithmetic. See [`docs
 | `apps/api` | ElysiaJS: cycle orchestration, observation ingest, scoring reads |
 | `apps/listener` | standalone mempool listener, one per region |
 | `apps/web` | TanStack Start: scoreboard, probe detail, method, console |
+| `apps/landing` | TanStack Start: the public page. Separate app because its rem scale reproduces a fixed canvas |
 | `apps/mcp` | MCP server: `gokuin_submit`, plus `SKILL.md` |
 | `cre/` | Chainlink CRE Confidential Workflow |
 | `tools/sandwich-harness` | Sepolia staging harness (self-targeting only) |
