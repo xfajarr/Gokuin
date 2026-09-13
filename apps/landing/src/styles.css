@@ -67,6 +67,7 @@ body {
 
 body {
   display: flex;
+  flex-direction: column;
   min-height: 100dvh;
   padding: var(--pad-t) var(--pad-x) var(--pad-b);
   background: var(--bg);
@@ -134,10 +135,11 @@ button {
   flex: 0 0 auto;
 }
 
-.brand svg {
+.brand-icon {
   width: 34px;
   height: 34px;
   display: block;
+  object-fit: contain;
 }
 
 .nav {
@@ -152,6 +154,10 @@ button {
   white-space: nowrap;
 }
 
+.navitem {
+  position: relative;
+}
+
 .navlink {
   display: inline-flex;
   align-items: center;
@@ -160,6 +166,11 @@ button {
   letter-spacing: -0.015em;
   color: #1b1b18;
   transition: opacity 0.18s ease;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .navlink:hover {
@@ -171,6 +182,46 @@ button {
   height: 6rem;
   color: var(--chev);
   display: block;
+  transition: transform 0.18s ease;
+}
+
+.navlink svg.is-open {
+  transform: rotate(180deg);
+}
+
+/* The dropdown a chevron nav item actually opens. */
+.navmenu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 12rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  flex-direction: column;
+  min-width: 168rem;
+  background: var(--panel);
+  border: var(--hairline) solid var(--rule);
+}
+
+.navmenu.is-open {
+  display: flex;
+}
+
+.navmenu a {
+  padding: 9rem 14rem;
+  font-size: max(11px, 13rem);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: nowrap;
+  transition: background-color 0.18s ease;
+}
+
+.navmenu a:hover {
+  background: rgba(26, 26, 23, 0.055);
+}
+
+.navmenu a:not(:last-child) {
+  border-bottom: var(--hairline) solid var(--hair);
 }
 
 .actions {
@@ -665,12 +716,20 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10rem;
   padding: 0 16rem;
   border-left: var(--hairline) solid var(--rule);
 }
 
 .strip-cell:first-child {
   border-left: none;
+}
+
+.strip-icon {
+  flex: 0 0 auto;
+  width: 22rem;
+  height: 22rem;
+  color: var(--ink);
 }
 
 /* Plain wordmarks standing in for logos, same max-height discipline as an
@@ -770,11 +829,6 @@ h1 {
   padding: 12px 0;
   font-size: 15px;
   border-bottom: 1px solid rgba(38, 38, 31, 0.12);
-}
-
-.drawer-cta {
-  display: none;
-  margin-top: 12px;
 }
 
 /* ==========================================================================
@@ -930,6 +984,11 @@ h1 {
     max-height: 36px;
     font-size: 16px;
   }
+
+  .strip-icon {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 @media (max-width: 470px) {
@@ -973,21 +1032,281 @@ h1 {
     max-height: 27px;
     font-size: 13px;
   }
-}
 
-@media (max-width: 360px) {
-  .header-signin {
-    display: none;
+  .strip-icon {
+    width: 15px;
+    height: 15px;
   }
 
-  .drawer-cta {
-    display: block;
+  .strip-cell {
+    gap: 6px;
   }
 }
 
 @media (max-width: 620px) {
   :root {
     --ed-detail: 0;
+  }
+}
+
+/* ==========================================================================
+   Below-the-fold sections (flow + method). Live outside .frame, so the hero
+   stays exactly the one-screen sheet it was; these just scroll in below it.
+   ========================================================================== */
+
+.section-head {
+  max-width: 640rem;
+  margin: 0 auto;
+  padding: 0 26rem;
+  text-align: center;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 10rem;
+  font-size: 12rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.section-head h2 {
+  margin: 0 0 14rem;
+  font-size: 34rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.section-head p {
+  margin: 0 auto;
+  max-width: 640rem;
+  font-size: 15rem;
+  line-height: 1.45;
+  color: var(--body);
+}
+
+.flow,
+.method {
+  padding: 96rem 28rem;
+  border-top: var(--hairline) solid var(--rule);
+  background: var(--bg);
+}
+
+/* ---- Flow / beam visualization: the sandwich in block 11693970 ---- */
+
+.flow-track {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24rem;
+  max-width: 900rem;
+  margin: 64rem auto 0;
+}
+
+.flow-line {
+  position: absolute;
+  top: 4.5rem;
+  left: 0;
+  right: 0;
+  height: 1rem;
+  background: var(--hair);
+  overflow: hidden;
+  z-index: 1;
+}
+
+.flow-beam {
+  position: absolute;
+  top: 0;
+  left: -32rem;
+  width: 32rem;
+  height: 100%;
+  background: var(--ink);
+  opacity: 0;
+  animation: flow-move 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.flow-beam:nth-child(2) {
+  animation-delay: 1.07s;
+}
+
+.flow-beam:nth-child(3) {
+  animation-delay: 2.14s;
+}
+
+@keyframes flow-move {
+  0% {
+    left: -32rem;
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.9;
+  }
+  92% {
+    opacity: 0.9;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.flow-node {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 0;
+  min-width: 180rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rem;
+  padding-top: 28rem;
+  text-align: center;
+}
+
+.flow-node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 9rem;
+  height: 9rem;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.flow-node:nth-child(3)::before {
+  width: 12rem;
+  height: 12rem;
+  background: var(--bg);
+  border: var(--hairline) solid var(--ink);
+}
+
+.flow-index {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.flow-role {
+  font-size: 15rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.flow-hash {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11rem;
+  color: var(--muted);
+}
+
+.flow-delta {
+  margin-top: 2rem;
+  font-size: 13rem;
+  color: var(--body);
+}
+
+/* ---- Method: what makes the measurement checkable ---- */
+
+.method-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--hairline);
+  max-width: 900rem;
+  margin: 56rem auto 0;
+  background: var(--rule);
+  border: var(--hairline) solid var(--rule);
+}
+
+.method-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12rem;
+  padding: 32rem 28rem;
+  background: var(--panel);
+}
+
+.method-icon {
+  width: 26rem;
+  height: 26rem;
+  color: var(--ink);
+}
+
+.method-card h3 {
+  margin: 0;
+  font-size: 17rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.method-card p {
+  margin: 0;
+  font-size: 13.5rem;
+  line-height: 1.45;
+  color: var(--body);
+}
+
+/* ---- Scroll reveal: below-the-fold content plays once, the section's own
+   border/background never does ---- */
+
+.flow .section-head,
+.flow-node,
+.method .section-head,
+.method-card {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(0.22, 0.61, 0.24, 1), transform 0.6s cubic-bezier(0.22, 0.61, 0.24, 1);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+.flow.is-revealed .section-head,
+.flow.is-revealed .flow-node,
+.method.is-revealed .section-head,
+.method.is-revealed .method-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 780px) {
+  .flow,
+  .method {
+    padding: 64rem 20rem;
+  }
+
+  .method-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-line {
+    display: none;
+  }
+
+  .flow-track {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20rem;
+  }
+
+  .flow-node {
+    padding-top: 14rem;
+    padding-bottom: 14rem;
+    border-top: var(--hairline) solid var(--hair);
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .flow-node:first-child {
+    border-top: none;
+  }
+
+  .flow-node::before {
+    display: none;
   }
 }
 

@@ -55,14 +55,19 @@ The spec was written against a generic developer-tool reference page. This
 app keeps every structural and motion detail from the spec and replaces only
 the content with Gokuin's own:
 
-- **Headline**: "Every Route Promises Privacy" / "Nobody Has Ever Checked".
-- **Subtitle**: the Flashbots Protect / MEV Blocker measurement claim,
-  verbatim as given.
+- **Headline**: "Every Route Sells Protection" / "Nobody Has Ever Checked".
+- **Subtitle**: "Flashbots Protect and MEV Blocker claim they stop most
+  sandwich attacks. Gokuin checks that claim on-chain." (tuned to hold
+  exactly two lines at desktop, see below).
 - **CTAs**: solid "Read the Evidence" (`#`, no evidence page yet), ghost
   "View on GitHub" (`https://github.com/xfajarr/Gokuin`).
-- **Nav**: Method, Evidence, Routes (chevron treatment kept on these three),
-  Credibility, Docs (no chevron on the last two, same rhythm as the spec's
-  original six-item split).
+- **Nav**: Method, Evidence, Routes, Credibility, Docs. The first three are
+  real disclosure buttons now (not decorative chevrons): click opens a
+  dropdown of placeholder links, click outside or Escape closes it. There's
+  no Sign In / Register in the header or the drawer; this page has no auth.
+- **Brand mark**: the header/drawer brand icon is
+  `public/image/gokuin-icon-nav.png` (the actual Gokuin seal), not a drawn
+  SVG placeholder.
 - **Editor mock**: instead of a syntax-highlighter demo, it shows the
   detector's own JSON output for Sepolia block 11693970, the block where a
   sandwich staged against our own probe was caught. Full front-run, victim,
@@ -82,19 +87,58 @@ the content with Gokuin's own:
   filename quirk (`card.jsx` twice) wasn't carried over since nothing here
   naturally duplicates without reading as a mistake; long filenames get an
   ellipsis in the fixed-width tree column instead of a hard clip.
-- **Customer strip**: became a "built on" strip. The reference's four
+- **Ecosystem strip**: became a "built on" strip. The reference's four
   CloudFront logos belonged to someone else's project and had no business
-  implying they're Gokuin customers, so the four cells now hold plain-text
-  wordmarks for what this project is actually built on: The Graph, ENS,
-  Chainlink CRE, Foundry, at the same `max-height` and grid/hairline
-  discipline a logo row would have kept.
+  implying they're Gokuin customers, so the four cells now hold a small
+  line-art icon plus label for what this project is actually built on:
+  Ethereum (leftmost, everything else sits on top of it), The Graph, ENS,
+  Chainlink CRE, at the same `max-height` and grid/hairline discipline a
+  logo row would have kept. Icons are original line art in the same visual
+  language as the tree's folder/file icons (currentColor stroke, no fill),
+  not borrowed brand marks.
 - **Meta**: title "Gokuin: every route promises privacy, nobody has ever
   checked", description is the subtitle sentence, theme-color unchanged.
 
+## Two more sections, below the hero
+
+The hero (`.frame`) is still exactly the one-screen sheet the spec
+describes, untouched. Two more sections were added below it, as siblings
+outside `.frame`, so the page now scrolls past the hero instead of being a
+single screen. Both reuse the existing tokens (palette, hairlines, Figtree,
+no gradients) rather than introducing a second design language:
+
+- **`.flow` ("Anatomy Of A Sandwich")**: a three-node diagram (front-run,
+  victim/our probe, back-run) for the same block 11693970 evidence, with a
+  connecting line and three small beams that continuously travel left to
+  right (`@keyframes flow-move`, CSS only, staggered, infinite) to visualize
+  the transaction order inside the block. This is the "flow/beam"
+  visualization; it is a deliberate, always-on decorative loop, not part of
+  the one-shot hero entrance, and it is governed by the same
+  `prefers-reduced-motion` rule as everything else (near-zero duration, one
+  iteration).
+- **`.method` ("Built To Be Checked, Not Trusted")**: a 2x2 card grid
+  (commit-before-probe, every row carries its hash, one authorized ENS
+  writer, "we don't sell routing"), laid out with the black-background/
+  hairline-gutter grid trick, adapted from the reference "Code Quality,
+  Features" grid pattern. Copy is grounded in what the contracts and tests
+  actually enforce (see `spec/decisions.md` and `spec/agent-briefs.md`), not
+  generic feature-card filler.
+
+Both sections play a one-shot reveal (opacity/translateY via CSS
+transition, staggered per child with a `--i` custom property) the first
+time they scroll into view, via `IntersectionObserver` (`threshold: 0.2`,
+disconnects after firing once per element). This is separate from the
+hero's load-time WAAPI timeline on purpose: these sections are below the
+fold, so animating them at page-load time would mean animating something
+the visitor can't see yet. Reduced-motion visitors get the `is-revealed`
+state immediately, no observer.
+
 ## A structural fix the new copy forced
 
-"Every Route Promises Privacy" measures about 6 to 8% wider per character
-than the spec's original reference headline. At the two mobile `h1` clamps
+The headline ("Every Route Sells Protection", kept to the same character
+count through a later copy revision) measures about 6 to 8% wider per
+character than the spec's original reference headline. At the two mobile
+`h1` clamps
 (`<=1040px` and `<=470px`) that was enough to break the spec's "exactly two
 lines" requirement across nearly the whole mobile range (checked at 300 to
 1040px), not just at one narrow edge case. Rather than hand-picking new
@@ -182,27 +226,48 @@ Everything else, the palette, the `rem` scale formula, section heights, the
 editor's `--e` container-query unit system, and the breakpoint list, is
 reproduced as specified, not reinterpreted.
 
+## The brand icon in `apps/web` too
+
+`public/image/gokuin-icon-nav.png` is also copied into `apps/web/public/image/`
+and used in that app's `.brand` (replacing the old "極印" text mark). That
+icon is drawn in black ink, which disappears against `apps/web`'s dark theme
+(its default, since it follows `prefers-color-scheme`), so `apps/web/src/
+styles.css` adds an `--icon-filter` token (`none` in the light palette,
+`invert(1)` in dark, defined in the same three places the other theme tokens
+already are) applied to `.brand-icon` via `filter: var(--icon-filter)`.
+Verified in a real browser in both the default (dark) and toggled (light)
+themes.
+
 ## Verification performed
 
-- `bun run build` (client + SSR) and `bun run typecheck`, both clean.
+- `bun run build` (client + SSR) and `bun run typecheck`, both clean, for
+  `apps/landing`; `bun run verify` from the repo root stays green (it now
+  also runs `@gokuin/landing typecheck` and `@gokuin/landing build`).
 - `bun run dev` and checked in a real browser (via CDP) at 1440, 800, and
   ~350 to 380px:
-  - Frame, both hatch bands, and the two-line headline render correctly
-    (checked the headline's natural-vs-available text width across 300 to
-    1040px after the `--h1-fit` fix, no wrap anywhere in that range).
+  - Frame, both hatch bands, and the two-line headline and two-line
+    subtitle render correctly (measured natural-vs-available text width
+    directly in the browser across 300 to 1040px, no wrap anywhere in that
+    range for either).
   - The editor mock is anchored to the bottom of the stage and clipped by
     the hero at wide viewports, and shows the real Sepolia block 11693970
     detector output, file tree, eyebrow/project/tab labels.
-  - The four "built on" wordmarks lay out in the 4-column strip (and 2x2 at
-    <=780px) with the same hairlines a logo row would have had.
+  - The nav dropdowns (Method/Evidence/Routes) open on click, close on
+    outside click and on Escape, and rotate their chevron; verified via
+    `aria-expanded` and the rendered menu, not just visually.
+  - The four "built on" cells (icon + label) lay out in the 4-column strip
+    (and 2x2 at <=780px) with the same hairlines a logo row would have had.
   - The <=1040px architecture switch (hidden nav, burger, 42px buttons, 48px
-    hero CTAs) and the <=360px header-Sign-In-hidden / drawer-cta-shown
-    behavior both verified live.
-  - Burger to close (X) toggle and Escape-to-close both verified.
+    hero CTAs) still holds with the header actions reduced to just the
+    burger.
+  - Burger to close (X) toggle, Escape-to-close, and drawer-link-click also
+    closing the drawer all verified.
+  - The `.flow` and `.method` sections reveal correctly on scroll into view
+    (confirmed via real `scroll`, not just a full-page screenshot, which
+    doesn't fire the intersection the way an actual scroll does) and read
+    correctly stacked on mobile.
   - The entrance timeline runs exactly once end to end, then fully clears
     (`js-anim` removed, no lingering `Animation` objects, no inline styles
     left behind).
   - The "View on GitHub" ghost CTA's `href` verified to point at
     `https://github.com/xfajarr/Gokuin`.
-- `bun run verify` from the repo root stays green; `verify:build` now also
-  runs `@gokuin/landing typecheck` and `@gokuin/landing build`.

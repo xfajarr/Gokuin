@@ -20,8 +20,7 @@ export const Route = createRootRoute({
       { title: 'Gokuin: every route promises privacy, nobody has ever checked' },
       {
         name: 'description',
-        content:
-          'Flashbots Protect and MEV Blocker both advertise that they stop around 80% of sandwich attacks. Both of those numbers were measured by the company that published them.',
+        content: 'Flashbots Protect and MEV Blocker claim they stop most sandwich attacks. Gokuin checks that claim on-chain.',
       },
     ],
     links: [

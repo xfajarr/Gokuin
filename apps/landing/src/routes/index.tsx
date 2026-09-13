@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import type { ComponentType } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
 export const Route = createFileRoute('/')({ component: Home })
@@ -6,10 +7,10 @@ export const Route = createFileRoute('/')({ component: Home })
 const EASE_EXPO = 'cubic-bezier(.16,1,.3,1)'
 const EASE_SOFT = 'cubic-bezier(.22,.61,.24,1)'
 
-const NAV_ITEMS: Array<{ label: string; chevron: boolean }> = [
-  { label: 'Method', chevron: true },
-  { label: 'Evidence', chevron: true },
-  { label: 'Routes', chevron: true },
+const NAV_ITEMS: Array<{ label: string; chevron: boolean; menu?: string[] }> = [
+  { label: 'Method', chevron: true, menu: ['Metrics', 'Commit & Reveal', 'Attestation'] },
+  { label: 'Evidence', chevron: true, menu: ['Block 11693970', 'All Reports', 'Compare Routes'] },
+  { label: 'Routes', chevron: true, menu: ['Flashbots Protect', 'MEV Blocker', 'All Routes'] },
   { label: 'Credibility', chevron: false },
   { label: 'Docs', chevron: false },
 ]
@@ -34,13 +35,50 @@ const TREE_ROWS: Array<{
 // Line numbers skip 4 on purpose, matches the reference mock's own quirk.
 const LINE_NUMBERS = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
 
-// What Gokuin is actually built on, not customer logos, so these are set as
-// plain wordmarks rather than borrowed images.
-const BUILT_ON: Array<{ key: string; label: string }> = [
-  { key: 'thegraph', label: 'The Graph' },
-  { key: 'ens', label: 'ENS' },
-  { key: 'chainlink', label: 'Chainlink CRE' },
-  { key: 'foundry', label: 'Foundry' },
+// What Gokuin is actually built on, not customer logos. Ethereum leads
+// because everything else here sits on top of it.
+const BUILT_ON: Array<{ key: string; label: string; icon: ComponentType<{ className?: string }> }> = [
+  { key: 'ethereum', label: 'Ethereum', icon: EthereumIcon },
+  { key: 'thegraph', label: 'The Graph', icon: GraphIcon },
+  { key: 'ens', label: 'ENS', icon: EnsIcon },
+  { key: 'chainlink', label: 'Chainlink CRE', icon: ChainlinkIcon },
+]
+
+// The four things that make the measurement checkable rather than trusted,
+// each grounded in something the contracts/tests actually enforce.
+const METHOD_CARDS: Array<{
+  icon: ComponentType<{ className?: string }>
+  title: string
+  copy: string
+}> = [
+  {
+    icon: CommitIcon,
+    title: 'Commit Before You Probe',
+    copy: 'The route, the slot, and a salted commitment land on-chain before any probe dispatches. Enforced in code, not convention.',
+  },
+  {
+    icon: HashIcon,
+    title: 'Every Row Carries Its Hash',
+    copy: 'A sandwich only counts as measured once the mainnet transaction that produced it is attached. No hash, no row.',
+  },
+  {
+    icon: KeyIcon,
+    title: 'One Authorized Writer',
+    copy: 'Scores reach ENS through exactly one contract path, proven with a 256-run fuzz test against arbitrary callers.',
+  },
+  {
+    icon: ShieldIcon,
+    title: "We Don't Sell Routing",
+    copy: "Gokuin never routes a single transaction. There's nothing here to protect by grading itself kindly.",
+  },
+]
+
+// The sandwich in block 11693970, staged against our own probe, walked
+// through as a flow: front-run, victim, back-run.
+const FLOW_NODES: Array<{ role: string; label: string; index: number; delta: string }> = [
+  { role: 'Front-run', label: '0x73261b96…451631', index: 1, delta: '+0.000600 WETH' },
+  { role: 'Victim (our probe)', label: '0xf6833083…895c1d4f', index: 2, delta: '+0.000200 WETH, worse price' },
+  { role: 'Back-run', label: '0x73261b96…451631', index: 7, delta: '-0.000593 WETH' },
 ]
 
 // This is the detector's own output, not invented copy: block 11693970 on
@@ -120,35 +158,16 @@ const CODE_LINES: Array<React.ReactNode> = [
   '// backrun  -0.000593 WETH for +16.55 USDC',
 ]
 
-function BrandMark() {
+function NavChevron({ open }: { open?: boolean } = {}) {
   return (
-    <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <circle cx="20" cy="20" r="18.5" stroke="#1a1a17" strokeWidth="1.9" />
-      <ellipse
-        cx="20"
-        cy="20"
-        rx="9.4"
-        ry="18.1"
-        stroke="#1a1a17"
-        strokeWidth="1.9"
-        transform="rotate(-40 20 20)"
-      />
-      <ellipse
-        cx="20"
-        cy="20"
-        rx="9.4"
-        ry="18.1"
-        stroke="#1a1a17"
-        strokeWidth="1.9"
-        transform="rotate(40 20 20)"
-      />
-    </svg>
-  )
-}
-
-function NavChevron() {
-  return (
-    <svg viewBox="0 0 10 6" width="9" height="6" fill="none" aria-hidden="true">
+    <svg
+      viewBox="0 0 10 6"
+      width="9"
+      height="6"
+      fill="none"
+      aria-hidden="true"
+      className={open ? 'is-open' : undefined}
+    >
       <path d="M1 1.2 5 4.9 9 1.2" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -190,6 +209,92 @@ function FileIcon() {
   )
 }
 
+// Ecosystem icons: line-art in the same visual language as the tree icons
+// above (currentColor stroke, no fill), not borrowed brand marks.
+function EthereumIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="M12 2 19.5 12 12 22 4.5 12Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M4.5 12 12 15.6 19.5 12M12 2v13.6" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function GraphIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="M11.5 8 7.4 15.6M12.5 8l3.7 7.6M8.3 17h7.3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="12" cy="6" r="2.2" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="6" cy="17.4" r="2.2" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="18" cy="17.4" r="2.2" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  )
+}
+
+function EnsIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="M12 2 20 7v10l-8 5-8-5V7Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M4.5 7.3 12 12l7.5-4.7M12 12v9.6" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function ChainlinkIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <rect x="2.3" y="7.8" width="10.4" height="8.4" rx="4.2" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="11.3" y="7.8" width="10.4" height="8.4" rx="4.2" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  )
+}
+
+function CommitIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <rect x="4.5" y="10.5" width="15" height="10" rx="1.4" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M7.8 10.5V7.2a4.2 4.2 0 0 1 8.4 0v3.3" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M12 14.4v2.6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function HashIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path
+        d="M9.2 3.5 7 20.5M17 3.5l-2.2 17M4 9h16M3.3 15h16"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function KeyIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <circle cx="8" cy="15" r="4" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M11 12 19.5 3.5M16.2 6.3l2.5 2.5M13.6 8.9l2 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function ShieldIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path
+        d="M12 2.6 19.5 5.4V11c0 5.6-3.3 9-7.5 10.4C7.8 20 4.5 16.6 4.5 11V5.4Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d="M8.3 11.3h7.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 function Home() {
   // Guards the timeline itself (not the effect) so that React's dev-mode
   // mount -> cleanup -> mount double-invoke can never build it twice: each
@@ -213,6 +318,8 @@ function Home() {
   const codeLineRefs = useRef<Array<HTMLElement | null>>([])
 
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [openNav, setOpenNav] = useState<string | null>(null)
+  const navWrapRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!drawerOpen) return
@@ -222,6 +329,51 @@ function Home() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [drawerOpen])
+
+  // Makes the chevron nav items actual disclosure controls instead of decorative
+  // chevrons: click opens a dropdown, click outside or Escape closes it.
+  useEffect(() => {
+    if (!openNav) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenNav(null)
+    }
+    const onClick = (e: MouseEvent) => {
+      if (navWrapRef.current && !navWrapRef.current.contains(e.target as Node)) {
+        setOpenNav(null)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('pointerdown', onClick)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('pointerdown', onClick)
+    }
+  }, [openNav])
+
+  // Below-the-fold sections play their own one-shot reveal the first time
+  // they scroll into view, independent of the hero's load-time timeline.
+  const revealRefs = useRef<Array<HTMLElement | null>>([])
+  useEffect(() => {
+    const els = revealRefs.current.filter((el): el is HTMLElement => el !== null)
+    if (els.length === 0) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      els.forEach((el) => el.classList.add('is-revealed'))
+      return
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed')
+            io.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.2 },
+    )
+    els.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [])
 
   useEffect(() => {
     const root = document.documentElement
@@ -273,7 +425,7 @@ function Home() {
         play(el, kf, opts)
       })
 
-      // 300, actions (Sign In, Register, burger), +60ms each
+      // 300, actions (burger), +60ms each
       actionRefs.current.forEach((el, i) => {
         const [kf, opts] = lifted({ delay: 300 + i * 60, duration: 500 })
         play(el, kf, opts)
@@ -372,47 +524,55 @@ function Home() {
   }, [])
 
   return (
+    <>
     <div className="frame">
       <header className="header">
         <a href="#" className="brand" aria-label="Home" ref={brandRef}>
-          <BrandMark />
+          <img src="/image/gokuin-icon-nav.png" alt="" className="brand-icon" />
         </a>
 
-        <nav className="nav">
+        <nav className="nav" ref={navWrapRef}>
           {NAV_ITEMS.map((item, i) => (
-            <a
-              key={item.label}
-              href="#"
-              className="navlink"
-              ref={(el) => {
-                navRefs.current[i] = el
-              }}
-            >
-              {item.label}
-              {item.chevron ? <NavChevron /> : null}
-            </a>
+            <div className="navitem" key={item.label}>
+              {item.menu ? (
+                <button
+                  type="button"
+                  className="navlink"
+                  aria-haspopup="true"
+                  aria-expanded={openNav === item.label}
+                  onClick={() => setOpenNav((cur) => (cur === item.label ? null : item.label))}
+                  ref={(el) => {
+                    navRefs.current[i] = el
+                  }}
+                >
+                  {item.label}
+                  <NavChevron open={openNav === item.label} />
+                </button>
+              ) : (
+                <a
+                  href="#"
+                  className="navlink"
+                  ref={(el) => {
+                    navRefs.current[i] = el
+                  }}
+                >
+                  {item.label}
+                </a>
+              )}
+              {item.menu ? (
+                <div className={`navmenu${openNav === item.label ? ' is-open' : ''}`}>
+                  {item.menu.map((entry) => (
+                    <a href="#" key={entry} onClick={() => setOpenNav(null)}>
+                      {entry}
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           ))}
         </nav>
 
         <div className="actions">
-          <a
-            href="#"
-            className="btn btn-ghost header-signin"
-            ref={(el) => {
-              actionRefs.current[0] = el
-            }}
-          >
-            Sign In
-          </a>
-          <a
-            href="#"
-            className="btn btn-solid"
-            ref={(el) => {
-              actionRefs.current[1] = el
-            }}
-          >
-            Register
-          </a>
           <button
             type="button"
             className="burger"
@@ -420,7 +580,7 @@ function Home() {
             aria-expanded={drawerOpen}
             onClick={() => setDrawerOpen((v) => !v)}
             ref={(el) => {
-              actionRefs.current[2] = el
+              actionRefs.current[0] = el
             }}
           >
             <span className="burger-bar" />
@@ -429,13 +589,10 @@ function Home() {
 
         <div className={`drawer${drawerOpen ? ' is-open' : ''}`}>
           {NAV_ITEMS.map((item) => (
-            <a key={item.label} href="#">
+            <a key={item.label} href="#" onClick={() => setDrawerOpen(false)}>
               {item.label}
             </a>
           ))}
-          <a href="#" className="btn btn-ghost drawer-cta">
-            Sign In
-          </a>
         </div>
       </header>
 
@@ -453,7 +610,7 @@ function Home() {
                   headlineRefs.current[0] = el
                 }}
               >
-                Every Route Promises Privacy
+                Every Route Sells Protection
               </span>
             </span>
             <span className="ln dim">
@@ -469,8 +626,8 @@ function Home() {
           </h1>
 
           <p className="sub" ref={subRef}>
-            Flashbots Protect and MEV Blocker both advertise that they stop around 80% of sandwich attacks. Both of
-            those numbers were measured by the company that published them.
+            Flashbots Protect and MEV Blocker claim they stop most sandwich attacks. Gokuin checks that claim
+            on-chain.
           </p>
 
           <div className="cta-row">
@@ -584,12 +741,91 @@ function Home() {
       <div className="hatch" />
 
       <div className="strip">
-        {BUILT_ON.map((tech) => (
-          <div className="strip-cell" data-tech={tech.key} key={tech.key}>
-            <span className="strip-word">{tech.label}</span>
+        {BUILT_ON.map((tech) => {
+          const Icon = tech.icon
+          return (
+            <div className="strip-cell" data-tech={tech.key} key={tech.key}>
+              <Icon className="strip-icon" />
+              <span className="strip-word">{tech.label}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+
+    <FlowSection
+      setRef={(el) => {
+        revealRefs.current[0] = el
+      }}
+    />
+    <MethodSection
+      setRef={(el) => {
+        revealRefs.current[1] = el
+      }}
+    />
+    </>
+  )
+}
+
+function FlowSection({
+  setRef,
+}: {
+  setRef: (el: HTMLElement | null) => void
+}) {
+  return (
+    <section className="flow" ref={setRef}>
+      <div className="section-head">
+        <span className="eyebrow">Evidence</span>
+        <h2>Anatomy Of A Sandwich</h2>
+        <p>
+          Front-run buys first, the victim buys at a worse price, back-run sells into the profit. All three sit in
+          block 11693970 on Sepolia, a sandwich staged against our own probe.
+        </p>
+      </div>
+
+      <div className="flow-track">
+        <div className="flow-line" aria-hidden="true">
+          <span className="flow-beam" />
+          <span className="flow-beam" />
+          <span className="flow-beam" />
+        </div>
+        {FLOW_NODES.map((node, i) => (
+          <div className="flow-node" key={node.role} style={{ '--i': i } as React.CSSProperties}>
+            <span className="flow-index">tx {node.index}</span>
+            <span className="flow-role">{node.role}</span>
+            <span className="flow-hash">{node.label}</span>
+            <span className="flow-delta">{node.delta}</span>
           </div>
         ))}
       </div>
-    </div>
+    </section>
+  )
+}
+
+function MethodSection({
+  setRef,
+}: {
+  setRef: (el: HTMLElement | null) => void
+}) {
+  return (
+    <section className="method" ref={setRef}>
+      <div className="section-head">
+        <span className="eyebrow">Method</span>
+        <h2>Built To Be Checked, Not Trusted</h2>
+      </div>
+
+      <div className="method-grid">
+        {METHOD_CARDS.map((card, i) => {
+          const Icon = card.icon
+          return (
+            <div className="method-card" key={card.title} style={{ '--i': i } as React.CSSProperties}>
+              <Icon className="method-icon" />
+              <h3>{card.title}</h3>
+              <p>{card.copy}</p>
+            </div>
+          )
+        })}
+      </div>
+    </section>
   )
 }
