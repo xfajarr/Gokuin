@@ -12,16 +12,9 @@ dataSources:
     name: ProbeLedger
     network: sepolia
     source:
-      # TODO(contracts): replace with the deployed ProbeLedger address once
-      # it exists -- it is being written in parallel with this subgraph.
-      # This placeholder is deliberately the zero address so an accidental
-      # deploy-without-editing fails loudly (indexes nothing) rather than
-      # silently pointing at an unrelated contract.
-      address: "0x0000000000000000000000000000000000000000"
+      address: "0x0E45Ec4cf655e5eDD394a8C6731197A588A20336"
       abi: ProbeLedger
-      # TODO(contracts): set to ProbeLedger's actual deploy block on Sepolia
-      # once known, to avoid indexing from genesis.
-      startBlock: 0
+      startBlock: 11693631
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
