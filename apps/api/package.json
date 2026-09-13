@@ -10,11 +10,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@gokuin/abi": "workspace:*",
     "@gokuin/core": "workspace:*",
-    "elysia": "^1.1.26",
-    "viem": "^2.21.0",
     "@sinclair/typebox": "^0.34.0",
-    "@gokuin/abi": "workspace:*"
+    "@substreams/core": "0.17.0",
+    "@substreams/node": "0.7.2",
+    "elysia": "^1.1.26",
+    "viem": "^2.21.0"
   },
   "devDependencies": {
     "@types/bun": "latest",

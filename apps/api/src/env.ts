@@ -40,6 +40,12 @@ export const EnvSchema = Type.Object({
   MEV_BLOCKER_RPC: Type.String({ default: 'https://rpc.mevblocker.io' }),
   DB_PATH: Type.String({ default: 'gokuin.db' }),
   PORT: Type.Number({ default: 3000 }),
+  /** The published Substreams package the sandwich verdict comes from.
+   *  Consumed by reference, so the detector a judge runs is the detector we run:
+   *  https://substreams.dev/packages/sandwich-detect/v0.1.0 */
+  SUBSTREAMS_PACKAGE: Type.Optional(Type.String()),
+  SUBSTREAMS_ENDPOINT: Type.Optional(Type.String()),
+  SUBSTREAMS_API_KEY: Type.Optional(Type.String()),
   /** Hard lifetime ceiling on real spend. Enforced in chain/budget.ts, not by intent.
    *  A decimal STRING, parsed with parseEther — float arithmetic loses wei. */
   PROBE_BUDGET_ETH: Type.String({ default: '0.004' }),

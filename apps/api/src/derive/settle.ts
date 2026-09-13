@@ -63,7 +63,7 @@ export async function settleProbe(deps: SettleDeps, probeId: number): Promise<Ro
   const realOut = await getRealOutFromReceipt(deps.publicClient, probe.tx_hash, probe.from_address)
   const extractedWei = computeExtracted(simOut, realOut)
 
-  const verdict = await fetchSandwichVerdict(deps.env, probe.tx_hash)
+  const verdict = await fetchSandwichVerdict(deps.env, probe.tx_hash, probe.included_block)
 
   const row: Row = {
     mainnetTxHash: probe.tx_hash,
