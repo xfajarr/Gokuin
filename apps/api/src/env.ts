@@ -40,6 +40,12 @@ export const EnvSchema = Type.Object({
   MEV_BLOCKER_RPC: Type.String({ default: 'https://rpc.mevblocker.io' }),
   DB_PATH: Type.String({ default: 'gokuin.db' }),
   PORT: Type.Number({ default: 3000 }),
+  /** Hard lifetime ceiling on real spend. Enforced in chain/budget.ts, not by intent.
+   *  A decimal STRING, parsed with parseEther — float arithmetic loses wei. */
+  PROBE_BUDGET_ETH: Type.String({ default: '0.004' }),
+  /** Refuse to dispatch above this. Gas has moved 500x before; a spike must not
+   *  be allowed to consume the whole budget in one cycle. Decimal string, parseGwei. */
+  MAX_GAS_PRICE_GWEI: Type.String({ default: '2' }),
 
   // Distributor funding tuning (chain/distributor.ts). All have safe
   // defaults; a real deployment should set the delay knobs above zero so

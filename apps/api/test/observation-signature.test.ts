@@ -16,6 +16,8 @@ function makeTestEnv(overrides: Partial<Env> = {}): Env {
     SEPOLIA_RPC: 'http://127.0.0.1:8545',
     LISTENER_REGION: 'eu-central',
     API_URL: 'http://localhost:3000',
+    PROBE_BUDGET_ETH: '0.004',
+    MAX_GAS_PRICE_GWEI: '2',
     FLASHBOTS_PROTECT_RPC: 'https://rpc.flashbots.net/fast',
     MEV_BLOCKER_RPC: 'https://rpc.mevblocker.io',
     DB_PATH: ':memory:',

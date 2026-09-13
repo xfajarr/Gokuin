@@ -23,6 +23,9 @@ import { scheduleAndHash } from './schedule'
 import { CommitBeforeDispatchGuard } from './order-guard'
 import { buildTwin, minOutForSlippage, rotateEOA, submitLeg, type SwapParams } from './dispatch'
 import { loadFundingConfig, nextFundingDelayMs, planProbeFunding, preflightDistributorFunding } from '../chain/distributor'
+import { assertWithinBudget } from '../chain/budget'
+
+const fmtEth = (w: bigint) => `${(Number(w) / 1e18).toFixed(6)} ETH`
 import { settleProbe } from '../derive/settle'
 import { revealCycle } from './reveal'
 
@@ -57,7 +60,19 @@ export async function runCycle(ctx: AppContext, opts: RunCycleOptions): Promise<
   const { schedule, scheduleHash } = scheduleAndHash(opts.cycleId, headBlock)
 
   // 0. preflight — BEFORE commitCycle. See module header + chain/distributor.ts.
-  await preflightDistributorFunding(ctx.mainnetPublic, ctx.distributor, routePair.length, opts.amountInWei, fundingConfig)
+  const requirement = await preflightDistributorFunding(
+    ctx.mainnetPublic, ctx.distributor, routePair.length, opts.amountInWei, fundingConfig,
+  )
+
+  // 0b. spend cap and gas ceiling, also before the commit. Same reason: a cycle
+  // that commits and then cannot pay for itself manufactures the committed-versus-
+  // published gap the integrity check is meant to read as dishonesty. Throws
+  // BudgetExceeded or GasTooExpensive, both of which name what to do next.
+  const budget = await assertWithinBudget(ctx.mainnetPublic, ctx.stmts, ctx.env, requirement.totalRequiredWei)
+  console.log(
+    `[cycle:${opts.cycleId}] budget ok — ${fmtEth(budget.spentWei)} spent, ` +
+      `${fmtEth(budget.remainingWei)} left after this cycle, gas ${(Number(budget.gasPriceWei) / 1e9).toFixed(3)} gwei`,
+  )
 
   // 2. ledger.commitCycle() — BEFORE dispatch, always.
   const commit = await ctx.ledger.commitCycle(opts.cycleId, scheduleHash, schedule.routeIds.length)

@@ -130,6 +130,13 @@ export function createStatements(db: Database) {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ),
     getDerivation: db.prepare(`SELECT * FROM derivation WHERE probe_id = ?`),
+    // Cumulative real spend, derived from the ledger rather than a counter, so a
+    // restart cannot forget what has already been spent.
+    totalFundingSpend: db.prepare(
+      `SELECT CAST(COALESCE(SUM(CAST(amount_wei AS INTEGER)), 0) AS TEXT) AS funded,
+              CAST(COALESCE(SUM(CAST(swept_amount_wei AS INTEGER)), 0) AS TEXT) AS swept
+         FROM funding`,
+    ),
 
     insertFunding: db.prepare(
       `INSERT INTO funding (probe_id, funding_tx, amount_wei, gas_budget_wei, funded_at)
