@@ -4,28 +4,32 @@ pragma solidity ^0.8.26;
 import {Script, console} from "forge-std/Script.sol";
 import {RouteRegistry} from "../src/RouteRegistry.sol";
 
-interface IENSOwner {
-    function owner(bytes32 node) external view returns (address);
+/// @dev Minimal read-only view of ENSv2's real `IRegistry.getSubregistry(string)`
+///      (`ensdomains/contracts-v2`, `contracts/src/registry/interfaces/IRegistry.sol`). The ABI
+///      encoding of an `IRegistry`-typed return value is identical to `address`, so this
+///      single-function interface is enough for the prerequisite check below without pulling in
+///      the whole contracts-v2 package.
+interface IRegistryView {
+    function getSubregistry(string calldata label) external view returns (address);
 }
 
-/// @notice Registers the three routes as ENSv2 subnames. Separate from `Deploy`
-///         because it depends on something no contract can do for itself: the
-///         parent name must exist and `RouteRegistry` must own it.
+/// @notice Registers the three routes as ENSv2 subnames of RouteRegistry's own namespace.
+///         Separate from `Deploy` because it depends on something no contract can do for
+///         itself: `gokuin.eth`'s ENSv2 subregistry must already point at `RouteRegistry` —
+///         only the name's owner (or an address it granted `ROLE_SET_SUBREGISTRY`) can set
+///         that, via `ETHRegistry.setSubregistry`.
 ///
 ///         Folding this into the deploy meant one revert here rolled back four
 ///         contract deployments — which is exactly what happened the first time.
 ///
 /// Required env vars:
 ///   ROUTE_REGISTRY_ADDRESS  from the deploy output.
-///   ENS_REGISTRY            same registry the deploy used.
 ///
-/// Optional:
-///   PARENT_NODE             namehash of the parent (default: namehash("gokuin.eth")).
-///
-/// Prerequisite, and the script checks it before spending gas:
-///   You own the parent name on Sepolia, and have transferred that node to
-///   RouteRegistry:
-///     cast send $ENS_REGISTRY "setOwner(bytes32,address)" $PARENT_NODE $ROUTE_REGISTRY_ADDRESS
+/// Prerequisite, and the script checks it before spending gas: `RouteRegistry` must be
+/// registered as `gokuin.eth`'s ENSv2 subregistry. `RouteRegistry` itself already stores the
+/// real `ETHRegistry` address and the parent label it was deployed with
+/// (`registry.ethRegistry()`, `registry.parentLabel()`), so this script reads those instead of
+/// requiring separate, potentially-mismatched env vars.
 contract RegisterRoutes is Script {
     /// @dev Index is the on-chain routeId. Must match
     ///      `packages/core/src/types.ts::ROUTE_IDS` and never be reordered.
@@ -33,16 +37,21 @@ contract RegisterRoutes is Script {
 
     function run() external {
         RouteRegistry registry = RouteRegistry(vm.envAddress("ROUTE_REGISTRY_ADDRESS"));
-        address ensRegistry = vm.envAddress("ENS_REGISTRY");
-        bytes32 parentNode = vm.envOr("PARENT_NODE", registry.parentNode());
+        address ethRegistry = registry.ethRegistry();
+        string memory parentLabel = registry.parentLabel();
 
-        address parentOwner = IENSOwner(ensRegistry).owner(parentNode);
-        if (parentOwner != address(registry)) {
-            console.log("Parent node is owned by", parentOwner);
-            console.log("It must be owned by RouteRegistry at", address(registry));
-            console.log("Run:");
-            console.log("  cast send <ENS_REGISTRY> 'setOwner(bytes32,address)' <PARENT_NODE> <ROUTE_REGISTRY>");
-            revert("parent node not owned by RouteRegistry");
+        address currentSubregistry = IRegistryView(ethRegistry).getSubregistry(parentLabel);
+        if (currentSubregistry != address(registry)) {
+            bytes32 labelHash = keccak256(bytes(parentLabel));
+            console.log("gokuin.eth's ENSv2 subregistry is currently", currentSubregistry);
+            console.log("It must be RouteRegistry, at", address(registry));
+            console.log("Run this once, as the owner of gokuin.eth, then re-run this script:");
+            console.log("");
+            console.log("  cast send", ethRegistry);
+            console.log("    \"setSubregistry(uint256,address)\"", vm.toString(uint256(labelHash)), address(registry));
+            console.log("    --private-key <owner-of-gokuin.eth> --rpc-url $SEPOLIA_RPC");
+            console.log("");
+            revert("RouteRegistry is not gokuin.eth's ENSv2 subregistry yet");
         }
 
         vm.startBroadcast();

@@ -6,25 +6,23 @@ import {ScorerReportReceiver} from "../src/ScorerReportReceiver.sol";
 import {IReceiver} from "../src/interfaces/IReceiver.sol";
 import {Scorer} from "../src/Scorer.sol";
 import {RouteRegistry} from "../src/RouteRegistry.sol";
-import {MockNameRegistry} from "./mocks/MockNameRegistry.sol";
 
 /// @notice The adapter widens the path from CRE to RouteRegistry by exactly one
 ///         hop, and must not widen who may write. These tests pin that.
 contract ScorerReportReceiverTest is Test {
-    MockNameRegistry ens;
     RouteRegistry registry;
     Scorer scorer;
     ScorerReportReceiver receiver;
 
     address constant FORWARDER = address(0xF0);
+    address constant ETH_REGISTRY = address(0xE7E9);
     bytes32 constant PARENT = keccak256("gokuin.eth");
 
     function setUp() public {
-        ens = new MockNameRegistry();
         // Two-phase wiring: the registry's scorer must be the Scorer, and the
         // Scorer's creForwarder must be the adapter — not Chainlink's Forwarder.
         address predictedScorer = vm.computeCreateAddress(address(this), vm.getNonce(address(this)) + 1);
-        registry = new RouteRegistry(predictedScorer, address(ens), PARENT);
+        registry = new RouteRegistry(predictedScorer, ETH_REGISTRY, PARENT, "gokuin");
         scorer = new Scorer(address(0xBEEF), registry);
         assertEq(address(scorer), predictedScorer, "scorer address prediction must hold");
         receiver = new ScorerReportReceiver(FORWARDER, scorer);

@@ -2,19 +2,18 @@
 pragma solidity ^0.8.26;
 
 import {Test} from "forge-std/Test.sol";
+import {IRegistry} from "../src/interfaces/IRegistry.sol";
 import {RouteRegistry} from "../src/RouteRegistry.sol";
-import {MockNameRegistry} from "./mocks/MockNameRegistry.sol";
 
 contract RouteRegistryTest is Test {
     RouteRegistry internal registry;
-    MockNameRegistry internal ens;
     address internal scorer = makeAddr("scorer");
     address internal stranger = makeAddr("stranger");
+    address internal ethRegistry = makeAddr("ethRegistry");
     bytes32 internal constant PARENT_NODE = keccak256("gokuin.eth");
 
     function setUp() public {
-        ens = new MockNameRegistry();
-        registry = new RouteRegistry(scorer, address(ens), PARENT_NODE);
+        registry = new RouteRegistry(scorer, ethRegistry, PARENT_NODE, "gokuin");
     }
 
     // ── test_OnlyScorerWritesENS ────────────────────────────────────────────
@@ -53,12 +52,26 @@ contract RouteRegistryTest is Test {
         registry.setScore(99, "gokuin.leakBps", "0");
     }
 
-    function test_RegisterRouteRecordsThisContractAsEnsOwner() public {
+    // RouteRegistry IS the ENSv2 subregistry: after registration, it must answer the exact two
+    // IRegistry calls ENSv2 traversal (`LibRegistry.findResolver`) makes for that label.
+    function test_RegisterRouteMakesThisContractTheResolver() public {
         bytes32 node = registry.registerRoute(0, "public-mempool");
-        // RouteRegistry must be its own resolver/owner so the permission check it
-        // enforces (onlyScorer) is the only gate that matters, independent of any
-        // external resolver's own ACL.
-        assertEq(ens.owner(node), address(registry));
+        assertEq(registry.getResolver("public-mempool"), address(registry));
+        assertEq(address(registry.getSubregistry("public-mempool")), address(0));
         assertEq(registry.routeOfNode(node), 0);
+    }
+
+    // An unregistered label must resolve to nothing — RouteRegistry only answers for labels it
+    // actually registered, not arbitrary strings.
+    function test_GetResolverIsZeroForUnregisteredLabel() public view {
+        assertEq(registry.getResolver("not-a-route"), address(0));
+    }
+
+    // IRegistry.getParent() is metadata ENSv2 tooling (LibRegistry.findCanonicalName) uses to
+    // reconstruct a registry's canonical DNS name — must point back at gokuin.eth's registry.
+    function test_GetParentPointsAtEthRegistryAndGokuinLabel() public view {
+        (IRegistry parent, string memory label) = registry.getParent();
+        assertEq(address(parent), ethRegistry);
+        assertEq(label, "gokuin");
     }
 }

@@ -7,24 +7,24 @@ import {ProbeLedger} from "../src/ProbeLedger.sol";
 import {RouteRegistry} from "../src/RouteRegistry.sol";
 import {Scorer} from "../src/Scorer.sol";
 import {ScorerReportReceiver} from "../src/ScorerReportReceiver.sol";
-import {MockNameRegistry} from "./mocks/MockNameRegistry.sol";
 
 /// @notice The deploy script predicts two addresses from nonce arithmetic and wires
 ///         four contracts in an order where a mistake fails silently rather than
 ///         reverting. Reasoning about the nonce math is not evidence; running it is.
 contract DeployTest is Test {
     Deploy script;
-    MockNameRegistry ens;
 
     address constant PROBER = address(0xB0B);
     address constant CHAINLINK_FORWARDER = address(0xF0);
+    // Real ENSv2 ETHRegistry on Sepolia; the deploy script never calls it, only stores it as
+    // RouteRegistry metadata, so a plain address stand-in is enough here.
+    address constant ETH_REGISTRY = address(0xE7E9);
 
     function setUp() public {
-        ens = new MockNameRegistry();
         script = new Deploy();
         vm.setEnv("PROBER_ADDRESS", vm.toString(PROBER));
         vm.setEnv("CRE_FORWARDER", vm.toString(CHAINLINK_FORWARDER));
-        vm.setEnv("ENS_REGISTRY", vm.toString(address(ens)));
+        vm.setEnv("ETH_REGISTRY", vm.toString(ETH_REGISTRY));
     }
 
     function test_ScriptRunsAndPredictionsHold() public {
@@ -50,8 +50,15 @@ contract DeployTest is Test {
     function test_RegistryAcceptsOnlyTheScorer() public {
         Deploy.Deployed memory d = script.deploy(address(script));
 
-                
+
         assertEq(d.registry.scorer(), address(d.scorer), "exactly one authorized writer, and it is the Scorer");
+    }
+
+    function test_RegistryPointsAtTheRealEthRegistryAndGokuinLabel() public {
+        Deploy.Deployed memory d = script.deploy(address(script));
+
+        assertEq(d.registry.ethRegistry(), ETH_REGISTRY, "must store the ETHRegistry it was deployed against");
+        assertEq(d.registry.parentLabel(), "gokuin", "default parent label must be gokuin");
     }
 
     function test_LedgerProberIsTheConfiguredAddress() public {

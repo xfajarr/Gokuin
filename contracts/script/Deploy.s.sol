@@ -16,11 +16,16 @@ import {ScorerReportReceiver} from "../src/ScorerReportReceiver.sol";
 ///   PROBER_ADDRESS      address permitted to write ProbeLedger (the API's hot key).
 ///   CRE_FORWARDER       Chainlink's own CRE Forwarder on Sepolia. NOTE: this is NOT
 ///                       what Scorer.creForwarder is set to — see the wiring below.
-///   ENS_REGISTRY        the ENSv2 (beta) name registry address on Sepolia.
+///   ETH_REGISTRY        the real ENSv2 ETHRegistry address on Sepolia
+///                       (0xbdc85dd5b15d7ecb354cd7cb6f2c50b4f2c4f0e2 as of writing —
+///                       see https://docs.ens.domains/learn/deployments/). Stored on
+///                       RouteRegistry only as metadata (IRegistry.getParent()) and for
+///                       RegisterRoutes's prerequisite check; never called to create subnames.
 ///   DEPLOYER_PK         private key to broadcast with (or use --private-key / a keystore).
 ///
 /// Optional:
 ///   PARENT_NODE         namehash of the parent name (default: namehash("gokuin.eth")).
+///   PARENT_LABEL        the label RouteRegistry answers for under ETH_REGISTRY (default: "gokuin").
 ///
 /// Usage:
 ///   bun run deploy:sepolia          (loads the repo-root .env, then runs forge)
@@ -59,8 +64,9 @@ contract Deploy is Script {
     function deploy(address deployer) public returns (Deployed memory) {
         address prober = vm.envAddress("PROBER_ADDRESS");
         address creForwarder = vm.envAddress("CRE_FORWARDER");
-        address ensRegistry = vm.envAddress("ENS_REGISTRY");
+        address ethRegistry = vm.envAddress("ETH_REGISTRY");
         bytes32 parentNode = vm.envOr("PARENT_NODE", _namehash("gokuin.eth"));
+        string memory parentLabel = vm.envOr("PARENT_LABEL", string("gokuin"));
 
         ProbeLedger ledger = new ProbeLedger(prober);
         console.log("ProbeLedger deployed at", address(ledger));
@@ -70,7 +76,7 @@ contract Deploy is Script {
         // RouteRegistry first against the deterministically-predicted address Scorer
         // will occupy at the very next nonce from this same deployer.
         address predictedScorer = vm.computeCreateAddress(deployer, vm.getNonce(deployer) + 1);
-        RouteRegistry registry = new RouteRegistry(predictedScorer, ensRegistry, parentNode);
+        RouteRegistry registry = new RouteRegistry(predictedScorer, ethRegistry, parentNode, parentLabel);
         console.log("RouteRegistry deployed at", address(registry));
 
         // Scorer's only permitted caller is the adapter, which does not exist yet —
@@ -87,11 +93,14 @@ contract Deploy is Script {
         require(scorer.creForwarder() == address(adapter), "Scorer must point at the adapter");
 
         console.log("");
-        console.log("Routes are NOT registered yet. RouteRegistry cannot create subnames");
-        console.log("until it owns the parent node. Next:");
-        console.log("  1. register gokuin.eth on Sepolia");
-        console.log("  2. cast send <ENS_REGISTRY> 'setOwner(bytes32,address)' <PARENT_NODE> <RouteRegistry>");
-        console.log("  3. bun run register:routes");
+        console.log("Routes are NOT registered yet, and RouteRegistry is not yet gokuin.eth's");
+        console.log("ENSv2 subregistry. gokuin.eth must already be registered in ETHRegistry");
+        console.log("(it is, on Sepolia) and its subregistry must be pointed at RouteRegistry");
+        console.log("before real ENS resolution of e.g. mev-blocker.gokuin.eth works. Next:");
+        console.log("  1. cast send", ethRegistry);
+        console.log("       'setSubregistry(uint256,address)'", vm.toString(uint256(keccak256(bytes(parentLabel)))), address(registry));
+        console.log("       --private-key <owner-of-gokuin.eth> --rpc-url $SEPOLIA_RPC");
+        console.log("  2. bun run register:routes   (RegisterRoutes re-checks this and refuses to run otherwise)");
         console.log("");
 
         return Deployed({ledger: ledger, registry: registry, scorer: scorer, adapter: adapter});

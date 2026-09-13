@@ -4,22 +4,20 @@ pragma solidity ^0.8.26;
 import {Test} from "forge-std/Test.sol";
 import {RouteRegistry} from "../src/RouteRegistry.sol";
 import {Scorer} from "../src/Scorer.sol";
-import {MockNameRegistry} from "./mocks/MockNameRegistry.sol";
 
 contract ScorerTest is Test {
     RouteRegistry internal registry;
     Scorer internal scorer;
-    MockNameRegistry internal ens;
     address internal creForwarder = makeAddr("creForwarder");
     address internal stranger = makeAddr("stranger");
+    address internal ethRegistry = makeAddr("ethRegistry");
     bytes32 internal constant PARENT_NODE = keccak256("gokuin.eth");
 
     function setUp() public {
-        ens = new MockNameRegistry();
         // `RouteRegistry.scorer` must be the `Scorer` contract's own address; compute
         // it ahead of deployment since both constructors reference each other.
         address predictedScorer = vm.computeCreateAddress(address(this), vm.getNonce(address(this)) + 1);
-        registry = new RouteRegistry(predictedScorer, address(ens), PARENT_NODE);
+        registry = new RouteRegistry(predictedScorer, ethRegistry, PARENT_NODE, "gokuin");
         scorer = new Scorer(creForwarder, registry);
         assertEq(address(scorer), predictedScorer, "scorer address prediction must hold");
 
