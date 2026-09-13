@@ -2,7 +2,14 @@
 // validation) and the test suite (asserting the server exposes exactly the
 // contract described in PRD §10).
 
-import { z } from 'zod'
+import { z, type ZodRawShape } from 'zod'
+
+// Each *Shape below is annotated ZodRawShape rather than left to inference.
+// Without the annotation tsc re-derives the full generic tree of every field at
+// each registerTool call site, and combined with the MCP SDK's own generics it
+// stops being slow and starts being unbounded — the typecheck ran past two
+// minutes and died on a heap abort, which reads as a crash rather than as a type
+// that is simply too expensive to name.
 import { ROUTES } from '@gokuin/core'
 
 export const routeIdSchema = z.enum([...ROUTES] as [string, ...string[]])
@@ -16,7 +23,7 @@ export const evidenceItemSchema = z.object({
 
 // --- gokuin_submit ---------------------------------------------------------
 
-export const submitInputShape = {
+export const submitInputShape: ZodRawShape = {
   tx: z.string().min(1).describe('Raw, already-signed transaction hex (0x-prefixed). Gokuin never signs anything.'),
   need: needSchema.describe(
     "What guarantee this transaction needs: 'privacy' (do not leak pre-inclusion), 'speed' (fastest inclusion), " +
@@ -27,7 +34,7 @@ export const submitInputShape = {
 }
 export const submitInputSchema = z.object(submitInputShape)
 
-export const submitOutputShape = {
+export const submitOutputShape: ZodRawShape = {
   hash: z.string().describe('The mainnet transaction hash returned by the chosen route after submission.'),
   route: routeIdSchema.describe('The route the transaction was actually sent through.'),
   reason: z.string().describe('Why this route, in plain language, grounded in its measured record.'),
@@ -49,9 +56,9 @@ export const routeScoreSchema = z.object({
   lastCycle: z.number(),
 })
 
-export const routesInputShape = {}
+export const routesInputShape: ZodRawShape = {}
 
-export const routesOutputShape = {
+export const routesOutputShape: ZodRawShape = {
   routes: z.array(routeScoreSchema).describe('Every measured route, most recently scored data from the live subgraph.'),
   reason: z.string().describe('What this list is, and where the numbers come from.'),
   evidence: z
@@ -65,11 +72,11 @@ export const routesOutputSchema = z.object(routesOutputShape)
 
 // --- gokuin_explain ----------------------------------------------------------
 
-export const explainInputShape = {
+export const explainInputShape: ZodRawShape = {
   route: z.string().min(1).describe(`Route id to explain, e.g. one of: ${ROUTES.join(', ')}. See gokuin_routes for the current list.`),
 }
 
-export const explainOutputShape = {
+export const explainOutputShape: ZodRawShape = {
   route: z.string(),
   record: routeScoreSchema.nullable().describe('The route\'s full measured record, or null if the API has never scored it.'),
   reason: z.string().describe('Plain-language walkthrough of what each number means and how it was derived.'),

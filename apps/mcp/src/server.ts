@@ -93,10 +93,24 @@ async function collectEvidenceForRoute(route: string): Promise<{ evidence: Evide
   return { evidence: fromSelect, source: fromSelect.length ? 'select' : 'none' }
 }
 
+/**
+ * `server.registerTool` infers a generic over every field of both schemas, and
+ * the MCP SDK's own generics compound it — tsc reported TS2589, "type
+ * instantiation is excessively deep", and before the shapes were annotated it
+ * ran past two minutes and died on a heap abort that looked like a crash.
+ *
+ * The schemas still validate at runtime; zod is doing the work either way. What
+ * is given up is compile-time inference of the handler's argument type, which
+ * the SDK was deriving at a cost out of proportion to the guarantee. Each
+ * handler annotates its own args instead.
+ */
+type RegisterTool = (name: string, config: unknown, handler: (args: any) => Promise<CallToolResult>) => void
+
 export function buildServer(): McpServer {
   const server = new McpServer({ name: 'gokuin', version: '0.1.0' })
+  const registerTool = server.registerTool.bind(server) as unknown as RegisterTool
 
-  server.registerTool(
+  registerTool(
     'gokuin_submit',
     {
       title: 'Submit a transaction through the best-measured route',
@@ -146,7 +160,7 @@ export function buildServer(): McpServer {
     },
   )
 
-  server.registerTool(
+  registerTool(
     'gokuin_routes',
     {
       title: 'List every measured route and its current score',
@@ -181,7 +195,7 @@ export function buildServer(): McpServer {
     },
   )
 
-  server.registerTool(
+  registerTool(
     'gokuin_explain',
     {
       title: "Explain one route's full record and evidence",
