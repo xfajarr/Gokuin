@@ -54,12 +54,26 @@ contract RegisterRoutes is Script {
             revert("RouteRegistry is not gokuin.eth's ENSv2 subregistry yet");
         }
 
+        // Idempotent on purpose. Re-running a completed step should report that it
+        // is done, not revert — a finished job that looks like a failure sends you
+        // debugging something that already works.
         vm.startBroadcast();
+        uint256 created;
         for (uint32 i = 0; i < ROUTE_LABELS.length; i++) {
+            if (registry.getResolver(ROUTE_LABELS[i]) != address(0)) {
+                console.log("already registered, skipping:", ROUTE_LABELS[i]);
+                continue;
+            }
             bytes32 node = registry.registerRoute(i, ROUTE_LABELS[i]);
             console.log("Registered route", ROUTE_LABELS[i]);
             console.logBytes32(node);
+            created++;
         }
         vm.stopBroadcast();
+
+        if (created == 0) {
+            console.log("");
+            console.log("All routes were already registered. Nothing to do.");
+        }
     }
 }
